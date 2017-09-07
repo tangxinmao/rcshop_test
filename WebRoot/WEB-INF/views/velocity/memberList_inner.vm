@@ -1,0 +1,58 @@
+#set($root=$request.getContextPath())
+<div class="service_wrap">
+	<table class="table order_table mt10" id="table">
+		<tr width="100%">
+			<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+				<div onclick="goThisPage('sort1')" class="sortDiv" id="sortDiv1">
+					<p class="sortP">Sign Up Time</p>
+					<span class="item dot-top checked"></span> 
+					<span class="item dot-bottom checked"></span> 
+						 
+				</div>
+				<div onclick="goThisPage('sort2')" class="sortDiv" id="sortDiv2">
+					<p class="sortP">Last Login Time</p>
+					<span class="item dot-top checked"></span> 
+					<span class="item dot-bottom checked"></span> 
+						 
+				</div>
+			</th>
+		</tr>
+		<tr>
+			<th>Buyer ID</th>
+			<th>Buyer Username</th>
+			<th>Phone</th>
+			<th>Email</th>
+			<th>wallet</th>
+			<th>Icon</th>
+			<th>Sign Up Time</th>
+			<th>Last Login Time</th>
+			<th>Actions</th>
+		</tr>
+
+		
+		#foreach($rcMemberInfo in $list)
+					<tr>
+						<td>$!rcMemberInfo.memberId</td>
+						<td>$!rcMemberInfo.name</td>
+						<td>$!rcMemberInfo.mobile</td>
+						<td>$!rcMemberInfo.email</td>
+						<td>$!viewutil.moneyStringFormat($!rcMemberInfo.walletAmount)</td>
+						<td>#if($rcMemberInfo.imgUrl)<img src="$!rcMemberInfo.imgUrl?rs=70_70" style="width:60px; height:60px;">#else<img src="$root/static/images/ico/iocn_head.png" style="width:60px; height:60px;">#end</td>
+						<td>$!viewutil.dateFormat($!rcMemberInfo.signUpTime)</td>
+						<td>$!viewutil.dateFormat($!rcMemberInfo.lastLoginTime)</td>
+						<td>
+							<!-- <a href="javascript:void(0)" onclick="showModifyPopupWin('$rcMemberInfo.memberId',this)">Edit</a>| -->
+							<!-- <a href="javascript:void(0)" onclick="deleteOne('$rcMemberInfo.memberId',this)">Delete</a>| -->
+							<a href="javascript:void(0)" onclick="orderInfo('$rcMemberInfo.memberId',this)">View Order history</a>
+				#*			|
+							<a href="javascript:void(0)" onclick="walletInfo('$rcMemberInfo.memberId',this)">View Top-up history</a>*#
+						</td>
+					</tr>
+					#end
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

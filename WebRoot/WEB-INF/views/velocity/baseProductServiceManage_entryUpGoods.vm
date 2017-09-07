@@ -1,0 +1,283 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Edit Product > Step 1</h1>
+	 	<div class="fr">
+			<input style="font-size: 18px;" class="button" type="button" value="Back to list" onclick="showConfirm('Are you sure to do?',&quot;backTolist()&quot;)">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG">
+			<div class="wd100 ht45 mt15 ml20">
+				<h2>Select Product Type</h2>
+			</div>
+			<div class="secBtn ml36 mt12">
+				<img src="$root/static/images/ico/icon_product.png" style="position: absolute; margin-left: 21px;width: 25px;">
+				<span>
+					<b></b>
+					Product
+				</span>
+				<img src="$root/static/images/ico/icon_package.png" style="position: absolute; margin-left: 49px;width: 25px;">
+				<span style="margin-left: 30px;">
+					<b></b>
+					Package
+				</span>
+			</div>
+				<div style="margin-left:22px;" class="goodsSelect_area">
+					<div class="wd100 ht45 mt15">
+						<h2 style="margin-bottom:10px; margin-top: 60px;">Select Category</h2>
+						<!-- <h2 style="margin-bottom:10px; position: absolute; margin-top: -36px; margin-left: 647px;">Select Store</h2> -->
+					</div>
+					<div class="selectItem entryGoodsSelect" id="zeroItems" style="display: none;">
+						<h2>Select product type:</h2>
+						<ul>
+							<li rel="1">Product</li>
+							<li rel="2">Package</li>
+						</ul>
+					</div>
+					
+					
+					<div class="selectItem entryGoodsSelect" id="topItems" style="margin-left: 14px;">
+						<h3>Select Category:</h3>
+						<ul>
+						</ul>
+					</div>
+					<div class="selectItem entryGoodsSelect" id="thirdItems" style="margin-left: 39px;">
+						<h3>Select Sub Category:</h3>
+						<ul>
+						</ul>
+					</div>
+					<div class="selectItem entryGoodsSelect" id="fourthItems" style="display:none">
+						<ul>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="goodsSelect_text" style="display:none">
+					<!--  <span class="tit">Now you select: </span><span id="ptype">Product | </span><span id="pos"></span><span id="mer"></span>-->
+				</div>
+				<div class="btns tac mt25 pb15">
+				<form id="updategood" method="post" action="$root/product/updatebasegoods">
+					<input type="hidden" name="prodId" id="prodId" value="$!prodId">
+					<input type="hidden" name="prodType" id="prodType" value="$!{prodType}">
+					<input type="hidden" name="prodCatId" id="prodCatId" value="$!prodCatId">
+					<input type="hidden" name="subprodCatId" id="subprodCatId" value="$!subProdCatId">
+				</form>
+					<input type="button" value="Next" class="btnG bwt125 bht39 bfz16 mt12" name="addpro" id="addpro"/>
+				
+					<span id="statusprompt" style="color:red"></span>
+				</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+					
+	<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows"  id="open_returnPop" style="display: none;">
+	</div>							
+  <!-- js code -->
+  
+ <script type="text/javascript">
+ $( function(){
+	 var prodCatId = $("#prodCatId").val();
+	 var subProdCatId = $("#subprodCatId").val();
+	 var prodType = $("#prodType").val();
+	 $("#yhtest").click(function(){
+		
+	 });
+	 $(".secBtn span").click(function(){
+			$(".secBtn span").each(function(){
+				$(this).removeClass("selectedd");
+			});
+			$(this).addClass("selectedd");
+			if($(".secBtn span").eq(0).hasClass("selectedd")){
+				$("#prodType").val("1");
+			}
+			else{
+				$("#prodType").val("2");
+			}
+		});
+	if(prodType=="1"){
+		$(".secBtn span").eq(0).addClass("selectedd");
+	}
+	else if(prodType=="2"){
+		$(".secBtn span").eq(1).addClass("selectedd");
+	}
+		dataForSend={"storeId":"123"};
+		$.post("querytopcat",jQuery.param(dataForSend),function(json){ 
+			var jsonObjArr = JSON.parse(json);
+			for(var i in jsonObjArr){
+				$("#topItems ul").append("<li rel='"+jsonObjArr[i].prodCatId+"'>"+jsonObjArr[i].name+"</li>");
+				//var jsonObjArr1 = JSON.parse(jsonObjArr[i].subList);
+				if(jsonObjArr[i].subList==0){
+					$("#topItems ul").find("li").each(function(){
+						$(this).css("background-image","none");
+					});
+					
+				}
+//			for(var j in jsonObjArr1){
+//				$("#topItems ul").append("<li rel='"+jsonObjArr1[j].prodCatId+"'>"+jsonObjArr1[j].name+"</li>");
+//			}
+			} 
+			$("#zeroItems").find("ul li").each(function(){
+				 if($(this).attr("rel")==prodType){
+					 $(this).addClass("selected");
+				 }
+			});
+			$("#topItems").find("ul li").each(function(){
+				 if($(this).attr("rel")==prodCatId){
+					 $(this).addClass("selected");
+				 }
+			});
+			dataForSenda={"parentCatgId":prodCatId};
+			$.post("queryNextcat",jQuery.param(dataForSenda),function(json3){ 
+				var jsonObjArr3 = JSON.parse(json3);
+				if(jsonObjArr3.code==0){
+					isEndCata=1;
+					return 0;
+				}
+				for(var k in jsonObjArr3){
+					$("#thirdItems ul").append("<li rel='"+jsonObjArr3[k].prodCatId+"'>"+jsonObjArr3[k].name+"</li>");
+					if(jsonObjArr3[k].subList==0){
+						$("#thirdItems ul").find("li").each(function(){
+							$(this).css("background-image","none");
+						});
+					}
+				}
+				$("#thirdItems").show();
+				$("#thirdItems").find("ul li").each(function(){
+					 if($(this).attr("rel")==subProdCatId){
+						 $(this).addClass("selected");
+					 }
+				});
+			});
+			
+			
+			$("#topItems").find("ul li").each(function(){
+				 if($(this).attr("rel")==prodCatId){
+					 $(this).addClass("selected");
+				 }
+			});
+			
+			$("#zeroItems ul li").bind("click",function(){
+				$(this).parent().find("li").each(function(){
+					$(this).removeClass("selected");
+				});
+				$(this).addClass("selected");
+				
+			});
+			$("#topItems ul li").bind("click",function(){
+				$("#thirdItems ul").html("");
+//				$("#fourItems ul").html("");
+//				$("#fiveItems ul").html("");
+				$(this).parent().find("li").each(function(){
+					$(this).removeClass("selected");
+				});
+				topText = $(this).text();
+				$("#pos").text(topText);  //显示当前位置
+				var parentCatgId = $(this).attr("rel");
+				//prodCatId=parentCatgId;
+				$("#prodCatId").val(parentCatgId);
+				dataForSend3={"parentCatgId":parentCatgId};
+				$(this).addClass("selected");
+				$.post("queryNextcat",jQuery.param(dataForSend3),function(json3){ 
+					var jsonObjArr3 = JSON.parse(json3);
+					if(jsonObjArr3.code==0){
+						isEndCata=1;
+						return 0;
+					}
+					for(var k in jsonObjArr3){
+						$("#thirdItems ul").append("<li rel='"+jsonObjArr3[k].prodCatId+"'>"+jsonObjArr3[k].name+"</li>");
+						if(jsonObjArr3[k].subList==0){
+							$("#thirdItems ul").find("li").each(function(){
+								$(this).css("background-image","none");
+							});
+						}
+					}
+					$("#thirdItems").show();
+					$("#thirdItems ul li").bind("click",function(){
+						$("#fourthItems ul").html("");
+						$("#fiveItems ul").html("");
+						$(this).parent().find("li").each(function(){
+							$(this).removeClass("selected");
+						});
+						thirdText = $(this).text();
+						$("#pos").html(topText + " > " + thirdText);
+						var parentCatgId4 = $(this).attr("rel");
+					
+						$("#subprodCatId").val(parentCatgId4);
+						dataForSend4={"parentCatgId":parentCatgId4};
+						$(this).addClass("selected");
+						$.post("queryNextcat",jQuery.param(dataForSend4),function(json4){ 
+							var jsonObjArr4 = JSON.parse(json4);
+							if(jsonObjArr4.code==0){
+								isEndCata=1;
+								return 0;
+							}
+							for(var k in jsonObjArr4){
+								$("#fourthItems ul").append("<li rel='"+jsonObjArr4[k].prodCatId+"'>"+jsonObjArr4[k].name+"</li>");
+							}
+						});
+					});
+				});
+			});
+		});
+		
+		$("#addpro").click(function(){
+			var prodId = $("#prodId").val();
+			//var prodType = $("#prodType").val();
+			var prodType = $("#zeroItems ul li[class='selected']").attr("rel");
+			var prodCatId = $("#prodCatId").val();
+			var subprodCatId = $("#subprodCatId").val();
+			//var promptText = $("#ptype").text() + $("#pos").text() + $("#mer").text();
+			if(prodCatId=="-1"){
+				alert("Please select a top level category!");
+				return 0;
+			}
+			if(subprodCatId=="-1"){
+				alert("Please select a second level category!");
+				return 0;
+			}
+			document.getElementById('updategood').submit();
+			//$("#updategood").submit();
+			//self.location="updatebasegoods?prodType="+prodType+"&prodCatId="+prodCatId+"&subprodCatId="+subprodCatId++"&promptText="+promptText+"&prodId="+prodId;
+		});
+		
+	});
+
+
+	
+	$(document).delegate("#thirdItems ul li","click",function(){  
+		$("#fourthItems ul").html("");
+		$("#fiveItems ul").html("");
+		$(this).parent().find("li").each(function(){
+			$(this).removeClass("selected");
+		});
+		thirdText = $(this).text();
+		//$("#pos").html(topText + " > " + thirdText);
+		var parentCatgId4 = $(this).attr("rel");
+	
+		$("#subprodCatId").val(parentCatgId4);
+		dataForSend4={"parentCatgId":parentCatgId4};
+		$(this).addClass("selected");
+		$.post("queryNextcat",jQuery.param(dataForSend4),function(json4){ 
+			var jsonObjArr4 = JSON.parse(json4);
+			if(jsonObjArr4.code==0){
+				isEndCata=1;
+				return 0;
+			}
+			for(var k in jsonObjArr4){
+				$("#fourthItems ul").append("<li rel='"+jsonObjArr4[k].prodCatId+"'>"+jsonObjArr4[k].name+"</li>");
+			}
+		});
+	});
+	
+	function backTolist(){
+		self.location="product_list";
+	}
+ </script>

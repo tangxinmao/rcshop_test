@@ -1,0 +1,46 @@
+<div class="service_wrap">
+	<table class="table order_table mt10" id="table">
+	<tbody>
+		<th></th>
+		<th>Icon</th>
+		<th>Serial Number</th>
+		<th>Name</th>
+		<th>Value</th>
+		<th>Actions</th>
+		#set($num=1)
+		#foreach($menu in $list)
+		<tr>
+			<td>$num</td>
+			<td><img src="$!menu.icon" style="max-height: 60px;"></td>
+			<td>
+				$!menu.seq
+			</td>
+			<td>$!menu.name</td>
+			<td>
+				<input type="hidden" name="amnVal" value="$!menu.amnVal">
+				#if($!menu.location=="page1")
+					Top up Center page
+				#elseif($!menu.location=="page2")
+					coupon page
+				#else
+					other
+				#end
+			</td>
+			<td>
+				<span>Edit</span> |
+				<span>Delete</span>
+				<!--  <a href="javascript:void(0)" onclick="showModyfyPopup('$!menu.appMenuId',this)">Edit</a> |
+				<a href="javascript:void(0)" onclick="deleteMenu('$!menu.appMenuId')">Delete</a>-->
+			</td>
+		</tr>
+		#set($num=$num+1)
+		#end
+		
+	</tbody>
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

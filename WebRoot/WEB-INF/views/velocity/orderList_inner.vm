@@ -1,0 +1,64 @@
+<table class="table order_table mt10">
+							<tr width="100%"> 
+								<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+									<div onclick="goThisPage('sort')" class="sortDiv">
+											<p class="sortP">Order Time</p>
+											<span class="item dot-top checked"></span> 
+											<span class="item dot-bottom"></span> 
+											<input style="display: none" type="checkbox" name="orderTimeDesc" id="orderTimeDesc" checked>
+											 
+											 
+									</div>
+										<div onclick="goThisPage('sort1')" class="sortDiv">
+									<p class="sortP">Grand Total</p>
+											<span class="item dot-top checked"></span> 
+											<span class="item dot-bottom checked"></span> 
+											<input style="display: none" type="checkbox" name="orderPayPriceDesc" id="orderPayPriceDesc" checked>
+								</div>
+								</th>
+							</tr>
+							<tr>
+								<th width="10%">Order ID</th>
+								<th width="10%">Order Time</th>
+								<th width="10%">Buyer Username</th>
+								<th width="10%">Store</th>
+								<th width="10%">Sub Total</th>
+								<th width="10%">Grand Total</th>
+								<th width="20%">Status</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.orderId}</td>
+								<td>#if(${item.orderTime})$viewutil.dateFormat(${item.orderTime})#else--#end</td>
+								<td>$!{item.memberNickname}</td>
+								<td>$!{item.merchantName}</td>
+								<td>Rp #if ($!{item.orderPrice})$viewutil.moneyStringFormat($!{item.orderPrice})#else 0 #end<input type="hidden" value="${item.orderPrice}"></td>
+								<td>Rp #if ($!{item.orderPayPrice})$viewutil.moneyStringFormat($!{item.orderPayPrice})#else 0 #end<input type="hidden" value="${item.orderPayPrice}"></td>
+								<td>#if ($!{item.orderStatus}==1)Unpaid#end 
+								#if ($!{item.orderStatus}==3&&!$!{item.deliveryStatus})<span style="color:green">Undelivered</span>#end 
+								#if ($!{item.orderStatus}==3&&$!{item.deliveryStatus})<span style="color:red">Send</span>#end 
+								#if ($!{item.orderStatus}==4)<span style="color:blue">Received</span>#end
+							    #if ($!{item.orderStatus}==5)Completed#end
+								#if ($!{item.orderStatus}==13)Rejected#end
+								#if ($!{item.orderStatus}==12)Canceled#end
+								#if ($!{item.orderStatus}==2)Waiting for pick up#end
+								 <input type="hidden" value="${item.orderStatus}"></td>
+									
+								<td>
+					<a href="javascript:void(0)" onclick="javascript:viewDetailWin('$!item.orderId',this)">View Detail</a>	
+						#if ($!{item.orderStatus}==2&&!$!{item.deliveryStatus})
+										|<a href="javascript:void(0)" onclick="javascript:inputDeliveryWin('$!item.orderId',this)">Input delivery</a>
+										|<a href="javascript:void(0)" onclick="javascript:rejectedTransactionyWin('$!item.orderId',this)">Rejected Transaction</a>
+										#end	
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

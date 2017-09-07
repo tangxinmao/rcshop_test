@@ -1,0 +1,78 @@
+#set($root=$request.getContextPath())
+<div class="service_wrap" >
+	<table class="table order_table mt10" id="review" >
+	<tr>
+		<th colspan="14" class="th_lev1"><span class="fl ml10">Sort By</span>
+			<div onclick="goThisPage('sort1')" class="sortDiv" id="sortDiv1">
+				<p class="sortP">Rating Time</p>
+				<span class="item dot-top checked"></span> 
+				<span class="item dot-bottom"></span> 
+					 
+			</div>
+			<div class="fr" style="padding-right: 10px;">
+				<input class="sortBtn" type="button" value="Refresh" onclick="goThisPage('search')">
+				<img class="refresh" src="$root/static/images/ico/refresh.png" onclick="goThisPage('search')">
+			</div>
+			
+		</th>
+	</tr>
+	<tr>
+		<th>Store Id</th>
+		<th>Store Name</th>
+		<th>Principal</th>
+		<th>Delivery Rating</th>
+		<th>Service Rating</th>
+		<th>Order ID</th>
+		<th>Buyer ID</th>
+		<th>Buyer Username</th>
+		<th>Rating Time</th>
+		<th>Actions</th>
+	</tr>
+		#foreach($merchant in $list)
+		<tr>
+			<td>$!merchant.merchant.merchantId</td>
+			<td>$!merchant.merchant.name</td>
+			<td>
+				$!merchant.vendor.name
+			</td>
+			<td>
+				#if($merchant.deliveryScore>=4)
+					<b style="color:#4ED321;">$!merchant.deliveryScore</b>
+				#else
+					<b style="color:#FF8B1D;">$!merchant.deliveryScore</b>
+				#end
+			</td>
+			<td>
+				#if($merchant.serviceScore>=4)
+					<b style="color:#4ED321;">$!merchant.serviceScore</b>
+				#else
+					<b style="color:#FF8B1D;">$!merchant.serviceScore</b>
+				#end
+			</td>
+			<td>$!merchant.orderId</td>
+			<td>
+				$!merchant.member.memberId
+			</td>
+			<td>
+				$!merchant.member.name
+			</td>
+			<td>$!viewutil.dateFormat($!merchant.createTime)</td>
+			<td>
+				#if($session.getAttribute("RcMerchant"))
+					<span>Delete</span> | 
+				<!-- 	<a href="javascript:void(0)" onclick="authApplicator('$!merchant.merchantId')">Auth Applicator</a>  --> 
+				#else
+					<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the merchant? If you deleted,The data can not be restore.',&quot;deleteOne('$!merchant.orderId',this)&quot;)">Delete</a>
+				#end
+				
+			</td>
+			
+		</tr>
+		#end
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

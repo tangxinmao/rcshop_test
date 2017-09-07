@@ -1,0 +1,44 @@
+
+.table-bordered th{
+	border-width:0px;
+    border-bottom: 1px solid #e4e4e4;	
+    font-weight: bold;
+}
+.table-bordered td {
+    border: 1px solid #e4e4e4;
+}
+/* table边框颜色 */
+.table-bordered {
+    border: 1px solid #e4e4e4;
+}
+/* table标题颜色 */
+.table thead{
+	background-color: #f4f4f4;
+}
+/* page输入框 */
+#page_currentPage{
+    width: 32px;
+    height: 26px;
+        background-color: #f8f8f8;
+}
+/* 分页组件位置 */
+.page_wrap {
+    padding:0px 0px;
+    margin-right:0px;
+}
+/* go文字 */
+.page_wrap .btn_go {
+    width: 42px;
+    height: 26px;
+    background-color: #f8f8f8;
+}
+/* 字体 */
+.text_link {
+    color: #005ea7;
+}
+/*错误样式*/
+.error_class{
+	color:red;
+}
+
+

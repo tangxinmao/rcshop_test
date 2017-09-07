@@ -1,0 +1,170 @@
+#set($root=$request.getContextPath())
+<input type="hidden" value="$!page.currentPage" id="currentPage" />
+<table class="table order_table mt10">
+	<tr width="100%">
+		<th colspan="12" class="th_lev1"><span class="fl">Sort By</span>
+			<div onclick="goThisPage('sort')" class="sortDiv">
+					<p class="sortP">On Shelves Time</p>
+					<span class="item dot-top checked"></span> 
+					<span class="item dot-bottom checked"></span> 
+			</div>
+		</th>
+	</tr>
+	<tr>
+		<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+		<th width="18%">Product Name</th>
+		<th width="8%">Product ID</th>
+		<th width="10%">Stock#</th>
+		<th width="8%">Price</th>
+		<th width="8%">Store</th>
+		<th width="6%">Principal</th>
+		<th width="6%">City</th>
+		<th width="6%">Type</th>
+		<th width="9%">Status</th>
+		<th width="7%">Add to Shelves Time</th>
+		<!--  <th width="9%">Remove from Shelves Time</th>-->
+		<th width="16%" class="tac">Actions</th>
+	</tr>
+	#if($productList&&!$productList.isEmpty())
+                          #foreach($product in $productList)
+                          	#if ( "00" != ${product.prodStatus})
+	<tr>
+		<td>
+			<input type="checkbox" name="radio" id="radio" value="$!{product.prodId}">
+		</td>
+		<td>
+        	<div class="media">
+                <div class="media-left media-middle">
+                        <img class="media-object" src="$!{product.prodImgUrl}?rs=90_90" alt="$!{product.prodImgUrl}?rs=90_90" style="width:60px;height: 60px">
+                </div>
+                <div class="media-body">
+                    <h4 title="$!{product.name}" class="media-heading" style="width: 100px; white-space: nowrap; overflow: hidden;text-overflow: ellipsis;">
+                     	$!{product.name}
+                     </h4>
+
+                 </div>
+             </div>
+		
+		#*	<div class="fl">
+				<img alt="" src="" />
+			</div>
+			<div class="mt10">/div>*#
+		</td>
+		<td>$!{product.prodId}</td>
+		<td>
+		  #if (${product.prodSkus.size()} == 0)
+			<!-- <b>
+				#if(${product.prodStorage})
+					${product.prodStorage}
+				#else
+					0
+				#end
+			</b>
+			-->
+			 <a href="javascript:searchProdStorage('$!{product.prodId}')"><b>Check Stock</b></a>
+		  #else
+		  	<!-- 
+		    <a href="#SiteUrl('site.merchant.url')/productmanage/search_sku_storage?prodId=$!{product.prodId}"><b>查看库存</b></a>
+		     -->
+		     <a href="javascript:searchSkuStorage('$!{product.prodId}')"><b>Check Stock</b></a>
+		  #end
+		</td>
+		<td>Rp $viewutil.moneyStringFormat($!{product.price})</td>
+		<td>$!{product.merchant.name}</td>
+		<td>$!{product.vendor.name}</td>
+		<td>$!{product.city.name}</td>
+		<td>
+			#if($product.type==1)
+				Product
+			#elseif($product.type==2)
+				Package
+			#elseif(!$product.type)
+				Product
+			#end
+		</td>
+		<td>
+		  #if (1 == ${product.status}) 										 
+			<b style="color:#FF8B1D;">Not On Shelves</b>
+		  #elseif (2 == ${product.status})
+		    <b style="color:#4ED321;">On Shelves</b>
+		  #end
+		</td>
+		<td>
+		  #if(${product.putawayTime})
+		    $viewutil.dateFormat(${product.putawayTime})
+		  #else
+		    --
+		  #end
+		</td>
+		<!-- <td>
+		  #if(${product.prodOutOfStockTime})
+		    $viewutil.dateFormat(${product.prodOutOfStockTime})
+		  #else
+		    --
+		  #end
+		</td> -->
+		<td>
+			#if($!loginMemberInfo.roleId!='1')
+		#if(!$session.getAttribute("RcVendor"))
+			#if ( 2 != ${product.status})
+			<form id="updategoods" method="post" action="$root/product/initupdate">
+				<input type="hidden" id="formprodId" name="prodId" value="$!{product.prodId}">
+			</form>
+			#end
+			<!-- |
+			<a href="#">定时上下架</a> -->
+			#if ( 2 == ${product.status})
+				<span>Edit</span> 
+				| <span>Delete</span>
+			#else
+				<!-- <a href="javascript:void(0)" onclick="checkstore('$!{product.prodId}','updategoods');">Edit</a> -->
+				<a href="javascript:void(0)" onclick="javascript:$(this).parent().find('form').submit();">Edit</a>
+				
+			#if(!$session.getAttribute("RcMerchant"))
+			|
+			<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete product?',&quot;deleteProd('$!{product.prodId}')&quot;)">Delete</a>
+			#end
+			#end
+			
+			|
+			#if (1 == ${product.status})
+			<a href="javascript:void(0)" onclick="showConfirm('Are you sure to put on the product?',&quot;begiputUpGoods('$!{product.prodId}')&quot;)">Add to Shelves</a>
+		    #elseif (2 == ${product.status})
+		    <a href="javascript:void(0)" onclick="showConfirm('Are you sure set the product to out of stock?',&quot;beginputDownGoods('$!{product.prodId}')&quot;)">Remove from Shelves</a>
+		    #end
+		    |
+		    #if (${product.prodSkus.size()} == 0)
+		    	<a href="javascript:void(0)" onclick="updateProdStorage('$!{product.prodId}')">Update Stock</a>
+						#else
+				<a href="javascript:void(0)" onclick="updateSkuStorage('$!{product.prodId}')">Update Stock</a>
+			#end
+			<!-- #if ( "04" == ${product.prodStatus})
+			|
+				<a href="javascript:void(0)" onclick="putUpDownGoodsByTime('$!{product.prodId}')">定时上下架</a>
+			#end -->
+		#else
+			<span>Edit</span> |
+			<span>Delete</span> |
+			<span>Remove from Shelves</span> |
+			<span>Update Stock</span> 
+		#end
+		#end
+		</td>
+	</tr>
+	#end
+	#end
+	#end
+</table>
+<div class="batsOpt">
+	<h1>Bulk Action</h1>
+	<input class="btnG bwt100 bht30 bfz12 fl" type="button" value="Add to Shelves" onclick="batsPutOn()">
+	<input class="btnG bwt140 bht30 bfz12 fl ml10" type="button" value="Remove from Shelves" onclick="batsPutDown()">
+	#if(!$session.getAttribute("RcMerchant"))
+	<input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+  		#end
+  </div>
+  <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+  <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+  <input type="hidden" value="$!page.currentPage" id="currentPage" />
+  <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+  <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

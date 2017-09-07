@@ -1,0 +1,29 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/orderConfig.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Timeout Order</h1>
+	</div> 
+	<div class="data_logic ml30">
+		<div class="service_wrap mt10" id="productListDiv">
+    <div class="main">
+    <form id="mailForm">
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle" style="margin-left: 50px;"><span class="colorRed">*</span><span>Cancel Time:</span></lebel><input min="0" class="poptxt" type="number" name="cancelTime" value=""><span style="color:#b3c8ef;margin-left: 44px;">/hour</span></div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -4px;"><span class="colorRed">*</span><span>Receive Product Time:</span></lebel><input min="0" class="poptxt" type="number" name="receiveTime" value=""><span style="color:#b3c8ef;margin-left: 44px;">/hour</span></div>
+				<div style="margin-top:20px;"><lebel style="margin-left: -1px;" class="colortitle"><span class="colorRed">*</span><span>Receive Pakage Time:</span></lebel><input min="0" class="poptxt" type="number" name="receiveServiceTime" value=""><span style="margin-left: 44px;color:#b3c8ef;">/hour</span></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" id="readnumbtn" value="Submit">
+			</div>
+			</form>
+		</div>			
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>

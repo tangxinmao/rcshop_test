@@ -1,0 +1,39 @@
+<table class="table order_table mt10" id="review">
+				<tr>
+					<th>Top-up Center ID</th>
+					<th>Top-up Center</th>
+					<th>Phone</th>
+					<th>Address</th>
+					<th>City</th>
+					<th>Operator ID</th>
+					<th>Operator</th>
+					<th>Create Time</th>
+					<th>Actions</th>
+				</tr>
+	
+				
+			#foreach($topup in $list)
+				<tr>
+					<td>$!topup.rechargeStationId</td>
+					<td>$!topup.stationName</td>
+					<td>$!topup.mobile</td>
+					<td>$!topup.stationLocation</td>
+					<td hidden>$!topup.city.cityId</td>
+					<td>$!topup.city.name</td>
+					<td>$!topup.memberId</td>
+					<td>$!topup.member.account</td>
+					<td>$!viewutil.dateFormat($!topup.createTime)</td>
+					<td hidden>$!{topup.city.provinceName}</td>
+					<td>
+						<a href="javascript:void(0)" onclick="showModifyPopup('$!topup.rechargeStationId',this)">Edit</a>
+						|
+						<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the station? If you deleted,The data can not be restore.',&quot;deleteStation('$!topup.rechargeStationId')&quot;)">Delete</a>
+					</td>
+				</tr>
+				#end
+			</table>
+			<input type="hidden" value="$!page.currentPage" id="currentPage">
+			<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+			<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+			<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+			<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

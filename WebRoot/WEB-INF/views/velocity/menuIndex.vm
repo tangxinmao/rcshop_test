@@ -1,0 +1,97 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Menu list" )
+#set($extCss = "/static/css/jquery.treetable.css,/static/css/jquery.treetable.theme.default.css")
+#set($extJs = "/static/js/menu.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Menu List</h1>
+	 	<div class="fr">
+			<input class="btnG bwt125 bht39 bfz16 fr mt12" type="button" value="Add Menu" onclick="addDadPopWin()">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="service_wrap mt5" id="reloadSearchMessages">
+		<table class="table order_table mt10" id="table">
+			<tbody>
+	
+		    </tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<!-- 娣诲姞鐖跺垎绫诲脊绐�-->
+<div class="pop_windows" id="dadpopwin" style="display:none;">
+<form id="menuWinForm">
+<input type="hidden" name="menuId" value="">
+<input type="hidden" name="parentId" value="">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2></h2>
+			</div>
+			<div id="belong"><lebel class="colortitle" style="margin-left: 81px;">Belong to:</lebel><span class="ml13" id="parentCatSpan"></span></div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle" style="margin-left: -22px;"><span class="colorRed">*</span><span>Menu Name:</span></lebel><input class="poptxt" type="text" name="name" value="" maxlength="20"></div>
+			<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:31px;"><span>Link:</span></lebel><textarea    style=" vertical-align: middle;height:70px" class="poptxt"  name="location" maxlength="100"></textarea></div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 18px;"><span class="colorRed">*</span><span>Serial:</span></lebel><input class="poptxt" type="text" name="seq"  value="" maxlength="3"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="addTopLevelCategory()" id="readnumbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+	</form>
+</div> 
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>
+<!-- 淇敼鐖跺垎绫诲脊绐�-->
+<div class="pop_windows" id="daduppopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Edit Category</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<input type="hidden" name="dadprodCatId" id="dadprodCatId" value="">
+               	<div><lebel class="colortitle"><span class="colorRed">*</span>Category Name:</lebel><input class="poptxt" type="text" name="upcategoryName" id="upcategoryName" value="" maxlength="20"></div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 17px;"><span class="colorRed">*</span>Category No:</lebel><input class="poptxt" type="text" name="upcatSerNum" id="upcatSerNum" value="" maxlength="3"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="upTopLevelCategory()" id="readnumbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div> 
+
+<!-- 娣诲姞瀛愬垎绫诲脊绐�-->
+<div class="pop_windows" id="childpopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Add Child Level Category</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<div><lebel class="colortitle" style="margin-left: 39px;">Belong to:</lebel><span class="ml13" id="parentCatSpan"></span><input type="hidden" id="parentCatId" value=""></div>
+               	<div style="margin-top:20px;"><lebel class="colortitle"><span class="colorRed">*</span>Category Name:</lebel><input class="poptxt" type="text" name="childcategoryName" id="childcategoryName" value="" maxlength="20"></div>
+				<div style="margin-top:20px;"></div>
+				<input type="hidden" name="childfileId" id="childfileId" value="">
+				<div style="position:relative;">
+					<lebel class="colortitle" style="margin-left: 63px;"><span class="colorRed">*</span>Icon:</lebel>
+					
+					<img class="ml13" src="$root/static/images/ico/icon_image.png" id="photochildcover" style="height:70px; width:70px;">
+					<input type="button" class="button" value="Upload">
+			        <input type="file" name="childcover" size="1" id="childcover" onchange="uploadChildCover()" value="涓婁紶鍥剧墖" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+				</div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 15px;"><span class="colorRed">*</span>Category No:</lebel><input class="poptxt" type="text" data-rules="{required:true}" name="childcatSerNum" id="childcatSerNum" value="" maxlength="3"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue=""> 
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="addNextLevelCategory()" id="readnumbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div> 

@@ -1,0 +1,761 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Product Release" )
+#set($extJs = "/static/js/ckeditor/ckeditor.js,/static/js/prodUpdate.js")
+#set($root=$request.getContextPath())
+<script type="text/javascript">
+		var merchantid="$merchantid";
+		var dirurl="$dirurl";
+		var imgurl="$imgurl";
+</script>
+</head>
+</body>
+<input type="hidden" id="rootPath" value="$root">
+<script type="text/javascript">
+var prodid = "$!productDTO.prodId";
+var baseProdId="$!productDTO.baseProdId";
+var storeIdinfo="$!productDTO.storeId";
+var prodCatIdinfo = "$!productDTO.prodCatId";
+var havacolorImg =0;   //0=无颜色图片；1=有颜色图片
+var siteurl = "$root";
+var skuattr = new Array();
+var colorenumids = new Array();
+var serverstoreId = storeIdinfo;
+#foreach($propObj in $listSales)
+	var skuProp_$propObj.otherData.get("PRODPROPID");
+#end
+var prodimgurls = new Array(); //商品图片
+var skuOriginsales = new Array(); //SKU原价
+var skusales = new Array();   //SKU价格
+var skuids = new Array(); //SKU商品编号
+var skuStorage = new Array();  //SKU库存
+var skuProdId = new Array(); //prodskuID
+
+var salesnum = 0;
+#foreach($Skus in $prodSkus)
+	skusales[salesnum] = "$!Skus.price";	  
+	skuOriginsales[salesnum] = "$!Skus.originPrice";
+	skuids[salesnum] ="$!Skus.merchantProdId";
+	skuProdId[salesnum]="$!Skus.prodSkuId";
+	skuStorage[salesnum] = "$!Skus.inventory";	
+	salesnum++;
+#end
+var prodimgnum=0
+#foreach($prodImgurl in $prodImgUrls)
+	prodimgurls[prodimgnum]="$!prodImgurl";
+	prodimgnum++;
+#end
+	$(document).ready(function() {
+		//初始化demo中的数据
+		//restoreData();
+		
+		//初始化CKEDITOR
+		CKEDITOR.disableAutoInline = true;
+		var contenthandle = CKEDITOR.replace( 'prodDetailDescContent' ,{
+			toolbar :
+	             [
+	                //加粗     斜体，     下划线      穿过线      下标字        上标字
+	                ['Bold','Italic','Underline','Strike','Subscript','Superscript'],
+	                // 数字列表          实体列表            减小缩进    增大缩进
+	                ['NumberedList','BulletedList','-','Outdent','Indent'],
+	                //左对 齐             居中对齐          右对齐          两端对齐
+	                ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+	                //超链接  取消超链接 锚点
+	                ['Unlink','Anchor'],
+	                //图片    flash    表格       水平线            表情       特殊字符        分页符
+	                ['Table','HorizontalRule','Smiley','SpecialChar'],
+	                '/',
+	                // 样式       格式      字体    字体大小
+	                ['Styles','Format','Font','FontSize'],
+	                //文本颜色     背景颜色
+	                ['TextColor','BGColor'],
+	                //全屏           显示区块
+	                ['Maximize', 'ShowBlocks','Source']
+	             ],
+			language: 'en-au',
+			allowedContent: true
+		});
+		$("body").css("min-height", $(window).height() - 90);
+		$(".demo").css("min-height", $(window).height() - 160);
+		#foreach($prodSkuProp in $prodSkuPropInfoMap)
+			
+			#foreach( $prop in $prodSkuProp )
+					$("input:checkbox[enumid=$prop.prodPropEnumId]").attr("checked","true");
+			#end 
+		#end
+		
+		inittable();
+		showimage();
+		#*#if($productDTO.prodStorage==0)
+			getSumSkuNum();
+		#end*#
+		cancelColorImage();
+		for(var i in prodimgurls){
+			var j=0;
+			j= parseInt(i)+1;
+			$("#prodimgarea"+j).attr("src",prodimgurls[i]+"?rs=120_120");
+			$("#prodimgarea"+j).attr("originurl",prodimgurls[i]);
+			$("#prodimgarea"+j).attr("isedit","1");
+		}
+		var colorenumnum = 0;
+		#foreach($skuImgs in $prodSkuImgUrlsMap)
+			
+			var imgnum = 0;
+			#foreach($skuImg in $skuImgs)
+				$("#prodimgarea"+colorenumids[colorenumnum]+(parseInt(imgnum)+1)).attr("src","$skuImg"+"?rs=120_120");
+			$("#prodimgarea"+colorenumids[colorenumnum]+(parseInt(imgnum)+1)).attr("originurl","$skuImg");
+				$("#prodimgarea"+colorenumids[colorenumnum]+(parseInt(imgnum)+1)).attr("isedit","1");
+				imgnum++;
+			#end
+			colorenumnum++;
+		#end
+		
+		//设置其他名牌名称
+		var otherBrandName = "";
+		$("#prodBrandId").change(function(){
+			if($("#prodBrandId").val()=="0"){
+				$("#brandnamediv").html("<p><label>品牌名称：</label><input type='text' value='"+otherBrandName+"' name='prodBrandName' id='prodBrandName' class='text' onblur='otherBrandName=this.value' /></p>");
+			}
+			else
+				$("#brandnamediv").html("");
+		});
+		#foreach($cusprop in $prodPropInfos)
+			#if($cusprop.prodPropId=="0")
+				otherBrandName = "$!cusprop.prodPropVal";
+			#end
+		#end
+			#if($productDTO.prodBrandId=="0")
+				$("#brandnamediv").html("<p><label>Brand:</label><input type='text' value='"+otherBrandName+"' name='prodBrandName' id='prodBrandName' class='text' onblur='otherBrandName=this.value' /></p>");
+			#end
+		#if($listSales.size()==0)
+			$("#skueara").css("display","none");
+		#end
+		//点击商品图片框，取消样式
+		$("#prodimgarea ul li img").click(function(){
+			$(this).attr("src","$root/static/images/ico/icon_image.png");
+			$(this).attr("isedit","0");
+		});
+		
+		//初始化商品属性单选框选中值
+		#foreach($proditems in $prodPropInfos)
+			#if($proditems.prodPropId!=0)
+				$("#prop_${proditems.prodPropId}").find("option[value='$proditems.prodPropVal']").attr("selected",true);
+				var val=$("#prop_${proditems.prodPropId}").val();
+				if(val!="$proditems.prodPropVal"){
+					$("#prop_${proditems.prodPropId}").find("option[iscustom='1']").attr("selected",true);
+					$("#div${proditems.prodPropId}").html('<input type="text" name="" id="prodpropvalue" value="$!proditems.prodPropVal" class="text" maxlength="20" style="width:90px;margin-top:-3px" onblur="changeselectval(this,this.value)">');
+					$("#prop_${proditems.prodPropId}").find("option[iscustom='1']").attr("value","$!proditems.prodPropVal");
+				}
+				//判断商品属性下拉框初始化时是否是自定义属性
+				var iscustom = $("#prop_${proditems.prodPropId}").find("option:selected").attr("iscustom");
+				if(iscustom=="1"){
+					$("#div${proditems.prodPropId}").html('<input type="text" name="" id="prodpropvalue" value="$!proditems.prodPropVal" class="text" maxlength="20" style="width:90px;margin-top:-3px" onblur="changeselectval(this,this.value)">');
+					$("#prop_${proditems.prodPropId}").find("option[iscustom='1']").attr("value","$!proditems.prodPropVal");
+				}
+			#end
+		#end
+		
+	});	
+	
+	function inittable(){
+		var checkedArr  = new Array();
+		var j=0;
+	    var skuHtml="<div style='overflow-x:auto'><table class='table order_table goodsTable_usrDefined mt10' id='skuproptable'><tbody>"
+		var listsize = "$listSales.size()";
+	    prodStorageMap.put("prodStorage","$!productDTO.prodStorage");
+	   	if(listsize=="0"){
+				$("#sku").html("");
+				$("#prodStorage").attr("disabled",false);
+				return 0;
+		}
+		#foreach($propObj in $listSales)
+			//skuHtml=skuHtml+"<th>${propObj.otherData.get("PRODPROPNAME")}</th>";
+			var skuProp_$propObj.otherData.get("PRODPROPID") =$("input[name='$propObj.otherData.get("PRODPROPID")']:checked");
+			//if(skuProp_${propObj.otherData.get("PRODPROPID")}.length<=0){
+			//	$("#sku").html("");
+			//	$("#prodStorageDiv").html("<label><span class='colorRed'>*</span></span>Stock:</label><input type='text' maxlength='14' value='"+prodStorageMap.get('prodStorage')+"' name='prodStorage' id='prodStorage' class='text' onblur=\"prodStorageMap.put('prodStorage',this.value)\" /></label>");
+			//	return 0;
+			//}
+			if(skuProp_${propObj.otherData.get("PRODPROPID")}.length>0){
+				skuHtml=skuHtml+"<th>${propObj.otherData.get("PRODPROPNAME")}</th>";
+				checkedArr[j] = skuProp_${propObj.otherData.get("PRODPROPID")};
+				j++;
+			}
+		#end
+		
+		
+		var result = descartes(checkedArr);
+	
+		
+		skuHtml=skuHtml+"<th><span class='colorRed'>*</span>Stock</th><th><span class='colorRed'>*</span>Origin Price</th><th><span class='colorRed'>*</span>Current Price</th><th hidden>Product Code</th><th>OPT</th></tr>";
+		skuHtml = skuHtml+result;
+		skuHtml=skuHtml+"</tbody></table></div>";
+		#if($listSales.size()==0)
+			skuHtml="";
+		#end
+		$("#sku").html(skuHtml);
+		isfillsku=1;
+	}
+	function showtable(){
+	   var checkedArr  = new Array(); 
+	   var j=0;
+	   var skuHtml="<div style='overflow-x:auto'><table class='table order_table goodsTable_usrDefined mt10' id='skuproptable'><tbody>"
+	   	
+		#foreach($propObj in $listSales)
+			//skuHtml=skuHtml+"<th>${propObj.otherData.get("PRODPROPNAME")}</th>";
+			var skuProp_$propObj.otherData.get("PRODPROPID") =$("input[name='$propObj.otherData.get("PRODPROPID")']:checked");
+			//if(skuProp_${propObj.otherData.get("PRODPROPID")}.length<=0){
+			//	$("#sku").html("");
+			//	$("#prodStorage").attr("disabled",false);
+			//	isfillsku=0;
+			//	return 0;
+			//}
+		   if(skuProp_${propObj.otherData.get("PRODPROPID")}.length>0){
+				skuHtml=skuHtml+"<th>${propObj.otherData.get("PRODPROPNAME")}</th>";
+				checkedArr[j] = skuProp_${propObj.otherData.get("PRODPROPID")};
+				j++;
+			}
+		#end
+		var result = descartes(checkedArr);
+		skuHtml=skuHtml+"<th><span class='colorRed'>*</span>Stock</th><th><span class='colorRed'>*</span>Origin Price</th><th><span class='colorRed'>*</span>Current Price</th><th>Merchant Code</th><th>OPT</th></tr>";
+		
+		skuHtml = skuHtml+result;
+		skuHtml=skuHtml+"</tbody></table></div>";
+		$("#sku").html(skuHtml);
+		isfillsku=1;
+	}
+	function showimage(){
+		var imageHtml="";
+		var imagespace="";
+		var arrayObj = new Array();
+		var i=0;
+		colorenumids.length=0; //设置数组值为空
+		#foreach($propObj in $listSales)
+			#if(${propObj.otherData.get("IS_COLOR")}==1)
+			var skuProp_$propObj.otherData.get("PRODPROPID") =$("input[name='$propObj.otherData.get("PRODPROPID")']:checked");
+			#end
+		#end
+		#foreach($propObj in $listSales)
+			#if(${propObj.otherData.get("IS_COLOR")}==1)
+			for(var i${propObj.otherData.get("PRODPROPID")}=0;i${propObj.otherData.get("PRODPROPID")}<skuProp_${propObj.otherData.get("PRODPROPID")}.length;i${propObj.otherData.get("PRODPROPID")}++){
+				var prop_value=skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}].value;
+				imageHtml = imageHtml+ "<div class='goodsAttr goodsImg' enumid="+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+">"
+										+"<div class='goodsAttr_hd'>"
+										+"<span class='colorRed'>*</span>"
+										+prop_value+" Picture:"
+										+"</div>"
+										+"<div class='goodsAttr_bd'>"
+										+"<div class='imgUpFile' id=imgarea_"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+">"
+										+"<ul>"
+											+"<li>"
+												+"<img src='$root/static/images/ico/icon_image.png' imgid='' width='80' height='80' id='prodimgarea"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"1' class='pic'  isedit='0' alt='' />"
+												+"<div>"
+													+"<iframe frameborder='0' id='fileInput"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"' name='fileInput"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"' style='display:none'></iframe>"
+													+"<form action='uploadprop' name='picUploadForm' id='picUploadForm"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_1' enctype='multipart/form-data' method='post' target='fileInput"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"'>"
+														+"<div class='button_up' style='position: relative;'>"
+														+"<input type='hidden' name='imgsnum' id='imgsnum' value='"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_1'>"
+														+"<input type='hidden' name='prodId' value='$!{prodId}'>"
+														+"<i class='btn_upfile'>Upload</i>"
+														+"<input type='file' onchange=\"uploadColorImg('"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"','1')\" name='imagefile' style='opacity:0; filter: Alpha(Opacity=0); height:27px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;' size=1 id='inputfile"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_1'/>"
+														+"</div>"
+													+"</form>"
+												+"</div>"
+											+"</li>"
+											+"<li>"
+												+"<img src='$root/static/images/ico/icon_image.png' imgid='' width='80' height='80' id='prodimgarea"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"2'  isedit='0' class='pic' alt='' />"
+												+"<div>"
+													+"<form action='uploadprop' name='picUploadForm' id='picUploadForm"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_2' enctype='multipart/form-data' method='post' target='fileInput'>"
+														+"<div class='button_up' style='position: relative;'>"
+														+"<input type='hidden' name='imgsnum' id='imgsnum"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"' value='"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_2'>"
+														+"<input type='hidden' name='prodId' value='$!{prodId}'>"
+														+"<i class='btn_upfile'>Upload</i>"
+														+"<input type='file' onchange=\"uploadColorImg('"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"','2')\" name='imagefile' style='opacity:0; filter: Alpha(Opacity=0); height:27px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;' size=1 id='inputfile"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_2'/>"
+														+"</div>"
+													+"</form>"
+												+"</div>"
+											+"</li>"
+											+"<li>"
+												+"<img src='$root/static/images/ico/icon_image.png' imgid='' width='80' height='80' id='prodimgarea"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"3'  isedit='0' class='pic' alt='' />"
+												+"<div>"
+													+"<form action='uploadprop' name='picUploadForm' id='picUploadForm"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_3' enctype='multipart/form-data' method='post' target='fileInput'>"
+														+"<div class='button_up' style='position: relative;'>"
+														+"<input type='hidden' name='imgsnum' id='imgsnum"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"' value='"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_3'>"
+														+"<input type='hidden' name='prodId' value='$!{prodId}'>"
+														+"<i class='btn_upfile'>Upload</i>"
+														+"<input type='file' onchange=\"uploadColorImg('"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"','3')\" name='imagefile' style='opacity:0; height:27px; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;' size=1 id='inputfile"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_3'/>"
+														+"</div>"
+													+"</form>"
+												+"</div>"
+											+"</li>"
+											+"<li>"
+												+"<img src='$root/static/images/ico/icon_image.png' imgid='' width='80' height='80' id='prodimgarea"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"4' isedit='0' class='pic' alt='' />"
+												+"<div>"
+													+"<form action='uploadprop' name='picUploadForm' id='picUploadForm"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_4' enctype='multipart/form-data' method='post' target='fileInput'>"
+														+"<div class='button_up' style='position: relative;'>"
+														+"<input type='hidden' name='imgsnum' id='imgsnum' value='"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_4'>"
+														+"<input type='hidden' name='prodId' value='$!{prodId}'>"
+														+"<i class='btn_upfile'>Upload</i>"
+														+"<input type='file' onchange=\"uploadColorImg('"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"','4')\" name='imagefile' style='opacity:0; height:27px; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;' size=1 id='inputfile"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_4'/>"
+														+"</div>"
+													+"</form>"
+												+"</div>"
+											+"</li>"
+											+"<li>"
+											+"<img src='$root/static/images/ico/icon_image.png' imgid='' width='80' height='80' id='prodimgarea"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"5' isedit='0' class='pic' alt='' />"
+											+"<div>"
+												+"<form action='uploadprop' name='picUploadForm' id='picUploadForm"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_5' enctype='multipart/form-data' method='post' target='fileInput'>"
+													+"<div class='button_up' style='position: relative;'>"
+													+"<input type='hidden' name='imgsnum' id='imgsnum' value='"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_5'>"
+													+"<input type='hidden' name='prodId' value='$!{prodId}'>"
+													+"<i class='btn_upfile'>Upload</i>"
+													+"<input type='file' onchange=\"uploadColorImg('"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"','5')\" name='imagefile' style='opacity:0; height:27px; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;' size=1 id='inputfile"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"_5'/>"
+													+"</div>"
+												+"</form>"
+											+"</div>"
+											+"</li>"
+										+"</ul>"
+									+"</div>"
+									+"<div class='imgManage'>"
+										+"<div class='imgManage_hd'>"
+											+"<i class='btn_upfile'  onclick='showimages(\""+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"\");showTree(0,0);'>Image Space</i>"
+											+""
+										+"</div>"
+										+"<div class='imgManage_bd' id=show_"+$(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId")+"  style='display:none' >"
+											+"<ul class='imgList'>"
+											+"</ul>"
+										+"</div>"
+									+"</div>"
+								+"</div>"
+							+"</div>";
+									colorenumids[i] = $(skuProp_${propObj.otherData.get("PRODPROPID")}[i${propObj.otherData.get("PRODPROPID")}]).attr("enumId");
+									i++;
+				
+			}
+			
+			#end
+		#end
+		$("#colorspace").html(imageHtml);
+		if(imageHtml!=""){
+			havacolorImg=1;
+		}
+		else{
+			havacolorImg=0;
+		}
+	}
+	
+	function cancelColorImage(){
+		#foreach($propObj in $listSales)
+			#foreach( $prop in $propObj.products )
+				#if(${propObj.otherData.get("IS_COLOR")}==1)
+				
+				//点击图片显示框取消颜色图片
+				$("#imgarea_$!{prop.enumId}").find("ul li img").click(function(){
+					$(this).attr("src",siteurl+"/static/images/ico/icon_image.png");
+					$(this).attr("isedit","0");
+				});
+				#end
+    		#end
+		#end
+	}
+	function setprodpropmap(){
+		var arrayprop = new Array();
+		var i=0;
+		#foreach($propObj in $listProd)
+			if($("#prop_${propObj.otherData.get("PRODPROPID")}").val()!="-1"){
+				arrayprop[i]="${propObj.otherData.get("PRODPROPID")},,,"+$("#prop_${propObj.otherData.get("PRODPROPID")}").val()+",,,${propObj.otherData.get("PRODPROPNAME")},,,"+$("#prop_${propObj.otherData.get("PRODPROPID")}").find("option:selected").attr("enumid");
+				i++;
+			}
+		#end
+		return arrayprop;
+	}
+</script>
+
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom: none;">
+	 	<h1 class="fl">Release Product > Step2</h1>
+	 	<div class="fr">
+	 		<form id="updategoods" method="post" action="$root/product/initupdate">
+	 			<input type="hidden" name="prodId" id="prodId" value="$!productDTO.prodId"/>	
+				<input style="font-size: 18px;" class="button" type="button" value="Back to Step 1" onclick="showConfirm('Are you sure to do?',&quot;backStep1()&quot;)">
+			</form>
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG">
+			<div class="wd100 ht45 mt15 ml20">
+					<h2>Product Infomation</h2>
+			</div>
+								<div class="step_group">
+									<p>
+										<label>
+											<span class="colorRed">*</span>
+											Product Name:
+										</label>
+										<input type="text" value="$!productDTO.prodName" name="prodName" id="prodName" style="width:400px" class="text"  maxlength="50" onblur="javascript:$('#prodnameprompt').html('')" /><span style="color: green;margin-left: 10px" id="prodnameprompt"></span>
+									</p>
+									<p>
+										<label>
+											<span class="colorRed"></span>
+											Adword:
+										</label>
+										<input type="text" value="$!productDTO.prodAdword" name="prodAdword" id="prodAdword" style="width:400px" class="text"  maxlength="100" />
+									</p>
+									<p>
+										<label>
+											<span class="colorRed"></span>
+											Brand:
+										</label>
+										<select class="text" name="prodBrandId" id="prodBrandId">
+											#foreach($brandObj in $listBrand)
+												#if($brandObj)
+													<option  value="$!brandObj.prodBrandId" #if($brandObj.prodBrandId==$productDTO.prodBrandId) selected #end)>$!{brandObj.name}</option>
+												#end
+											#end
+											<option value="0">other</option>
+										</select>
+									</p>
+									<div id="brandnamediv"></div>
+									<div class="goodsAttr">
+										<div class="goodsAttr_hd">
+											Properties:
+										</div>
+										<div class="goodsAttr_bd">
+											<ul class="step_group_inner">
+												#foreach($propObj in $listProd)
+													<li>
+														<div class="dt">
+															#if($propObj.otherData.get("IS_REQUIRED")=="1")
+																<span class="colorRed">*</span>
+															#end
+															$propObj.otherData.get("PRODPROPNAME")：
+														</div>
+													<div class="dd" >
+														#if($propObj.otherData.get("IS_REQUIRED")=="1")
+															<select class="text" style="width: 90px;" isrequired="1" propname="$propObj.otherData.get("PRODPROPNAME")"  name="$propObj.otherData.get("PRODPROPID")" id="prop_$propObj.otherData.get("PRODPROPID")" onchange="showcustomsizeprop(this,'${propObj.otherData.get("PRODPROPID")}')">
+														#else
+															<select class="text" style="width: 90px;"  name="$propObj.otherData.get("PRODPROPID")" id="prop_$propObj.otherData.get("PRODPROPID")" onchange="showcustomsizeprop(this,'${propObj.otherData.get("PRODPROPID")}')">
+														#end
+													<option  value="-1">chose...</option>
+													#foreach( $prop in $propObj.products )
+														#if($prop.propSelfdf=="1")
+															<option iscustom="1" enumid="$prop.enumId" value="$prop.prodName">$prop.prodName</option><!--  
+															<input type="text" name="" id="prodpropvalue" value="$prop.prodName" class="text"  style="width:90px;border:0px;background-color:transparent;color:green;"  onfocus="if (value =='自定义'){value =''}" onblur="if (value ==''){value='自定义';}$(this).parent().find('input[type=radio]').attr('value',this.value)">
+															-->
+														#else
+															<option enumid="$prop.enumId" value="$prop.prodName">$prop.prodName</option>
+														#end
+														
+													#end 
+													</select>  <span id="div$propObj.otherData.get("PRODPROPID")"></span>
+													</div>
+													</li>	
+												#end
+												
+												<li>
+													<div class="dt">
+														Custom Properties:
+													</div>
+													<div class="dd">
+														<p>
+															<span class="button" id="addDIYprop">Add</span>
+														</p>
+														
+													</div>
+												</li>
+												<li>
+													<div class="skuTable" style="width: 90%; margin-left: 41px;">
+														<table class="table order_table goodsTable_usrDefined mt10" id="customsizetable">
+															<tbody>
+																#if($prodPropInfos)
+																	<th>Property Name</th>
+																	<th>Property Value</th>
+																	<th>Actions</th>
+																#end
+																#set($cuspropnum=1)
+																#foreach($cusprop in $prodPropInfos)
+																	#if($cusprop.prodPropId==0)
+																		<tr num="$cuspropnum">
+																			<td>$cusprop.prodPropName</td>
+																			<td>$cusprop.prodPropVal</td>
+																			<td width='105'><a href='javascript:void(0)' onclick="updatecustomprop('$cuspropnum')">Edit</a> | <a href="javascript:void(0)" onclick="$(this).parent().parent().remove()">Delete</a></td>
+																		</tr>
+																		#set($cuspropnum=$cuspropnum+1)	
+																	#end
+																#end
+															</tbody>
+														</table>
+													</div>
+												</li>
+											</ul>
+										</div>
+									</div>
+									</div>
+			
+									<div class="wd100 ht45 mt15 ml20">
+											<h2>Sales Infomation</h2>
+									</div>
+									
+									<div class="step_group">
+									<p id="prodStorageDiv">
+										<label>
+											<span class="colorRed">*</span>
+											Stock:
+										</label>
+										<input type="text" value="$!productDTO.prodStorage" maxlength="9" name="prodStorage" id="prodStorage" class="text"  maxlength="9"  style="margin-right:26px;"/>
+									</p>
+									<p>
+										<label>
+											<span class="colorRed">*</span>
+											Stock Warning Number:
+										</label>
+										<input type="text" value="$!productDTO.prodStockWarning" name="prodStockWarning" id="prodStockWarning" class="text" maxlength="4" style="margin-right:50px;" />
+										<span style="margin-left:-8px;">Unit Of Measurement:</span>
+										<input type="text" value="$!productDTO.prodMeasureUnit" name="prodMeasureUnit" id="prodMeasureUnit" class="text" maxlength="5" />
+									
+									</p>
+									<p>
+										<label>
+											<span class="colorRed">*</span>
+											Product Origin Price:
+										</label>
+										<input type="text" value="$!productDTO.prodOriginPrice" name="prodOriginPrice" id="prodOriginPrice" class="text" maxlength="10" style="margin-right:38px;"/>
+											<span class="colorRed" style="margin-left:-4px;">*</span>
+											<span>Product Current Price:</span>
+										<input type="text" value="$!productDTO.prodPrice" name="prodPrice" id="prodPrice" class="text" maxlength="10" />
+									</p>
+									
+									<div class="goodsAttr" id="skueara">
+										<div class="goodsAttr_hd">
+											SKU Properties:
+										</div>
+										<div class="goodsAttr_bd">
+											<ul class="step_group_inner" id="propItems">
+												#set($skupropnum=0)
+												#foreach($propObj in $listSales)
+													<li>
+														<div class="dt">
+															$propObj.otherData.get("PRODPROPNAME"):
+														</div>	
+														<div class="dd">
+														
+														#foreach( $prop in $propObj.products )
+															<span class="vol">
+																#if(${propObj.otherData.get("IS_COLOR")}==1 && ${propObj.otherData.get("IS_EDIT")}==1)
+																<input pval="$propObj.otherData.get("PRODPROPNAME")" name="$propObj.otherData.get("PRODPROPID")" id="$propObj.otherData.get("PRODPROPID")" isedit="1" enumid="$prop.enumId"  type="checkbox" onclick="showtable();showimage();cancelColorImage();changeEdit(this);getSumSkuNum();" value="$prop.prodName" /><span>$prop.prodName</span>
+																#elseif(${propObj.otherData.get("IS_COLOR")}==1 && ${propObj.otherData.get("IS_EDIT")}==0)
+																<input pval="$propObj.otherData.get("PRODPROPNAME")" name="$propObj.otherData.get("PRODPROPID")" id="$propObj.otherData.get("PRODPROPID")" enumid="$prop.enumId"  type="checkbox" onclick="showtable();showimage();cancelColorImage();getSumSkuNum();" value="$prop.prodName" /><span>$prop.prodName</span>
+																#elseif(${propObj.otherData.get("IS_COLOR")}==0 && ${propObj.otherData.get("IS_EDIT")}==1)
+																<input pval="$propObj.otherData.get("PRODPROPNAME")" name="$propObj.otherData.get("PRODPROPID")" id="$propObj.otherData.get("PRODPROPID")" isedit="1" enumid="$prop.enumId"  type="checkbox" onclick="showtable();changeEdit(this);getSumSkuNum();" value="$prop.prodName" /><span>$prop.prodName</span>
+																#else
+																<input pval="$propObj.otherData.get("PRODPROPNAME")" name="$propObj.otherData.get("PRODPROPID")" id="$propObj.otherData.get("PRODPROPID")" enumid="$prop.enumId"  type="checkbox" onclick="showtable();getSumSkuNum();" value="$prop.prodName" /><span>$prop.prodName</span>
+																#end
+															</span>
+															
+														#end 
+														#set($skupropnum=$skupropnum+1)
+														</div>
+													</li>	
+												#end
+												<input type="hidden" name="skupropnum" id="skupropnum" value="$skupropnum">
+												<li>
+													<div id="sku" class="skuTable">
+														
+													</div>
+												</li>
+											</ul>
+										</div>
+									</div>
+									<div class="goodsAttr goodsImg">
+										<div class="goodsAttr_hd">
+										<span class="colorRed">*</span>
+											Product Picture:
+										</div>
+										<div class="goodsAttr_bd">
+											<div class="imgUpFile" id="prodimgarea">
+												<ul>
+													<li>
+														<img src="$root/static/images/ico/icon_image.png" imgid="" width="80" height="80" class="pic" isedit="0"  id="prodimgarea1" alt="" />
+														<div>
+															<iframe frameborder="0" id="fileInput" name="fileInput" style="display:none"></iframe>
+															
+															<form action="upload" name="picUploadForm1" id="picUploadForm1" enctype="multipart/form-data" method="post" target="fileInput">
+																<div class="button_up" style="position: relative;">
+																<input type="hidden" name="imgsnum" id="imgsnum" value="1">
+																<input type="hidden" name="prodId" value="$!{prodId}">
+																<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+																<input type="file" name="imagefile" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;" size=1  id="inputfile1"/>
+																</div>
+															</form>
+														</div>
+													</li>
+													<li>
+														<img src="$root/static/images/ico/icon_image.png" imgid="" width="80" height="80" class="pic" isedit="0" id="prodimgarea2" alt="" />
+														<div>
+															<form action="upload" name="picUploadForm2" id="picUploadForm2" enctype="multipart/form-data" method="post" target="fileInput">
+																<div class="button_up" style="position: relative;">
+																<input type="hidden" name="imgsnum" id="imgsnum" value="2">
+																<input type="hidden" name="prodId" value="$!{prodId}">
+																<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+																<input type="file" name="imagefile" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;" size=1 id="inputfile2"/>
+																</div>
+															</form>
+														</div>
+													</li>
+													<li>
+														<img src="$root/static/images/ico/icon_image.png" imgid="" width="80" height="80" class="pic" isedit="0" id="prodimgarea3" alt="" />
+														<div>
+															<form action="upload" name="picUploadForm3" id="picUploadForm3" enctype="multipart/form-data" method="post" target="fileInput">
+																<div class="button_up" style="position: relative;">
+																<input type="hidden" name="imgsnum" id="imgsnum" value="3">
+																<input type="hidden" name="prodId" value="$!{prodId}">
+																<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+																<input type="file" name="imagefile" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;" size=1 id="inputfile3"/>
+																</div>
+															</form>
+														</div>
+													</li>
+													<li>
+														<img src="$root/static/images/ico/icon_image.png" imgid="" width="80" height="80" class="pic" isedit="0" id="prodimgarea4" alt="" />
+														<div>
+															<form action="upload" name="picUploadForm4" id="picUploadForm4" enctype="multipart/form-data" method="post" target="fileInput">
+																<div class="button_up" style="position: relative;">
+																<input type="hidden" name="imgsnum" id="imgsnum" value="4">
+																<input type="hidden" name="prodId" value="$!{prodId}">
+																<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+																<input type="file" name="imagefile" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;" size=1 id="inputfile4"/>
+																</div>
+															</form>
+														</div>
+													</li>
+													<li>
+														<img src="$root/static/images/ico/icon_image.png" imgid="" width="80" height="80" class="pic" isedit="0" id="prodimgarea5" alt="" />
+														<div>
+															<form action="upload" name="picUploadForm5" id="picUploadForm5" enctype="multipart/form-data" method="post" target="fileInput">
+																<div class="button_up" style="position: relative;">
+																<input type="hidden" name="imgsnum" id="imgsnum" value="5">
+																<input type="hidden" name="prodId" value="$!{prodId}">
+																<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+																<input type="file" name="imagefile" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 9px; width:62px; overflow:hidden; top: 0;" size=1 id="inputfile5"/>
+																</div>
+															</form>
+														</div>
+													</li>
+												</ul>
+											</div>
+											<div class="imgManage">
+												<div class="imgManage_hd">
+													<i class="btn_upfile"  id="prodshowimages" onclick="showTree(0,0)">Image Space</i>
+													You must upload at least one picture(the first one is prduct main picture,others four is complementary for the first),the size of picture must below 5 MB, the Resolution of picture suggest 800*800 px.
+												</div>
+												<div class="imgManage_bd" style="display:none">
+													<ul class="imgList" id="prodimgList">
+													</ul>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div id="colorspace"></div>
+									<div class="goodsAttr goodsImg">
+										<div class="goodsAttr_hd">
+											<span class="colorRed">*</span>Detail Description:
+										</div>
+										<div class="goodsAttr_bd">
+											<textarea name="prodDetailDescContent" id="prodDetailDescContent">
+											${productDTO.prodDetail}
+											</textarea>
+										<div class="imgManage">
+												<div class="imgManage_hd" id="ckimagespace" onclick="showTree(0,0)">
+													<div class="button_up" style="position: relative;">
+														<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+														<input type="file" name="image" id="image" onchange="ckeditorUpload()" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 1px; width:62px; overflow:hidden; top: 0;" size=1/>
+														<i class="btn_upfile" id="ckimagespace" onclick="showTree(0,0)">Editor Image Space</i> 
+														</div>
+												</div>
+												<div class="imgManage_bd" style="display:none">
+													<ul class="imgList" id="ckeditorspace">
+													</ul>
+												</div>
+											</div>
+										
+										</div>
+									</div>									
+								</div>
+								
+							<!--  	<div class="gradient_title">2、City Infomation</div>
+								<div class="step_group">
+									<p>
+										<label>
+											<span class="colorRed">*</span>
+											City:
+										</label>
+										Please chose the sales city for the product
+										
+									</p>
+									<div class="tabtitle like_type_list" style="margin-left:161px;">
+										#foreach($city in $cityList)
+											#if($city.isDefault==1)
+												<span myval="$city.cityId" class="selected1">
+											#else
+												<span myval="$city.cityId">
+											#end
+												<b></b>
+												$city.cityName
+											</span>
+										#end
+									</div>
+								</div>
+								-->
+							</div>
+								<div class="btns tac mt25 pb15">
+									<input type="button" value="Save" class="btnG bwt100 bht30 bfz16"  onclick="publishProduct('1')"/>
+									<input type="button" value="Cancel" class="btnO bwt100 bht30 bfz16" onclick="showConfirm('Are you sure to give up?',&quot;innerInit()&quot;)" />
+								</div>
+							</div>
+							</div>
+
+	<!-- 弹出层 开始 -->
+		<div class="shade_layout" style="display: none;"></div>
+		<div class="pop_windows"  id="pop_windows0" style="display:none">
+			<div class="layout">
+				<b class="ico_close">关闭</b>
+				<div class="main">
+					<div class="hd">
+						<h2>Add Custom Properties</h2>
+					</div>
+					<div class="bd_p10" style="padding-left:56px">
+						<div><lebel class="colortitle"><span class='colorRed'>*</span>Propertie Name:</lebel><input class="poptxt" type="text" name="customsizename" id="customsizename" maxlength="20"></div>
+						<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:2px;"><span class='colorRed'>*</span>Propertie Value:</lebel><input class="poptxt" type="text" name="customsizevalue" id="customsizevalue" maxlength="20"></div>
+					</div>	
+							<div class="popup_btn_con">
+								<input class="btnG bwt100 bht30 bfz16" type="button" myvalue="" name="addcuspropsubmit" id="addcuspropsubmit" value="OK" />
+								<input class="btnC bwt100 bht30 bfz16" type="button" name="" value="Cancel" onclick="$('.ico_close').trigger('click')" />
+							</div>
+				</div>
+			</div>
+		</div>
+		<div class="pop_windows"  id="pop_windows1" style="display:none">
+			<div class="layout">
+				<b class="ico_close">关闭</b>
+				<div class="main">
+					<div class="hd">
+						<h2>Modify Custom Properties</h2>
+					</div>
+					<div class="bd_p10" style="padding-left:56px">
+						<div><lebel class="colortitle">Propertie Name:</lebel><input class="poptxt" type="text" name="customsizename2" id="customsizename2" maxlength="20"></div> 
+						<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:2px;">Propertie Value:</lebel><input class="poptxt" type="text" name="customsizevalue2" id="customsizevalue2" maxlength="20"></div> 
+					</div>	
+					<div class="popup_btn_con">
+						<input class="btnG bwt100 bht30 bfz16" type="button" myvalue="" name="updatecuspropsubmit" id="updatecuspropsubmit" value="OK" />
+						<input class="btnC bwt100 bht30 bfz16" type="button" name="" value="Cancel" onclick="$('.ico_close').trigger('click')" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="pop_windows"  id="open_returnPop" style="display: none;">
+			
+		</div>
+	</div>
+	<input type="hidden" id="sumskunum" value="0"/>	
+	<input type="hidden" id="sitedomain"  value="$root"/>	
+	<input type="hidden" id="prodType" value="$!{prodType}">
+	<input type="hidden" id="chooseProdCatId" value="$!prodCatId">
+	

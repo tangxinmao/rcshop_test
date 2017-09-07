@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Expires" CONTENT="0">
+<meta http-equiv="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="Pragma" CONTENT="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>merchant list</title> #set($root=$request.getContextPath())
+<script type="text/javascript"
+	src="$root/static/js/jquery-1.11.1.min.js"></script>
+<link href="$root/static/css/seller_center.css" rel="stylesheet"
+	type="text/css" />
+<link href="$root/static/css/bootstrap.min.css" rel="stylesheet"
+	type="text/css" />
+<link href="$root/static/css/uploadify.css" rel="stylesheet"
+	type="text/css" />
+<link href="$root/static/css/common.css" rel="stylesheet"
+	type="text/css" />
+<link href="$root/static/css/jquery-ui.css" rel="stylesheet"
+	type="text/css" />
+<link href="$root/static/css/jquery-ui-timepicker-addon.min.css"
+	rel="stylesheet" type="text/css" />
+<link href="$root/static/css/lightbox.css" rel="stylesheet"
+	type="text/css" />
+</head>
+<body>
+	<input type="hidden" value="$root" id="rootPath">
+	<input type="hidden" value="$!marketType" id="marketType">
+	<div class="rightArea fl mt10 mb10" style="width: 100%;">
+		<div class="service_wrap clearfix">
+			<div class="right_tab_wrap">
+				<div id="tab_container" class="tab_con">
+
+
+					<div id="Tab2" class="tab-item" data-link="/main/anno/list">
+						<div class="service_wrap">
+							<div class="filtrate_wrap" style="text-align: center;">
+								<div class="clearfix">
+									<div class="width2_9">
+										<label>Order ID:</label> <input type="text" name="orderId"
+											id="orderId" value="$!{order.orderId}" />
+									</div>
+									<div class="width2_9">
+										<label>Member ID：</label> <input type="text" name="memberId"
+											id="memberId" value="$!{order.memberId}" />
+									</div>
+									<div class="width2_9">
+										<label>Status:</label> <select id="orderStatus"
+											name="orderStatus">
+											<option value="">All</option>
+											<option value="1">Wait for payment</option>
+											<option value="2">Wait for pickup</option>
+											<option value="3">Payment</option>
+											<option value="4">Wait for evaluation</option>
+											<option value="5">Finished</option>
+											<option value="6">Closed</option>
+											<option value="7">Delete</option>
+											<option value="8">Part payment</option>
+											<option value="9">Part refund</option>
+											<option value="10">Part certain payment</option>
+											<option value="11">Not allow payment</option>
+										</select>
+									</div>
+									<div class="width1_3">
+										<label>Order Time:</label> <input class="long" type="text"
+											id="orderTimeStart" name="orderTimeStart"
+											value="$!viewutil.dateFormat($!order.orderTimeStart)"
+											readonly="readonly" /> <a class="clearBtn"
+											href="javascript:void(0)"
+											onclick="clearTime('orderTimeStart')">X</a> To&nbsp; <input
+											class="long" type="text" id="orderTimeEnd"
+											name="orderTimeEnd"
+											value="$!viewutil.dateFormat($!order.orderTimeEnd)"
+											readonly="readonly" /> <a class="clearBtn"
+											href="javascript:void(0)" onclick="clearTime('orderTimeEnd')">X</a>
+									</div>
+								</div>
+								<div class="clearfix mt15">
+									<div class="width1_4">
+										<input class="submit ml10" type="button"
+											onclick="goThisPage('search')" value="Search" />
+									</div>
+								</div>
+							</div>
+							<div id="productListDiv">
+								<input type="hidden" value="$!page.currentPage" id="currentPage" />
+								<table class="table order_table mt10">
+									<tr>
+										<th>ORDER ID</th>
+										<th>MEMBWER ACCOUNT</th>
+										<th>ORDER TIME</th>
+										<th>SUB TOTAL</th>
+										<th>FREIGHT AMOUNT</th>
+										<th>ORDER PAY PRICE</th>
+										<th>ORDER STATUS</th>
+										<th>MERCHANT</th>
+										<th>IS DELIVERY</th>
+										<th>ORDER PAYMENT</th>
+										<th class="tac">Actions</th>
+									</tr>
+									#if($list&&!$list.isEmpty()) 
+									#foreach($orderInfo in $list)
+									<tr>
+										<td>$!{orderInfo.orderId}</td>
+										<td>$!{orderInfo.memberAccount}</td>
+										<td>$viewutil.dateFormat($!{orderInfo.orderTime})</td>
+										<td>$!{orderInfo.orderPrice}</td>
+										<td>$!{orderInfo.freightAmount}</td>
+										<td>$!{orderInfo.orderPayPrice}</td>
+										<td>#if($!{orderInfo.orderStatus}==1)#end</td>
+										<td>$!{orderInfo.merchantName}</td>
+										<td>#if($!{orderInfo.isDelivery}==1)merchant distribution#end #if($!{orderInfo.isDelivery}==0)shipment of the customer#end</td>
+										<td>#if($!{orderInfo.orderPayment}==1)online payment#end #if($!{orderInfo.orderPayment}==2)offline payment#end</td>
+										<td>45646546</td>
+									</tr>
+									#end #end
+								</table>
+								<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+								<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+								<input type="hidden" value="$!page.currentPage" id="currentPage" />
+								<div id="pageNm_tip"
+									style="text-align: right; color: red; margin-bottom: 20px"></div>
+								<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+							</div>
+							<!-- jquery ui 日期js -->
+
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- main end -->
+	<!-- 查看库存 div begin -->
+	<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="skuStorageDiv1" style="display: none;">
+		<div class="layout">
+			<b class="ico_close" onclick="closeStorageDiv();"> <!-- <a href="javascript:closeStorageDiv();" >关闭</a> -->
+			</b>
+			<div class="main">
+				<div class="hd">
+					<h2>Check Storage</h2>
+				</div>
+				<div class="bd_p10">
+					<div class="scrollTable_hd">
+						<table class="table" id="skuStorageTable">
+							<tr>
+								<th class="tac" width="215">SKU ID#</th>
+								<th class="tac" width="200">SKU PROPERTY</th>
+								<th class="tac" width="110">SKU STORAGE</th>
+								<th class="tac" width="110">SKU PRICE</th>
+							</tr>
+						</table>
+					</div>
+					<div class="scrollTable_bd tac">
+						<table class="table" id="skuStorageTbody">
+						</table>
+					</div>
+				</div>
+				<div class="popup_btn_con">
+					<input class="btn btn-xs btn_orange" type="button"
+						onclick="closeStorageDiv();" name="" value="OK" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 查看库存 div end -->
+	<!-- 修改SKU库存 div begin -->
+	<div class="pop_windows" id="skuStorageDiv2" style="display: none;">
+		<div class="layout">
+			<b class="ico_close" onclick="closeStorageDiv();"> <!-- <a href="javascript:closeStorageDiv();" >关闭</a> -->
+			</b>
+			<div class="main">
+				<div class="hd">
+					<h2>Update Storage</h2>
+				</div>
+				<div class="bd_p10">
+					<div class="scrollTable_hd">
+						<table class="table" id="skuStorageTable2">
+							<tr>
+								<th class="tac" width="215">SKU ID#</th>
+								<th class="tac" width="200">SKU PROPERTY</th>
+								<th class="tac" width="110">SKU STORAGE</th>
+								<th class="tac" width="110">SKU PRICE</th>
+							</tr>
+						</table>
+					</div>
+					<div class="scrollTable_bd tac">
+						<table class="table" id="skuStorageTbody2">
+						</table>
+					</div>
+				</div>
+				<div class="popup_btn_con">
+					<input class="btn btn-xs btn_orange" type="button"
+						id="updateStorage" onclick="beginUpdateSkuStorage()"
+						value="Submit" /> <input class="btn btn-xs btn_gray"
+						type="button" name="" onclick="closeStorageDiv();" value="Cancel" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 修改SKU库存 div end -->
+	<!-- 修改商品库存 div begin -->
+	<div class="pop_windows" id="skuStorageDiv3" style="display: none;">
+		<div class="layout">
+			<b class="ico_close" onclick="closeStorageDiv();"> <!-- <a href="javascript:closeStorageDiv();" >关闭</a> -->
+			</b>
+			<div class="main">
+				<div class="hd">
+					<h2>Update Storage</h2>
+				</div>
+				<div class="bd_p10">
+					<div class="scrollTable_hd">
+						<table class="table" id="skuStorageTable3">
+							<tr>
+								<th class="tac" width="215">PRODUCT ID#</th>
+								<th class="tac" width="200">PRODUCT NAME</th>
+								<th class="tac" width="110">PRODUCT STORAGE</th>
+								<th class="tac" width="110">PRODUCT PRICE</th>
+							</tr>
+						</table>
+					</div>
+					<div class="scrollTable_bd tac">
+						<table class="table" id="skuStorageTbody3">
+							<tr>
+								<td width='202'></td>
+								<td width='189'></td>
+								<td width='105'>
+									<div class='amount_wrap'>
+										<a class='minus_ico' id='reduce' href='javascript:void(0)'
+											onclick='reduceNum(this)'>-</a> <input type='text'
+											class='width40' name='prodStorage' id='prodStorage'
+											value='" + jsonArr[i].PROD_STORAGE + "'> <a
+											class='plus_ico' id='increase' href='javascript:void(0)'
+											onclick='increaseNum(this)'>+</a>
+									</div>
+								</td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div class="popup_btn_con">
+					<input class="btn btn-xs btn_orange" type="button"
+						id="updateStorage" onclick="beginUpdateProdStorage()"
+						value="Submit" /> <input class="btn btn-xs btn_gray"
+						type="button" name="" onclick="closeStorageDiv();" value="Cancel" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 修改商品库存 div end -->
+	<div class="pop_windows" id="putgoodsup" style="display: none;">
+		<div class="layout">
+			<b class="ico_close" onclick="closeStorageDiv();"> <!-- <a href="javascript:closeStorageDiv();" >关闭</a> -->
+			</b>
+			<div class="main">
+				<div class="hd">
+					<h2>定时上下架</h2>
+				</div>
+				<div class="bd_p10">
+					上架时间：<input class="short" readonly type="text" name="timeupupup"
+						id="timeupupup" value=""> 下架时间：<input class="short"
+						readonly type="text" name="timedowndowndown" id="timedowndowndown"
+						value="">
+				</div>
+				<div class="popup_btn_con">
+					<input class="btn btn-xs btn_orange" type="button" myvalue=""
+						id="upupsubmit" onclick="begiputUpDownGoods(this)" value="确定" />
+					<input class="btn btn-xs btn_gray" type="button" name=""
+						onclick="closeStorageDiv();" value="取消" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="open_returnPop"></div>
+	<script type="text/javascript" src="$root/static/js/orderList.js"></script>
+	<script type="text/javascript" src="$root/static/assets/js/bui-min.js"></script>
+	<script type="text/javascript"
+		src="$root/static/assets/js/config-min.js"></script>
+	<script type="text/javascript" src="$root/static/js/jquery-ui.js"></script>
+	<script type="text/javascript"
+		src="$root/static/js/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="$root/static/js/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="$root/static/js/common.js"></script>
+</body>
+</html>
+

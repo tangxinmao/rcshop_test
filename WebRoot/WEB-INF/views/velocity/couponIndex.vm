@@ -1,0 +1,167 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/coupon.js,/static/js/jquery-ui-timepicker-addon.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Voucher Management</h1>
+	 	<div class="fr">
+			<input class="btnG bwt125 bht39 bfz16 fr mt12" type="button" value="Add Voucher" onclick="javascript:window.location.href='$root/coupons/couponDetail';">
+		</div>
+	</div> 
+	
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<form id="searchForm">
+			<div class="mt35">
+				<div class="unit">
+					<label>Date From</label>
+					<input type="text" name="couponGenTimeStart">
+				</div>
+				<div class="unit">
+					<label >Date To</label>
+					<input type="text" name="couponGenTimeEnd">
+				</div>
+			<div class="unit">
+					<label >Status</label>
+						<select name="status">
+							<option value="">All</option>
+							<option value="2">Ongoing</option>
+							<option value="1">Waiting to publish</option>
+							<option value="3">Reverted</option>
+							<option value="4">Overdue</option>
+						</select>
+					
+				</div>
+			
+			
+			
+			</div>
+			
+			<div class="clearfix">
+				<div class="mt10 unit">
+					<label >Discount From</label>
+						<input type="text" name="couponAmountStart" value="">
+					
+				</div>
+				
+				<div class="mt10 unit">
+					<label>Discount To</label>
+					<input type="text" name="couponAmountEnd" value="">
+					
+				</div>
+				<div class="mt10 unit">
+					<label >Owner Name</label>
+						<input type="text" name="merchantName" value="">
+					
+				</div>
+			<div class="mt10" style="float:right;">
+					<input  class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+			</form>
+		</div>
+		
+		<div class="sortArea">
+			<ul>
+				<li  class="selcted">All</li>
+				<li >Ongoing</li>
+				<li >Waiting to publish</li>
+				<li >Reverted</li>
+				<li  >Overdue</li>
+			</ul>	
+		</div>
+
+		<div class="service_wrap mt10 clearfix" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+						<table class="table order_table mt10" id="review">
+						
+							<tr>
+										<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+								<th >Voucher ID</th>
+								<th >Type</th>
+								<th >User Range</th>
+					<!-- 			<th >Created Time</th> -->
+								<th >Voucher Name</th>
+								<th >Discount</th>
+								<th >Minimum Buy Price</th>
+								<th >Total QTY</th>
+								<th >Remaining QTY</th>
+								<th >Start Time</th>
+								<th >Expire Time</th>
+								<th >Status</th>
+								<th class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+								<td><input type="checkbox" name="radio" id="radio" value="$!item.couponId"></td>
+							    <td>$!{item.couponId}</td>
+							       <td>
+							        #if($!item.merchantId>0)Store
+							    #else
+							       Beli Material
+							    #end
+							       </td>
+							    <td>
+							    #if($!item.type==1)
+							    $!{item.merchantName}
+							    #end
+							    #if ($!item.type==2)
+							    $!{item.prodCatName}
+							    #end
+							    </td>
+<!-- 							    <td>#if(${item.couponGenTime})$viewutil.dateFormat($!{item.couponGenTime})#else--#end</td> -->
+								<td>$!{item.name}</td>
+								<td>Rp #if ($!{item.amount})$viewutil.moneyStringFormat($!{item.amount})#else 0 #end<input type="hidden" value="$!{item.amount}"></td>
+								<td>Rp #if ($!{item.baseAmount})$viewutil.moneyStringFormat($!{item.baseAmount})#else 0 #end<input type="hidden" value="$!{item.baseAmount}"></td>
+								<td>$!{item.initCount}</td>
+							    <td>$!{item.leftCount}</td>
+							    <td>#if(${item.effectTime})$viewutil.datetimeFormat($!{item.effectTime})#else--#end</td>
+							    <td>#if(${item.expireTime})$viewutil.datetimeFormat($!{item.expireTime})#else--#end</td>
+								
+							<td>#if ($!{item.status}==4)<span style="color:#9B9B9B">Overdue</span>#end
+								#if ($!{item.status}==2)<span  style="color:#4ED321">Ongoing</span>#end
+								#if($!{item.status}==1)<span style="color:red">Waiting to publish</span>#end 
+								#if($!{item.status}==3)<span style="color:red">Reverted</span>#end 
+								 <input type="hidden" value="${item.status}"></td>
+									
+									
+								<td>
+									 #if(!$session.getAttribute("RcVendor"))
+						#if($!{item.status}==1||$!{item.status}==3)
+					    <a href="javascript:void(0)" onclick="showConfirm('Are you sure to publish this voucher?',&quot;publishCoupons('$!{item.couponId}')&quot;)">Publish</a>
+					#end
+						
+						#if($!{item.status}==1)
+					    <a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete this voucher?',&quot;deleteCoupons('$!{item.couponId}')&quot;)">Delete</a>
+					#end
+							#if($!{item.status}==2)
+					    <a href="javascript:void(0)" onclick="showConfirm('Are you sure to revert this voucher?',&quot;revertCoupons('$!{item.couponId}')&quot;)">Revert</a>
+					#end
+						#end		
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+						<div class="batsOpt">
+							<h1>Bulk Action</h1>
+							 #if(!$session.getAttribute("RcVendor"))
+							<input class="btnG bwt100 bht30 bfz12 fl" type="button" value="Publish" onclick="batsPublish()">
+							<input class="btnG bwt100 bht30 bfz12 fl ml10" type="button" value="Revert" onclick="batsRevert()">
+							<input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+							#end
+						</div>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>

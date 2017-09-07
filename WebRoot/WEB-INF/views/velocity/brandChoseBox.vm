@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Expires" CONTENT="0">
+<meta http-equiv="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="Pragma" CONTENT="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>merchant list</title>
+#set($root=$request.getContextPath())
+<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+<link href="$root/static/css/seller_center.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/common.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<input type="hidden" id="rootsite" value="$root">
+<div class="entryGoods_selectType">
+	<div class="tit">
+		
+	</div>
+	<input type="hidden" name="prodCatId" id="prodCatId" value="$!prodCatId">
+	<div class="bd">
+		Your currently selected category:
+		<span class="sel_item colorRed">
+			$!categoryName
+		</span>
+	</div>
+</div>
+<div>
+	<div class="goodsSelect_area">
+		<div id="all" class="selectItem entryGoodsSelect" style="margin-left: 137px;">
+			<h3>Unselected</h3>
+			<ul>
+				#foreach($oBrand in $originBrandList)
+					<li mydata="$!oBrand.prodBrandId">$!oBrand.prodBrandName</li>
+				#end
+			</ul>
+		</div>
+		<div style="float: left;">
+			<input style="margin-left:25px;margin-right:28px;margin-top:70px;" class="submit ml10" type="button" name="" onclick="addProp()" value="Add >>">
+			<input style="position: absolute;margin-top:51px;" class="submit2 ml10" type="button" name="" onclick="removeProp()" value="<< Remove">
+		</div>
+		<div id="mine" class="selectItem entryGoodsSelect">
+			<h3>Selected</h3>
+			<ul>
+				#foreach($brand in $brandList)
+					<li mydata="$!brand.prodBrandId">$!brand.prodBrandName</li>
+				#end
+			</ul>
+		</div>
+	</div>
+</div>
+<div style="text-align: center; margin-top:60px;">
+<input class="btnG bwt125 bht39 bfz16 mt12"  type="button" onclick="saveModify()" id="" value="Submit" />
+</div>
+<script  type="text/javascript" >
+$(document).delegate("#all ul li","click",function(){
+	$("#thirdItems ul").html("");
+//	$("#fourItems ul").html("");
+//	$("#fiveItems ul").html("");
+	$(this).parent().find("li").each(function(){
+		$(this).removeClass("selected");
+	});
+	$(this).addClass("selected");
+});
+
+$(document).delegate("#mine ul li","click",function(){
+	$("#thirdItems ul").html("");
+//	$("#fourItems ul").html("");
+//	$("#fiveItems ul").html("");
+	$(this).parent().find("li").each(function(){
+		$(this).removeClass("selected");
+	});
+	$(this).addClass("selected");
+});
+
+function addProp(){
+	var name = $("#all ul").find("li[class='selected']").text();
+	var id = $("#all ul").find("li[class='selected']").attr("mydata");
+	var li = "<li mydata='"+id+"'>"+name+"</li>";
+	$("#mine ul").append(li);
+	$("#all ul").find("li[class='selected']").remove();
+}
+function removeProp(){
+	var name = $("#mine ul").find("li[class='selected']").text();
+	var id = $("#mine ul").find("li[class='selected']").attr("mydata");
+	var li = "<li mydata='"+id+"'>"+name+"</li>";
+	$("#all ul").append(li);
+	$("#mine ul").find("li[class='selected']").remove();
+}
+
+function saveModify(){
+	var ids = "";
+	var root = $("#rootsite").val();
+	var prodCatId = $("#prodCatId").val();
+	$("#mine ul").find("li").each(function(){
+		if(ids==""){
+			ids = $(this).attr("mydata");
+		}
+		else{
+			ids = ids + ",,," + $(this).attr("mydata");
+		}
+	});
+	$.post(root+"/category/addBrandInfo", {"ids":ids,"prodCatId":prodCatId},
+			function(data){
+			var jsonObjArr = JSON.parse(data);
+			if(jsonObjArr.code="1"){
+				window.open(' ', '_self').close();
+			}
+			
+	});
+}
+</script>
+<script type="text/javascript" src="$root/static/assets/js/bui-min.js"></script>
+<script type="text/javascript" src="$root/static/assets/js/config-min.js"></script>
+<script type="text/javascript" src="$root/static/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="$root/static/js/common.js"></script>
+</body>
+</html>

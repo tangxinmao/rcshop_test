@@ -1,0 +1,33 @@
+<table class="table order_table mt10">
+	<th width="40">Version Number</th>
+	<th width="40">System</th>
+	<th style="width: 100px;">Force Update</th>
+	<th>Infomation</th>
+	<th width="150">Update Time</th>
+	<th>Down Url</th>
+	<th>Actions</th>
+	
+	#foreach($ves in $list)
+	<tr>
+		<td>$!ves.verNo</td>
+		<td><p style="color:red">#if($ves.system==0)Android#else IOS#end</p></td>
+		<td>#if($ves.forceFlag==1)Yes #else No #end</td>
+		<td>$!ves.verInfo</td>
+		<td>$!viewutil.dateFormat($!ves.updateTime)</td>
+		<td>$!ves.downloadUrl</td>
+		<td><a href="javascript:void(0)" onclick="versionpopup($!ves.system,this)">Edit Infomation</a>
+		|
+			#if($ves.system==0)
+				<a href="javascript:void(0)" onclick="uploadfypopup()">Upload File</a>
+			#else
+				<a href="javascript:void(0)" onclick="aKeypopup()">not available</a>
+			#end
+		</td>
+	</tr>
+	#end
+</table>
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

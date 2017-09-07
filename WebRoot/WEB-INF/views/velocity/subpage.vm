@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+#set($root=$request.getContextPath())
+<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+{"success": $!success , "fileid": "$!fileid", "imgUrl": "$!imgUrl","errorMsg":"$!errorMsg","filename":"$!filename"}
+</body>
+</html>

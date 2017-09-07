@@ -1,0 +1,426 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Recommend</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht62">
+			<div class="mt35">
+				<div style="width:52%; float: left;">
+					<label style="margin-left:0px">City:
+						<select class="poptxt" name="province" id="province" onchange="changeProvince()">
+							<option value="-1">Select</option>
+							#foreach($province in $provinceList)
+								<option value="$province">$province</option>
+							#end
+						</select>
+						
+						<select class="poptxt" name="city" id="city" style="margin-left: 20px;">
+						</select>
+	    			</label>
+				</div>
+				<div style="width:12%; float: left;">
+	    			<input class="button ml165" type="button" name="" onclick="goThisPage('search')" value="Search">
+	 			</div>
+				
+				<div style="width:12%; float: right;">
+	    			<input class="addBtn" type="button" name="" onclick="addMenuPopWin()" value="Add Product" style="float: right; width: 134px;">
+	 			</div>
+			</div>
+		</div>
+		<div id="reloadSearchMessages">
+			<div class="service_wrap">
+				<table class="table order_table mt10" id="table">
+				<tbody>
+					<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+					<th>Product Name</th>
+					<th>Product ID</th>
+					<th>Store</th>
+					<th>Serial Number</th>
+					<th>Status</th>
+					<th>City</th>
+					<th>Actions</th>
+					#set($num=1)
+					#foreach($pro in $list)
+					<tr>
+						<td>
+							<input type="checkbox" name="radio" id="radio" value="$!{pro.appProdRecId}">
+						</td>
+						<td>
+							<div class="fl">
+								<img alt="" src="$!{pro.prod.prodImgUrl}?rs=90_90">
+							</div>
+							<div class="mt10">$!pro.prod.name</div>
+						</td>
+						<td>$!pro.prod.prodId</td>
+						<td>
+							$!{pro.prod.merchant.name}
+						</td>
+						<td>$!pro.seq</td>
+						<td>
+							#if($!pro.prod.status==1)
+								<b style="color:#FF8B1D;">Not On Shelves</b>
+							#elseif($!pro.prod.status==2)
+								 <b style="color:#4ED321;">On Shelves</b>
+							#end
+						</td>
+						<td>
+							<input type="hidden" name="province" value="$!pro.city.provinceName">
+							<input type="hidden" name="cityId" value="$!pro.cityId">
+							<input type="hidden" name="theCityId" value="$!pro.cityId">$!pro.city.name
+						</td>
+						<td>
+							<a href="javascript:void(0)" onclick="showUpdatePopWin('$!pro.appProdRecId',this)">Edit</a> |
+							<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the data? If you deleted,The data can not be restore.',&quot;deleteHotProd('$!pro.appProdRecId')&quot;)">Delete</a> 
+						</td>
+					</tr>
+					#set($num=$num+1)
+					#end
+					
+				</tbody>
+				</table>
+				<div class="batsOpt">
+					<h1>Bulk Action</h1>
+					<input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+				</div>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>
+	</div>
+</div>		
+<div class="shade_layout" style="display: none;"></div>
+<!-- 添加弹窗 -->
+<div class="pop_windows" id="addpopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Add Recommended</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<form id="jform">
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 61px;">
+							<span class="colorRed">*</span>
+							City:
+						</lebel>
+						<select class="poptxt" style="width:138px;" name="addprovince" id="addprovince" onchange="changePopProvince(this);clearProd(this);">
+						<option value="-1">Select</option>
+						#foreach($province in $provinceList)
+							<option value="$province">$province</option>
+						#end
+					</select>
+					
+					<select class="poptxt" style="width:138px;" name="city" id="addcity" onchange="clearProd(this);"> 
+					</select>
+					</div>
+					<div style="margin-top:20px;"></div>
+	               	<div>
+	               		<lebel class="colortitle">
+	               			<span class="colorRed">*</span>
+	               			Select Product:
+	               		</lebel>
+	               		<input type="hidden" name="prodId" id="prodId" value="">
+						<input type="text" class="poptxt" onclick="openchosewindow(1)" name="prodName" id="prodName" value="" readonly disabled="disabled">
+	               	</div>
+					<div style="margin-top:20px;"></div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 8px;">
+							<span class="colorRed">*</span>
+							Serial Numer:
+						</lebel>
+						<input type="text" class="poptxt" name="serNum" id="serNum" value="" maxlength="3" minlength="1">
+					</div>
+				</form>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="saveHotProd()" id="readnumbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div> 
+	
+<!-- 修改弹窗 -->
+<div class="pop_windows" id="modifypopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Update recommended</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<input type="hidden" name="amnId" id="amnId" value="">
+				<input type="hidden" name="originCityId" id="originCityId" value="">
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 62px;">
+						<span class="colorRed">*</span>
+						City:
+					</lebel>
+					<select class="poptxt" style="width:138px;" name="uprovince" id="upprovince" onchange="changePopProvince(this)" disabled="disabled">
+						<option value="-1">Select</option>
+						#foreach($province in $provinceList)
+							<option value="$province">$province</option>
+						#end
+					</select>
+					
+					<select class="poptxt" style="width:138px;" name="city" id="upcity" disabled="disabled"> 
+					</select>
+				</div>
+				<div style="margin-top:20px;"></div>
+				<div>
+               		<lebel class="colortitle">
+               			<span class="colorRed">*</span>
+               			product Name:
+               		</lebel>
+               		<input type="hidden" name="modifyprodId" id="modifyprodId" value="">
+					<input type="text" class="poptxt" name="modifyprodName" id="modifyprodName" value="" disabled="disabled">
+               	</div>
+				<div style="margin-top:20px;"></div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 8px;">
+						<span class="colorRed">*</span>
+						Serial Numer:
+					</lebel>
+					<input type="text" class="poptxt" name="modifyserNum" id="modifyserNum" value="">
+				</div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modifyHotProd()" id="readnumbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div> 
+<script  type="text/javascript" >
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == 'city'){
+			currentPage = $("#currentPage").val();
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		var city = $("#city").val();
+		$.post("$root/general/Recommended", {"currentPage":currentPage,"cityId":city},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+			    var province = $("#province").val();
+			    $("#addprovince").find("option[value='"+province+"']").prop("selected","true");
+			    var root = $("#rootsite").val();
+			    $.post(root+"/manager/changeprovince", {"provinceName":province},
+		    		function(data){
+		    			$("#addcity").html("");
+		    			var jsonObjArr = JSON.parse(data);
+		    		    for(var i in jsonObjArr){
+		    		    	 $("#addcity").append("<option value='"+jsonObjArr[i].cityId+"'>"+jsonObjArr[i].name+"</option>");  
+		    		    }
+		    		    var city = $("#city").val();
+		    			$("#addcity option[value='"+city+"']").attr("selected","true");
+		    	    }
+		    	);
+		    }
+		);
+	}	
+	function addMenuPopWin(){
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		var serNum = $.trim($("#table").find("tr").last().find("td").eq(3).text());
+		if(serNum==null || serNum=="" || serNum=="undefined"){
+			serNum = 0;
+		}
+		$("#prodName").val("");
+		$("#prodId").val("");
+		$("#serNum").val("");
+		pop_center ('560');
+	}
+	function choseType(){
+		if($("#hrefType").val()=="1"){
+			$("#UrlDiv").hide();
+			$("#prodIdDiv").show();
+		}
+		else{
+			$("#UrlDiv").show();
+			$("#prodIdDiv").hide();
+		}
+	}
+	
+	function saveHotProd(){
+		var prodId = $("#prodId").val();
+		var serNum = $("#serNum").val();
+		var city = $("#addcity").val();
+		if(prodId == ""){
+			alertWarn("please chose a Product!");
+			return 0;
+		}
+        var regInt = /^[0-9]+[0-9]*]*$/;  //正整数
+        if(!regInt.test(serNum)){
+            if(serNum != ''){
+                alertWarn("Serial Numer  must be positive integer!");
+                $("#serNum").focus();
+                return 0;
+            }else{
+                alertWarn("please input a Serial Numer!")
+            }
+
+        }
+		if(city==null || city==""){
+			alertWarn("Please select a city.");
+			return 0;
+		}
+		$.post("$root/general/saveRecommended", {"prodId":prodId,"seq":serNum,"cityId":city},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function deleteHotProd(appProdRecId){
+		$.post("$root/general/delRecommended", {"appProdRecId":appProdRecId},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function showUpdatePopWin(appProdRecId,obj){
+		var root = $("#rootsite").val();
+		var $tr = $(obj).parent().parent().find("td");
+		$("#modifyprodId").val(appProdRecId);
+		$("#modifyprodName").val($.trim($tr.eq(1).text()));
+		$("#modifyserNum").val($.trim($tr.eq(4).text()));
+		var cityId = $tr.eq(5).find("input[name='theCityId']").val();
+		$("#upcity").find("option[value='"+cityId+"']").prop("selected",true);
+		$("#originCityId").val(cityId);
+		$(".shade_layout").show();
+		$("#modifypopwin").show();
+		var provinceName = $tr.eq(6).find("input[name='province']").val();
+		$("#upprovince").find("option[value='"+provinceName+"']").prop("selected","true");
+		$.post(root+"/manager/changeprovince", {"provinceName":provinceName},
+			function(data){
+				$("#upcity").html("");
+				var jsonObjArr = JSON.parse(data);
+			    for(var i in jsonObjArr){
+			    	 $("#upcity").append("<option value='"+jsonObjArr[i].cityId+"'>"+jsonObjArr[i].name+"</option>");  
+			    }
+			    var city = $tr.eq(6).find("input[name='cityId']").val();
+				$("#upcity option[value='"+city+"']").attr("selected","true");
+				pop_center ('560');
+		    }
+		);
+		pop_center ('560');
+	}
+	
+	function modifyHotProd(){
+		var prodId = $("#modifyprodId").val();
+		var serNum = $("#modifyserNum").val();
+		var city = $("#upcity").val();
+		var originCityId = $("#originCityId").val();
+		if(city==null || city==""){
+			alertWarn("Please select a city.");
+			return 0;
+		}
+		$.post("$root/general/modifyRecommended", {"appProdRecId":prodId,"seq":serNum,"cityId":city},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function openchosewindow(method){
+		var iTop = (window.screen.availHeight-30-350)-500;
+		var iLeft = (window.screen.availWidth-10-500)/2-200; 
+		var cityId = $("#addcity").find("option:selected").text();
+		var url = "";
+		if(cityId!=null){
+			url = '$root/product/chooselist?method='+method+"&city="+cityId;
+		}
+		else{
+			url = '$root/product/chooselist?method='+method;
+		}
+		window.open (url,'newwindow','height=800,width=1000,top='+iTop+',left='+iLeft+',toolbar=no,menubar=no,scrollbars=yes, resizable=no,location=no, status=no')
+	}
+	function batsDelete(){
+		var flag = 0;
+		var prodIds = "";
+		$("input[name=radio]").each(function(){
+			if($(this).prop("checked")){
+				flag = 1;
+				if(prodIds == ""){
+					prodIds = $(this).val();
+				}
+				else{
+					prodIds =prodIds + ",,," + $(this).val();
+				}
+			}
+		});
+		if(flag ==0){
+			alertWarn("Please at lease chose a Product");
+			return 0;
+		}
+		showConfirm('Are you sure to delete these product?','batsDel(\''+prodIds+'\')');
+	}
+	
+	function batsDel(ids){
+		var root = $("#rootsite").val();
+		var url = root+"/general/batsDelNiceProd";
+		$.post(url,{"ids":ids},function(data){
+			goThisPage($('#currentPage').val());
+		});
+	}
+	
+	function clearProd(obj) {
+		if($(obj).parent().find("#addcity").val()==undefined) {
+			$(obj).parent().parent().find("#prodName").attr("disabled", "disabled");
+		} else {
+			$(obj).parent().parent().find("#prodName").removeAttr("disabled");
+		}
+		$(obj).parent().parent().find("#prodId").val("");
+		$(obj).parent().parent().find("#prodName").val("");
+	}
+</script>

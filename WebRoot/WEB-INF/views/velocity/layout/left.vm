@@ -1,0 +1,107 @@
+#set($rcmerchant = $c.fnc())
+<div class="leftMenu fl">
+	<div class="top">
+		<a href="/memberinfo/member_list"><b>Home</b></a>
+	</div>
+	<!--  <div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>City Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>Vendor Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>Store Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a class="ico"></a>
+			<a class="alink" href="javascript:void(0)"><b>Product Mgmt</b></a>
+		</div>
+		<div class="mb" style="display: block;">
+			<ul>
+				<li>
+					<a class="menu_item" href="$root/product/init">Product Release</a>
+				</li>
+				<li>
+					<a class="menu_item" href="$root/product/product_list">Product List</a>
+				</li>
+				<li>
+					<a class="menu_item" href="$root/category/list">Category List</a>
+				</li>
+				<li>  
+					<a class="menu_item" href="$root/brand/BrandList">Brand List</a>
+				</li>
+				<li>
+					<a class="menu_item" href="$root/prodprop/list">Property List</a>
+				</li>
+				<li>
+					<a class="menu_item" href="$root/prodprop/skulist">SKU List</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink"  href="javascript:void(0)"><b>Transaction Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>Buyer Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink"  href="javascript:void(0)"><b>Home Page Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>Coupon Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink"  href="javascript:void(0)"><b>Top-up Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink" href="javascript:void(0)"><b>Statistics</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink" href="javascript:void(0)"><b>Clearing</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink" href="javascript:void(0)"><b>Authority Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_closed">
+			<a class="ico"></a>
+			<a class="alink" href="javascript:void(0)"><b>Configuration Mgmt</b></a>
+		</div>
+	</div>
+	<div class="mg">
+		<div class="mt ico_opened">
+			<a href="javascript:void(0)"><b>Image Space</b></a>
+		</div>
+	</div> 
+	-->
+</div>

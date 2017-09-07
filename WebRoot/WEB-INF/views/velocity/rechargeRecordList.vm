@@ -1,0 +1,400 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Review list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/jquery.ui.datepicker.js")
+#set($root=$request.getContextPath())
+<input type="hidden" name="isDesc" id="isDesc" value="1">
+<div class="rightContent fl">
+	<div class="tpos ml30  mt25">
+	 	<h1 class="fl">Top-up History</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<div class="mt35">
+				<div class="unit">
+					<label>Date From</label>
+					<input type="text" name="rechargeTimeStartStr" id="rechargeTimeStartStr">
+				</div>
+				<div class="unit">
+					<label>Date to</label>
+					<input type="text" name="rechargeTimeEndStr" id="rechargeTimeEndStr">
+				</div>
+				<div class="unit">
+					<label>Buyer ID</label>
+					<input type="text" name="rechargeMemberId" id="rechargeMemberId"></label>
+				</div>
+			
+			
+			</div>
+			
+			<div class="clearfix">
+				<div class="mt10 unit">
+					<label>Operator ID</label>
+					<input type="text" name="memberId" id="memberId"  value="">
+					
+				</div>
+				
+				<div class="mt10 unit">
+					<label>Top-up Center</label>
+					<input type="text" name="stationName" id="stationName"  value="">
+				</div>
+				<div style="float:right;" class="mt10">
+					<input class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+			
+			
+		</div>
+		<div class="service_wrap" id="reloadSearchMessages">
+			<table class="table order_table mt10" id="review">
+				<tr>
+					<th>Top-up ID</th>
+					<th>Top-up Amount</th>
+					<th>Buyer ID</th>
+					<th>Buyer Username</th>
+					<th>Operator ID</th>
+					<th>Operator</th>
+					<th hidden>City</th>
+					<th>Top-up Center</th>
+					<th>Top-up Time</th>
+					<th hidden>Actions</th>
+				</tr>
+	
+				
+				#foreach($record in $list)
+				<tr>
+					<td>$!record.rechargeRecordId</td>
+					<td>Rp #if ($!record.amount)$viewutil.moneyStringFormat($!record.amount)#else 0 #end</td>
+					<td>$!record.member.memberId</td>
+					<td>$!record.member.name</td>
+					<td>$!record.rechargeMember.memberId</td>
+					<td>$!record.rechargeMember.account</td>
+					<td hidden>$!record.rechargeStation.city.name</td>
+					<td>$!record.rechargeStation.stationName</td>
+					<td>$!viewutil.dateFormat($!record.createTime)</td>
+					<td hidden>
+						<a href="javascript:void(0)" onclick="showModifyPopup('$!record.stationId',this)">Edit</a>
+						|
+						<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the station? If you deleted,The data can not be restore.',&quot;deleteStation('$!record.stationId')&quot;)">Delete</a>
+					</td>
+				</tr>
+				#end
+			</table>
+			<input type="hidden" value="$!page.currentPage" id="currentPage">
+			<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+			<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+			<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+			<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>	
+	</div>
+</div>
+
+<div class="shade_layout" style="display: none;"></div>
+<!-- 添加弹窗 -->
+<div class="pop_windows" id="addpopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Add Top-up Center</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div>
+               		<lebel class="colortitle"><span class="colorRed">*</span>Center Name:</lebel>
+               		<input class="poptxt" type="text" name="addstationName" id="addstationName" value="">
+               	</div>
+           		<div style="margin-top:20px;">
+               		<lebel class="colortitle" style="margin-left: 39px;"><span class="colorRed">*</span>Phone:</lebel>
+               		<input class="poptxt" type="text" name="addmobile" id="addmobile" value="">
+               	</div>
+               	<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 32px;">
+						<span class="colorRed">*</span>
+						Region:
+					</lebel>
+					<select class="poptxt" style="width:138px;" name="uprovince" id="addprovince" onchange="changePopProvince(this)">
+						<option value="-1">Select</option>
+						#foreach($province in $provinceList)
+							<option value="$province">$province</option>
+						#end
+					</select>
+					
+					<select class="poptxt" style="width:138px;" name="city" id="addcity"> 
+					</select>
+				</div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: -12px;"><span class="colorRed">*</span>Center Address:</lebel>
+					<textarea class="poptxt" style="height:100px;" name="addstationLocation" id="addstationLocation" value=""></textarea>
+				</div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 20px;">
+						<span class="colorRed">*</span>
+						Operator:
+					</lebel>
+					
+					<select class="poptxt" style="width:138px;" name="addoperatorId" id="addoperatorId"> 
+						#foreach($operator in $operators)
+							<option value="$operator.memberId">$operator.memberAccount</option>
+						#end
+					</select>
+				</div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="saveStation()" id="addnewbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 修改弹窗 -->
+<div class="pop_windows" id="modifypopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Edit Top-up Center</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<input type="hidden" name="upstationId" id="upstationId" value="">
+               	<div>
+               		<lebel class="colortitle"><span class="colorRed">*</span>Center Name:</lebel>
+               		<input class="poptxt" type="text" name="upstationName" id="upstationName" value="">
+               	</div>
+           		<div style="margin-top:20px;">
+               		<lebel class="colortitle" style="margin-left: 39px;"><span class="colorRed">*</span>Phone:</lebel>
+               		<input class="poptxt" type="text" name="upmobile" id="upmobile" value="">
+               	</div>
+               	<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 32px;">
+						<span class="colorRed">*</span>
+						Region:
+					</lebel>
+					<select class="poptxt" style="width:138px;" name="uprovince" id="upprovince" onchange="changePopProvince(this)">
+						<option value="-1">Select</option>
+						#foreach($province in $provinceList)
+							<option value="$province">$province</option>
+						#end
+					</select>
+					
+					<select class="poptxt" style="width:138px;" name="city" id="upcity"> 
+					</select>
+				</div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: -12px;"><span class="colorRed">*</span>Center Address:</lebel>
+					<textarea class="poptxt" style="height:100px;" name="upstationLocation" id="upstationLocation" value=""></textarea>
+				</div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 20px;">
+						<span class="colorRed">*</span>
+						Operator:
+					</lebel>
+					
+					<select class="poptxt" style="width:138px;" name="upoperatorId" id="upoperatorId"> 
+						#foreach($operator in $operators)
+							<option value="$operator.memberId">$operator.memberAccount</option>
+						#end
+					</select>
+				</div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modifyStation()" id="upnewbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div>
+<script  type="text/javascript" >
+
+	function goThisPage(ta){
+		var currentPage = '';
+		var isDesc = $("#isDesc").val();
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		var rechargeTimeStartStr;
+		if($("#rechargeTimeStartStr").val())
+			rechargeTimeStartStr=$("#rechargeTimeStartStr").val();
+		var rechargeTimeEndStr ;
+		if( $("#rechargeTimeEndStr").val())
+			rechargeTimeEndStr= $("#rechargeTimeEndStr").val();
+		var rechargeMemberId = $("#rechargeMemberId").val();
+		var stationName = $("#stationName").val();
+		var memberId = $("#memberId").val();
+		$.post("$root/memberinfo/rechargeRecordList", 
+			{"currentPage":currentPage,
+			 "createTimeFrom":rechargeTimeStartStr,
+			 "createTimeTo":rechargeTimeEndStr,
+			 "memberId":rechargeMemberId,
+			 "rechargeStationName":stationName,
+			 "rechargeMemberId":memberId
+			},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+	/*
+	 * 动态绑定日期控件
+	 */
+	$(function() {
+		$( "#rechargeTimeStartStr" ).datepicker({
+			showOtherMonths: true,
+			//defaultDate: "+1w",
+			changeMonth: true,
+			dateFormat:"yy-mm-dd",
+			showButtonPanel: true,
+			numberOfMonths: 1,
+		});
+		$( "#rechargeTimeEndStr" ).datepicker({
+			showOtherMonths: true,
+			//defaultDate: "+1w",
+			changeMonth: true,
+			dateFormat:"yy-mm-dd",
+			showButtonPanel: true,
+			numberOfMonths: 1,
+		});
+		
+		
+	});
+	function showAddPopWin(){
+		var root = $("#rootsite").val();
+		$("#addoperatorId").html("");
+		$.post(root+"/memberinfo/getOperator", {},
+			function(data){
+				var jsonObjArr = JSON.parse(data);
+			    for(var i in jsonObjArr){
+			    	 $("#addoperatorId").append("<option value='"+jsonObjArr[i].memberId+"'>"+jsonObjArr[i].memberAccount+"</option>");  
+			    }
+		    }
+		);
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		pop_center('560');
+	}
+	function showModifyPopup(stationId,obj){
+		var root = $("#rootsite").val();
+		$("#upoperatorId").html("");
+		var $td = $(obj).parent().parent().find("td");
+		$("#upstationId").val(stationId);
+		$("#upstationName").val($.trim($td.eq(1).text()));
+		$("#upmobile").val($.trim($td.eq(2).text()));
+		$("#upstationLocation").val($.trim($td.eq(3).text()));
+		$("#upoperatorId").append("<option value='"+$.trim($td.eq(5).text())+"'>"+$.trim($td.eq(6).text())+"</option>"); 
+		$.post(root+"/memberinfo/getOperator", {},
+			function(data){
+				var jsonObjArr = JSON.parse(data);
+			    for(var i in jsonObjArr){
+			    	 $("#upoperatorId").append("<option value='"+jsonObjArr[i].memberId+"'>"+jsonObjArr[i].memberAccount+"</option>");  
+			    }
+		    }
+		);
+		$(".shade_layout").show();
+		$("#modifypopwin").show();
+		pop_center('560');
+	}
+	
+	function saveStation(){
+		var root = $("#rootsite").val();
+		var addstationName = $("#addstationName").val();
+		var addmobile = $("#addmobile").val();
+		var addcity = $("#addcity").val();
+		var addstationLocation = $("#addstationLocation").val();
+		var addoperatorId = $("#addoperatorId").val();
+		if(upcity== null || upcity==""){
+			alert("Please select a city!");
+			return 0;
+		}
+		if(addoperatorId== null || addoperatorId==""){
+			alert("Please select a addoperatorId!");
+			return 0;
+		}
+		
+		$.post(root+"/memberinfo/saveRechargeStation", 
+				{"stationName":addstationName,
+				 "mobile":addmobile,
+				 "cityId":addcity,
+				 "stationLocation":addstationLocation,
+				 "memberId":addoperatorId
+				 },
+				function(jsonObjArr){
+				if(jsonObjArr.code=="1"){
+					close();
+					goThisPage($('#currentPage').val());
+				}
+				else{
+					alert(jsonObjArr.result);
+				}
+		});
+	}
+	function modifyStation(){
+		var root = $("#rootsite").val();
+		var upstationId = $("#upstationId").val();
+		var upstationName = $("#upstationName").val();
+		var upmobile = $("#upmobile").val();
+		var upcity = $("#upcity").val();
+		var upstationLocation = $("#upstationLocation").val();
+		var upoperatorId = $("#upoperatorId").val();
+		
+		if(upcity== null || upcity==""){
+			alert("Please select a city!");
+			return 0;
+		}
+		if(addoperatorId== null || addoperatorId==""){
+			alert("Please select a addoperatorId!");
+			return 0;
+		}
+		$.post(root+"/memberinfo/saveRechargeStation", 
+				{"stationId":upstationId,
+				 "stationName":upstationName,
+				 "mobile":upmobile,
+				 "cityId":upcity,
+				 "stationLocation":upstationLocation,
+				 "memberId":upoperatorId
+				 },
+				function(jsonObjArr){
+				if(jsonObjArr.code=="1"){
+					close();
+					goThisPage($('#currentPage').val());
+				}
+				else{
+					alert(jsonObjArr.result);
+				}
+		});
+	}
+	/**
+	 * 删除
+	 */
+	function deleteStation(stationId){
+		var root = $("#rootsite").val();
+		$.post(root+"/memberinfo/removeStations", {"stationIds":stationId},
+				function(jsonObjArr){
+				if(jsonObjArr.code=="1"){
+					close();
+					goThisPage($('#currentPage').val());
+				}
+				else{
+					alert(jsonObjArr.result);
+				}
+		});
+	}
+</script>

@@ -1,0 +1,25 @@
+<table class="table order_table mt10">
+	<tr>
+		<th width="14%">Top-up ID</th>
+		<th width="18%">Time</th>
+		<th width="14%">Amount</th>
+		<th width="14%">Operator ID</th>
+		<th width="12%">Operator</th>
+		<th width="14%">Station</th>
+	</tr>
+	#foreach($recharge in $list)
+					<tr>
+					<td>$!recharge.rechargeRecordId</td>
+						<td>$!viewutil.dateFormat($!recharge.createTime)</td>
+						<td>$!recharge.amount</td>
+						<td>$!recharge.rechargeMemberId</td>
+						<td>$!recharge.rechargeMember.account</td>
+						<td>$!recharge.rechargeStation.stationName</td>
+					</tr>
+				#end
+</table>
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<input type="hidden" value="$!page.currentPage" id="currentPage" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

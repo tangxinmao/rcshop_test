@@ -1,0 +1,28 @@
+<div class="service_wrap">
+	<table class="table order_table mt10" id="table">
+	<tbody>
+		<th></th>
+		<th>Brand Name</th>
+		<th>Logo</th>
+		#set($num=1)
+		#foreach($bra in $list)
+		<tr class="dad" onclick="choose(this)">
+			<td>$num</td>
+			<td>
+				$!bra.name
+				<input type="hidden" name="prodBrandId" value="$!bra.prodBrandId">
+				<input type="hidden" name="prodBrandName" value="$!bra.name">
+			</td>
+			<td><img src="$!bra.logoUrl" style="max-height:30px;"></td>
+		</tr>
+		#set($num=$num+1)
+		#end
+		
+	</tbody>
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

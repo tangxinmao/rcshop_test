@@ -1,0 +1,51 @@
+#set($root=$request.getContextPath())
+<div class="todo_wrap clearfix">
+	<div class="fl">
+		<span class="ml10">Image space contains $dirnum folder and $imagenum images in total.</span>
+	<!--  	<a class="replace" href="#">替换</a>-->
+		
+		<a class="move" href="javascript:void(0)" onclick="showMove()">Move</a>
+		<a class="rename" href="javascript:void(0)" onclick="showRename()">Rename</a>
+		<a class="delete" id="delete" href="javascript:void(0)" onclick="showConfirm('Are you sure to delete it?',&quot;showDelete()&quot;)">Delete</a>
+	</div>
+	<div class="show_type fr">
+		<input class="btn btn-xs btn-sgOrange" id="searchback" type="button" onclick="searchback()" value="Back" style="display:none">
+		<a class="showbylist" href="initlist">List</a>
+		<a  class="showbyimg crt" href="javascript:void(0)">Image</a>
+	</div>
+</div>
+<div class="imglist_wrap clearfix mb10">
+	#if($parentId!="0")
+		<div class="list_item">
+			<div class="img_con">
+				<a href="javascript:void(0)" >
+  					<img alt="" src="$root/static/images/sellercenter_bg/imgs/imgitem1.png"  ondblclick="showTree($('#dirpos').attr('buz'),$('#dirpos').attr('rel'))"  />
+  				</a>
+  			</div>
+ 			<p><a href="javascript:void(0)">Back</a></p>
+		</div>
+	#end
+	#foreach($image in $ImageObj)
+		<div class="list_item">
+			<div class="img_con">
+					
+					#if($image.type==1)
+						<a href="javascript:void(0)">
+						<img alt="" src="$image.imgUrl" ondblclick="showTree($(this).attr('rel'),$(this).attr('buz'))" buz="0" rel="$image.imageSpaceId" />
+					#else
+						<a href="$image.imgUrl" data-lightbox="groupA">
+						<img alt="" title="click me to see big picture" src="$image.imgUrl?rs=120_120"/>
+					#end
+				</a>
+			</div>
+			<p>
+				<input type="checkbox" name="radio" id="radio" value="$image.imageSpaceId"><a href="javascript:void(0)" title="$!image.title">$!image.name</a>
+			</p>
+		</div>
+	#end
+</div>	
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-left: 10px">#vm_page2</div>

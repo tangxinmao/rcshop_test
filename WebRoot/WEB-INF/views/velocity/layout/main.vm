@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta http-equiv="Expires" CONTENT="0">
+	<meta http-equiv="Cache-Control" CONTENT="no-cache">
+	<meta http-equiv="Pragma" CONTENT="no-cache">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Beli Material</title>
+	#set($root=$request.getContextPath())
+	<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+	<link href="$root/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="$root/static/css/common.css" rel="stylesheet" type="text/css" />
+	<link href="$root/static/css/seller_center.css" rel="stylesheet" type="text/css" />
+	<link href="$root/static/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+	<link href="$root/static/css/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+    <link href="$root/static/assets/css/easyui.css" rel="stylesheet" />
+    <link href="$root/static/assets/css/icon.css" rel="stylesheet" />
+	<script type="text/javascript" src="$root/static/js/jquery.treetable.js"></script>
+	<script type="text/javascript" src="$root/static/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="$root/static/js/jquery-ui.js"></script>
+<!--     <script type="text/javascript" src="$root/static/js/jquery.easyui.min.js"></script> -->
+	#if( $extCss )
+	  #set($extCssArr=$extCss.split(","))
+	  #foreach($extCssi in $extCssArr)
+	     <link type="text/css" href="$root$extCssi" rel="stylesheet" />
+	  #end
+	#end
+</head>
+<body>
+	<input type="hidden" id="rootsite" value="$root">
+	<input type="hidden" id="rcMenuParent" value="$!rcMenuParent">
+	<input type="hidden" id="rcMenuItem" value="$!rcMenuItem">
+	<!-- itemsChecked为当前角色所含菜单 已改为缓存 -->
+	<input type="hidden" id="itemsChecked" value="$!itemsChecked">
+	<!--当前登录用户信息  -->
+	<input type="hidden" id="loginMember" value="$!loginMember">
+	<div>
+		#parse('layout/header.vm') 
+		<div class="main_content">
+			#parse('layout/left.vm') 
+			$screen_content
+		</div>
+	</div>
+	#if( $extJs )
+	  #set($extJsArr=$extJs.split(","))
+	  #foreach($extJsi in $extJsArr)
+	     <script type="text/javascript" src="$root$extJsi"></script>
+	  #end
+	#end	
+
+	<script type="text/javascript" src="$root/static/js/common.js"></script>
+	<script type="text/javascript" src="$root/static/js/ajaxfileupload.js"></script>
+</body>
+</html>

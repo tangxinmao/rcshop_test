@@ -1,0 +1,63 @@
+<div class="service_wrap">
+	<table class="table order_table mt10" id="table">
+	<tbody>
+		<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+		<th>Product Name</th>
+		<th>Product ID</th>
+		<th>Store</th>
+		<th style="display:none">Home Page Image</th>
+		<th>Serial Number</th>
+		<th>Status</th>
+		<th>City</th>
+		<th>Actions</th>
+		#set($num=1)
+		#foreach($pro in $list)
+		<tr>
+			<td>
+				<input type="checkbox" name="radio" id="radio" value="$!{pro.appProdHotId}">
+			</td>
+			<td>
+				<div class="fl">
+					<img alt="" src="$!{pro.prod.prodImgUrl}?rs=90_90">
+				</div>
+				<div class="mt10">$!pro.prod.name</div>
+			</td>
+			<td>$!pro.prod.prodId</td>
+			<td>
+				$!{pro.prod.merchant.name}
+			</td>
+			<td style="display:none"><img url="$!{pro.homePageLogoUrl}" src="$!{pro.homePageLogoUrl}?rs=90_90" style="max-height:60px;"></td>
+			<td>$!pro.seq</td>
+			<td>
+				#if($!pro.prod.status==1)
+					<b style="color:#FF8B1D;">Not On Shelves</b>
+				#elseif($!pro.prod.status==2)
+					 <b style="color:#4ED321;">On Shelves</b>
+				#end
+			</td>
+			<td>
+				<input type="hidden" name="province" value="$!pro.city.provinceName">
+				<input type="hidden" name="cityId" value="$!pro.cityId">
+				<input type="hidden" name="theCityId" value="$!pro.cityId">$!pro.city.name
+			</td>
+			<td>
+				<a href="javascript:void(0)" onclick="showUpdatePopWin('$!pro.appProdHotId',this)">Edit</a> |
+				<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the data? If you deleted,The data can not be restore.',&quot;deleteHotProd('$!pro.appProdHotId')&quot;)">Delete</a>
+				<!-- <a href="javascript:void(0)" onclick="addHomePageLogo('$!pro.appProdHotId',this)">Edit home page image </a>  -->
+			</td>
+		</tr>
+		#set($num=$num+1)
+		#end
+		
+	</tbody>
+	</table>
+	<div class="batsOpt">
+		<h1>Bulk Action</h1>
+		<input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+	</div>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

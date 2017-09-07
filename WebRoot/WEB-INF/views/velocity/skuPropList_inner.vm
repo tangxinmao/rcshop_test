@@ -1,0 +1,26 @@
+<table class="table order_table mt10" id="table">
+	<th>Name</th>
+	<th>Has different pictures</th>
+	<th>Is Applicator</th>
+	<th>Actions</th>
+	#foreach($prop in $list)
+		<tr prodPropId="$prop.prodPropId" onclick="showEnumList('$prop.prodPropId',this)">
+			<td>$prop.name</td>
+			<td>
+				#if($prop.hasImg==1)yes #else no #end
+			</td>
+			<td>
+				#if($prop.isPackService==1)yes #else no #end
+			</td>
+			<td>
+				<a href="javascript:void(0)" onclick="editSkuPropPopup('$prop.prodPropId',this)">Edit</a> |
+				<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the property? If you deleted,The Value belong to the property will be delete.',&quot;deleteOneProp('$prop.prodPropId')&quot;)">Delete</a>
+			</td>
+		</tr>
+	#end
+</table>
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-left: 10px">#vm_page2</div>

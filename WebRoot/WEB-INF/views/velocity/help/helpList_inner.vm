@@ -1,0 +1,26 @@
+#set($root=$request.getContextPath())
+<div class="service_wrap">
+	<table class="table order_table mt10">
+		<th>Title</th>
+		<th>Serial Number</th>
+		<th>Type</th>
+		<th>Actions</th>
+		
+		#foreach($help in $list)
+		<tr>
+			<td style="text-align: left;">$help.name</td>
+			<td>$help.seq</p></td>
+			<td>$help.description</td>
+			<td><a href="javascript:void(0)" onclick="javascript:self.location='$root/help/pccontent?helpId=$help.helpId'"">Preview</a> |
+				<a href="javascript:void(0)" onclick="javascript:self.location='$root/help/edit?helpId=$help.helpId'">Edit</a> |
+				<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the data? If you deleted,The data can not be restore.',&quot;deleteHelp('$help.helpId')&quot;)">Delete</a>
+			</td>
+		</tr>
+		#end
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

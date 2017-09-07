@@ -1,0 +1,35 @@
+
+<!doctype html>
+<html>
+<head>
+	#set($root=$request.getContextPath())
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+	<title>Help Center</title>
+	<link rel="stylesheet" tyle="text/css" href="$root/static/css/reset.css" />
+	<link rel="stylesheet" href="css/cmp/title-bar.css" /> 
+    <link rel="stylesheet" href="css/cmp/arrow.css" /> 
+    <link rel="stylesheet" href="css/cmp/b-arrow.css" /> 
+    <link rel="stylesheet" href="css/cmp/m-arrow.css" /> 
+    <link rel="stylesheet" href="css/cmp/btn.css" />
+    <link rel="stylesheet" href="css/cmp/b-btn.css" /> 
+	<link rel="stylesheet" href="$root/static/css/help.css" />
+</head>
+<body>
+<style type="text/css">
+body{font-family:"Roboto";}
+</style>
+	<div class="help-main" style="padding:0;">
+		#set($row=1)
+		#foreach($map in $mapList)
+			<h3 class="help-tit"><span class="icon${row}"></span><span class="text">$map.type</span></h3>
+			<ul class="help-list">
+				#foreach($help in $map.helpList)
+					<li><a href="$root/help/content?helpId=$!{help.helpId}" class="hlink"><span class="text">$help.name</span><span class="arrow m-arrow"></span></a></li>
+				#end
+			</ul>
+			#set($row=$row+1)
+		#end
+	</div>
+</body>
+</html>

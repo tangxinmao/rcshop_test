@@ -1,0 +1,8 @@
+<html>
+#set($root=$request.getContextPath())
+<head>
+</head>
+<body>
+{"success": $success , "fileid": "$!{fileid}", "imgUrl": "$!{imgUrl}","errorMsg":"$!errorMsg","filename":"$!filename"}
+</body>
+</html>

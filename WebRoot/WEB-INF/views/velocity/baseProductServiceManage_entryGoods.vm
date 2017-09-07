@@ -1,0 +1,72 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Product Release" )
+#set($extJs = "/static/js/baseProdService.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom: none;">
+	 	<h1 class="fl">Release Product > Step1</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG">
+			<div class="wd100 ht45 mt15 ml20">
+				<h2>Select Product Type</h2>
+			</div>
+			<div class="secBtn ml36 mt12">
+				<img src="$root/static/images/ico/icon_product.png" style="position: absolute; margin-left: 21px;width: 25px;">
+				<span class="selectedd">
+					<b></b>
+					Product
+				</span>
+				<img src="$root/static/images/ico/icon_package.png" style="position: absolute; margin-left: 49px;width: 25px;">
+				<span style="margin-left: 30px;">
+					<b></b>
+					Package
+				</span>
+			</div>
+			
+				<div style="margin-left:22px;" class="goodsSelect_area">
+					<div class="wd100 ht45 mt15">
+						<h2 style="margin-bottom:10px; margin-top: 60px;">Select Category</h2>
+					</div>
+					<div class="selectItem entryGoodsSelect" id="zeroItems" style="display: none;">
+						<input type="hidden" id="prodType" value="1">
+						<p>Select product type:</p>
+						<ul>
+							<li rel="1" class="selected">Product</li>
+							<li rel="2">Package</li>
+						</ul>
+					</div>
+					
+					
+					<div class="selectItem entryGoodsSelect" id="topItems" style="margin-left: 14px;">
+						<input type="hidden" id="prodCatId" value="-1">
+						<h3>Category</h3>
+						<ul>
+						</ul>
+					</div>
+					<div class="selectItem entryGoodsSelect" id="thirdItems" style="margin-left: 39px;">
+						<input type="hidden" id="subprodCatId" value="-1">
+						<h3>Sub Category</h3>
+						<ul>
+						</ul>
+					</div>
+					<div class="selectItem entryGoodsSelect" id="fourthItems" style="display:none">
+						<ul>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="goodsSelect_text" style="display: none;">
+					<span class="tit">Now you select: </span><span id="ptype">Product | </span><span id="pos"></span><span id="mer"></span>
+				</div>
+				<div class="btns tac mt50 pb15">
+					<input type="button" value="Next" class="btnG bwt125 bht39 bfz16 mt12" name="addpro" id="addpro" />
+					<span id="statusprompt" style="color:red"></span>
+				</div>
+			</div>
+		</div>
+</div>							
+	<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows"  id="open_returnPop">
+	</div>							
+  

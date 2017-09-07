@@ -1,0 +1,446 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Brands Street</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht62">
+			<div class="mt35">
+				<div style="width:27%; float: left;">
+					<label style="margin-left: 0px;">Brand Name
+						<input class="poptxt" type="text" name="sbrandName" id="sbrandName" value="">
+					</label>
+				</div>
+				<div style="width:12%; float: left;">
+	    			<input class="button ml165" type="button" name="" onclick="goThisPage('search')" value="Search">
+	 			</div>
+				<div style="width:12%; float: right;">
+	    			<input class="addBtn" type="button" name="" onclick="addMenuPopWin()" value="Add Brand" style="float: right; width: 134px;">
+	 			</div>
+			</div>
+		</div>
+		<div id="reloadSearchMessages">
+			<div class="service_wrap">
+				<table class="table order_table mt10" id="table">
+				<tbody>
+					<th></th>
+					<th>Brand Name</th>
+					<th>Logo</th>
+					<th>Serial Number</th>
+					<th>Street List Image</th>
+					<th style="width:14%;">Actions</th>
+					#set($num=1)
+					#foreach($bra in $list)
+					<tr>
+						<td>
+							$num
+							<input type="hidden" name="tProdBrandId" value="$!bra.prodBrandId">
+						</td>
+						<td>$!bra.prodBrand.name</td>
+						<td><img src="$!{bra.prodBrand.logoUrl}?rs=180_180" style="max-height:60px;"></td>
+						<td>$!bra.seq</td>
+						<td><img url="$!{bra.imgUrl}" src="$!{bra.imgUrl}?rs=180_180" style="max-height:60px;"></td>
+						<td>
+							<a href="javascript:void(0)" onclick="showUpdatePopWin('$!bra.appBrandHotId',this)">Edit</a> |
+							<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the data? If you deleted,The data can not be restore.',&quot;deleteBrand('$!bra.appBrandHotId')&quot;)">Delete</a>|
+							<!-- <a href="javascript:void(0)" onclick="addHomePageLogo('$!bra.appBrandHotId',this)">Edit home page image</a>| -->
+							<a href="javascript:void(0)" onclick="addStreetListLogo('$!bra.appBrandHotId',this)">Edit street list image</a>
+						</td>
+					</tr>
+					#set($num=$num+1)
+					#end
+				</tbody>
+				</table>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>
+	</div>
+</div>	
+<div class="shade_layout" style="display: none;"></div>
+	<!-- 添加弹窗 -->
+	<div class="pop_windows" id="addpopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Add Hot Brand</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<form id="jform">
+	                	<div>
+	                		<lebel class="colortitle">
+	                			<span class="colorRed">*</span>
+	                			Select Brand:
+	                		</lebel>
+	                		<input type="hidden" name="prodBrandId" id="prodBrandId" value="">
+							<input type="text" class="poptxt" onclick="openchosewindow(1)"  name="prodBrandName" id="prodBrandName" value="" readonly>
+	                	</div>
+						<div style="margin-top:20px;"></div>
+						<div style="margin-top:20px;">
+							<lebel class="colortitle" style="margin-left: -3px;">
+								<span class="colorRed">*</span>
+								Serial Numer:
+							</lebel>
+							<input type="text" class="poptxt" name="serNum" id="serNum" value="" maxlength="3" minlength="1" >
+						</div>
+					</form>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="saveHotBrand()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 修改弹窗 -->
+	<div class="pop_windows" id="modifypopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Update Hot Brand</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<input type="hidden" name="amnId" id="amnId" value="">
+					<div>
+                		<lebel class="colortitle">
+                			<span class="colorRed">*</span>
+                			Brand Name:
+                		</lebel>
+						<input type="hidden" name="modifyprodBrandId" id="modifyprodBrandId" value="">
+						<input type="text" class="poptxt" name="modifyprodBrandName" id="modifyprodBrandName" value="" disabled="disabled">
+                	</div>
+					<div style="margin-top:20px;"></div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: -3px;">
+							<span class="colorRed">*</span>
+							Serial Numer:
+						</lebel>
+						<input type="text" class="poptxt" name="modifyserNum" id="modifyserNum" value="">
+					</div>
+					
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modifyHotBrand()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div> 
+	
+	<!-- 首页logo -->
+	<div class="pop_windows" id="AddHomePagePopWin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit Home Page Logo</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<input type="hidden" name="homePageamnId" id="homePageamnId" value="">
+					<div style="margin-top:20px;"></div>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 15px;"><span class="colorRed">*</span>Home Page Logo:</lebel>
+						
+						<img src="$root/static/images/ico/icon_image.png" id="homepagelogoPto" style="height:70px; width:70px;">
+						<input type="button" class="button" value="Upload">(Image Size:420x270px)
+				        <input type="file" name="homepagelogo" size="1" id="homepagelogo" onchange="uploadCover(1)" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 204px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+					
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="beginAddHomePageLogo()" id="HomePagebtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div> 
+	
+	<!-- 品牌街logo -->
+	<div class="pop_windows" id="AddStreetListPopWin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit street list logo</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<input type="hidden" name="streetListamnId" id="streetListamnId" value="">
+					<div style="margin-top:20px;"></div>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 15px;"><span class="colorRed">*</span>Street List Logo:</lebel>
+						
+						<img src="$root/static/images/ico/icon_image.png" id="streetlogoPto" style="height:70px; width:70px;">
+						<input type="button" class="button" value="Upload">
+				        <input type="file" name="streetlogo" size="1" id="streetlogo" onchange="uploadCover(2)" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 204px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+					
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="beginAddStreetListLogo()" id="StreetListbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div> 
+	
+	
+<script  type="text/javascript" >
+	var type = 0;
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		var brandName = $("#sbrandName").val();
+		$.post("$root/general/brandStreet", {"currentPage":currentPage,"brandName":brandName},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+	function addMenuPopWin(){
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		$("#prodBrandName").val("");
+		$("prodBrandId").val("");
+		$("#serNum").val("");
+		pop_center ('560');
+	}
+	function choseType(){
+		if($("#hrefType").val()=="1"){
+			$("#UrlDiv").hide();
+			$("#prodIdDiv").show();
+		}
+		else{
+			$("#UrlDiv").show();
+			$("#prodIdDiv").hide();
+		}
+	}
+	
+	function saveHotBrand(){
+		var prodBrandId = $("#prodBrandId").val();
+		var serNum = $("#serNum").val();
+		if(!prodBrandId){
+			alertWarn('product name not allow null.');
+			return;
+		}
+        var regInt = /^[0-9]+[0-9]*]*$/;  //正整数
+        if(!regInt.test(serNum)){
+            if(serNum != ''){
+                alertWarn("Serial Numer  must be positive integer!");
+                $("#serNum").focus();
+                return 0;
+            }else{
+                alertWarn("please input a Serial Numer!")
+            }
+
+        }
+		
+		$.post("$root/general/saveHotBrand", {"prodBrandId":prodBrandId,"seq":serNum},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+		
+	}
+	
+	function deleteBrand(appBrandHotId){
+		$.post("$root/general/delHotBrand", {"appBrandHotId":appBrandHotId},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function showUpdatePopWin(prodBrandId,obj){
+		var $tr = $(obj).parent().parent().find("td");
+		$("#modifyprodBrandId").val(prodBrandId);
+		$("#modifyprodBrandName").val($.trim($tr.eq(1).text()));
+		$("#modifyserNum").val($.trim($tr.eq(3).text()));
+		$(".shade_layout").show();
+		$("#modifypopwin").show();
+		pop_center ('560');
+		
+	}
+	function modifyHotBrand(){
+		var prodBrandId = $("#modifyprodBrandId").val();
+		var serNum = $("#modifyserNum").val();
+		$.post("$root/general/modifyBrand", {"appBrandHotId":prodBrandId,"seq":serNum},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function openchosewindow(method){
+		var iTop = (window.screen.availHeight-30-350)/2;
+		var iLeft = (window.screen.availWidth-10-500)/2; 
+		window.open ('$root/brand/chooselist?method='+method,'newwindow','height=800,width=1000,top='+iTop+',left='+iLeft+',toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no')
+	}
+	
+	function addHomePageLogo(prodBrandId,obj){
+		var $tr = $(obj).parent().parent().find("td");
+		$("#homePageamnId").val(prodBrandId);
+		var homepagelogoPto = $tr.eq(4).find("img").attr("url");
+		$("#homepagelogoPto").attr("src",homepagelogoPto);
+		$(".shade_layout").show();
+		$("#AddHomePagePopWin").show();
+		pop_center ('560');
+	}
+	function beginAddHomePageLogo(){
+		var homePageamnId = $("#homePageamnId").val();
+		var homepagelogoPto = $("#homepagelogoPto").attr("src");
+		$.post("$root/general/saveHomePageLogo", {"homePageamnId":homePageamnId,"homepagelogoPto":homepagelogoPto},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function addStreetListLogo(prodBrandId,obj){
+		var $tr = $(obj).parent().parent().find("td");
+		$("#streetListamnId").val(prodBrandId);
+		var streetlogoPto = $tr.eq(4).find("img").attr("src");
+		$("#streetlogoPto").attr("src",streetlogoPto);
+		$(".shade_layout").show();
+		$("#AddStreetListPopWin").show();
+		pop_center ('560');
+	}
+	
+	function beginAddStreetListLogo(){
+		var streetListamnId = $("#streetListamnId").val();
+		var streetlogoPto = $("#streetlogoPto").attr("src");
+		$.post("$root/general/modifyBrand", {"appBrandHotId":streetListamnId,"imgUrl":streetlogoPto},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+					}
+					else{
+						alertWarn("error!");
+					}
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	
+	function uploadCover(i){
+		var root = $("#rootsite").val();
+		var fileid = "";
+		var flag = "";
+		if(i==1){
+			fileid = "homepagelogo";
+			flag = "1";
+		}
+		else{
+			fileid = "streetlogo";
+			flag = "2";
+		}
+		$.ajaxFileUpload
+		(
+			{
+				url:root+'/general/uploadBrand',
+				secureuri:false,
+				fileElementId:fileid,
+				dataType: 'json',
+				data:{"flag":flag},
+				success: function (data, status)
+				{
+					if( data.success )
+					{
+						if(i==1){
+							$("#homepagelogoPto").prop("src",data.imgUrl);
+							$("#fileId").attr("value",data.fileid);
+						}
+						else{
+							$("#streetlogoPto").prop("src",data.imgUrl);
+							$("#streetfileId").attr("value",data.fileid);
+						}
+					} else {
+						alert("333");
+//						alert(data.errorMsg);
+						closed_add_shade_layout();
+						alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+					}
+					createColverUploadHtml(i);
+				},
+				error: function (data, status, e)
+				{
+					alert("444");
+				}
+			}
+		);
+	}
+	/**
+	 * 重新绑定onchange事件
+	 */
+	function createColverUploadHtml(i){
+		var fileid = "";
+		if(i==1){
+			fileid="homepagelogo"
+		}
+		else{
+			fileid="streetlogo";
+		}
+		var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="'+fileid+'" id="'+fileid+'" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;top:18px;left: 204px; width: 89px;height: 29px;" />');
+		$('#cover').replaceWith( $new );
+		$new.change(uploadCover);
+	}
+	
+
+</script>

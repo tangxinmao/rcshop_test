@@ -1,0 +1,109 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Product Release" )
+#set($extJs = "/static/js/merchant.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom: none;">
+	 	<h1 class="fl" id="sTit">Add Store > Step1</h1>
+	 	<div class="fr" id="backSt" style="display:none;">
+			<input style="font-size: 18px;" class="button" type="button" value="Back to Step 1" onclick="showConfirm('Are you sure to do?',&quot;backStep()&quot;)">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG">
+			<div id="screen1">
+				<div class="wd100 ht45 mt15 ml20">
+					<h2>Create Store</h2>
+				</div>
+				<div class="step_group">
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Principal:</label>
+						<select class="text" name="vendor" id="vendor">
+							#foreach($vendor in $vendorList)
+								<option value="$vendor.vendorId">$vendor.name</option>
+							#end
+						</select>
+					</p>
+					
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Region:</label>
+						<select class="text" name="province" id="province" onchange="changeProvince()">
+							#foreach($province in $provinceList)
+								<option value="$province">$province</option>
+							#end
+						</select>
+						
+						<select class="text" name="city" id="city" style="width: 186px; margin-left: 4px;">
+							#foreach($city in $cityList)
+								<option value="$!city.cityId">$!city.name</option>
+							#end
+						</select>
+					</p>
+					
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Store Name:</label>
+						<input type="text" class="text" style="width:400px" name="merchantName" id="merchantName" value="" maxlength="50" >
+					</p>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<p style="position:relative; padding: 10px 0 10px 0;">
+						<label class="colortitle" style="margin-top: 14px;"><span class="colorRed">*</span>Logo:</label>
+						
+						<input type="hidden" name="merchantId" id="merchantId" value="$!merchantId">
+						<img src="$root/static/images/ico/icon_image.png" id="photocover" style="width:70px; height:70px;">
+						<input type="button" class="button" value="Upload">(Image Size:500x300px)
+				        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 240px; top: 28px; width: 63px;height: 29px;" />
+					</p>
+					<p>
+						<label class="colortitle"><span class="colorRed" >*</span>Description:</label>
+						<textarea class="text" id="merchantDesc" style="width: 410px; height: 180px;" maxlength="500" ></textarea>
+					</p>
+					<p>
+						<label class="colortitle">Contact:</label>
+						<input type="text" class="text" style="width:400px" name="contact" id="contact" value="" maxlength="50">
+					</p>
+					
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Phone:</label>
+						<input type="text" class="text" style="width:400px" name="mobile" id="mobile" value="" maxlength="20">
+					</p>
+					
+					<p>
+						<label class="colortitle">Address:</label>
+						<input type="text" class="text" style="width:400px" name="address" id="address" value="" maxlength="200">
+					</p>
+				</div>
+				<div class="wd100 ht45 mt15 ml20">
+					<h2>Bank Account Imformation</h2>
+				</div>
+				<div class="step_group">
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Bank Name:</label>
+						<input type="text" class="text" style="width:400px" name="bankName" id="bankName" value="" maxlength="100">
+					</p>
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Bank Account Number:</label>
+						<input type="text" class="text" style="width:400px" name="bankAccount" id="bankAccount" value="" maxlength="50">
+					</p>
+					<p>
+						<label class="colortitle"><span class="colorRed">*</span>Bank Account Name:</label>
+						<input type="text" class="text" style="width:400px" name="bankAccountName" id="bankAccountName" value="" maxlength="50">
+					</p>
+				</div>
+				<div class="mt25" style="margin-left: 460px;margin-bottom: 18px;">
+					<input type="button" class="btnG bwt100 bht30 bfz16" value="Next" onclick="next()">
+				</div>
+			</div>
+			<div id="screen2" style="display:none;">
+				<div class="wd100 ht45 mt15 ml20">
+					<h2>Create User</h2>
+				</div>
+				<div class="step_group" id="s2d">
+				</div>
+			</div>
+			<div id="screen3" style="text-align: center; margin-top: 100px; display:none;">
+				<h1 style="font-size: 70px; color: #3f326d;">Success!</h1>
+				<input type="button" class="btnG bwt100 bht30 bfz16" style="margin-bottom: 20px; margin-top: 100px;" value="Continue" onclick="Continue1()" style="margin-top: 100px;">
+			</div>
+		</div>
+	</div>
+</div>

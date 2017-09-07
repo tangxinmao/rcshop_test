@@ -1,0 +1,93 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extCss = "/static/css/jquery.treetable.css,/static/css/jquery.treetable.theme.default.css")
+#set($extJs = "/static/js/role.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Role List</h1>
+	 	<div class="fr">
+			<input class="btnG bwt125 bht39 bfz16 fr mt12" type="button" value="Add Role" onclick="addRoleWin()">
+		</div>
+	</div> 
+	<div class="data_logic ml30">
+	
+	
+		<div class="service_wrap mt10" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+						<table class="table order_table mt10">
+							<tr>
+								<th width="10%">Role ID</th>
+								<th width="10%">Role Name</th>
+								<th width="10%">Description</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.roleId}</td>
+								<td>$!{item.name}</td>
+								<td>$!{item.description}</td>
+								<td>
+								<a href="javascript:void(0)" onclick="javascript:editRoleWin('$!item.roleId',this)">Edit</a>		
+                               | <a href="javascript:void(0)" onclick="javascript:editPermissionsWin('$!item.roleId',this)">Edit Permissions</a>
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>
+<div class="pop_windows" id="roleWin" style="display:none;">
+<form id="roleWinForm">
+<input type="hidden" name="roleId">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2></h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle" style="margin-left: -22px;"><span class="colorRed">*</span><span>Role Name:</span></lebel><input class="poptxt" type="text" name="name" value="" maxlength="50"></div>
+			
+			    <div style="margin-top:20px;"><lebel style="margin-left: -19px;" class="colortitle"><span>Description:</span></lebel><textarea style=" vertical-align: middle;height:70px" class="poptxt" name="description" maxlength="200"></textarea></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addVendor()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>
+<div class="pop_windows" id="permissionsWin" style="display:none;">
+<form id="permissionsWinForm">
+<input type="hidden" name="roleId">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2></h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px;overflow-y: auto;;height:350px">
+               
+               
+               
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addMenu()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Expires" CONTENT="0">
+<meta http-equiv="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="Pragma" CONTENT="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>merchant list</title>
+#set($root=$request.getContextPath())
+<script type="text/javascript"
+		src="$root/static/js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript"
+		src="$root/static/assets/js/bui.js"></script>
+<link href="$root/static/css/seller_center.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/uploadify.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/common.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/jquery-ui-timepicker-addon.min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/lightbox.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<input type="hidden" name="mywallet" id="mywallet" value="$!wallet">
+<input type="hidden" name="myvendor" id="myvendor" value="$!rcMerchantVendor">
+<div class="rightArea fl mt10 mb10" style="width:100%;">
+	<div class="service_wrap clearfix">
+		<div class="right_tab_wrap">
+		<div id="tab_container" class="tab_con store_date_wrap">
+			<div class="part_title">Basic infomation</div>
+			<div class="store_info mb10">
+			
+					<img class="head_img" alt="" src="$!imgUrl">
+					<div class="fl">
+						<p class="mt15"><label>Name:</label><b style="margin-left: 5px;">$!merchant.merchantName</b></p>
+						<p><label>Username:</label><span style="margin-left: 5px;">$!member.memberAccount</span></p>
+						<p><label>Security level:</label><span class="colorOrange ml10 mr15">Middle</span><img class="mt8" alt="" src="$root/static/images/sellercenter_bg/safe_info.png"></p>
+						<!--  <p><label>安全等级：</label><span class="colorOrange ml10 mr15">中级</span><img class="mt8" alt="" src="../images/sellercenter_bg/safe_info.png"></p>-->
+					</div>
+					<div class="fl pl150">
+						<p class="mt15"><label>ID#:</label><b style="margin-left: 5px;">$!merchant.merchantId</b></p>
+						<p><label>Mobile:</label><span style="margin-left: 5px;" id="mobileSpan">$!merchant.mobile</span><a class="ml20" onclick="showMobilePopup()" href="javascript:void(0)">Edit</a></p>
+						<p><label>E-mail:</label><span style="margin-left: 5px;" id="emailSpan">$!member.email</span><a class="ml20" onclick="showEmailPopup()" href="javascript:void(0)">Edit</a></p>
+					</div>
+				</div>            
+				<div class="store_date_wrap clearfix">
+                	<div class="part_title">Shop infomation</div>
+                	<div class="part_con mt10">
+                        <div id="shop1" class="tab_con con1 clearfix">
+                        	<div class="fl">
+                                <div class="part_tips parts">
+                                    <div class="item_title">Reminder</div>
+                                    <div class="item_con">
+                                        <p class="nobdr pb15">
+                                            <b>The job you need to do:</b>
+                                        </p>
+                                        <p class="dashed_border">
+                                            <label>Order:</label>
+                                            <a href="#">
+                                                Undelivered （ <em class="colorOrange">$!unfiiledOrder</em>
+                                                ）
+                                            </a>
+                                            <a href="#">
+                                                Pick up（ <em class="colorOrange">$!pickupOrder</em>
+                                                ）
+                                            </a>
+                                            
+                                             <a href="#">
+                                                Unpaid（ <em class="colorOrange">$!unpaidOrder</em>
+                                                ）
+                                            </a>
+                                        </p>
+                                        <p class="dashed_border">
+                                            <label>Product:</label>
+                                            <a href="#">
+                                               Not on Shelves（
+                                                <em class="colorOrange">$!outStock</em>
+                                                ）
+                                            </a>
+                                            <a href="#">
+                                                On Shelves（
+                                                <em class="colorOrange">$!onsell</em>
+                                                ）
+                                            </a>
+                                            <a href="#">
+                                                No Stock（
+                                                <em class="colorOrange">$!noStorage</em>
+                                                ）
+                                            </a>
+                                        </p>
+                                      
+                                        <p class="dashed_border">
+                                            <label>Evaluation:</label>
+                                            <a href="#">
+                Not reply（
+                                                <em class="colorOrange">$!notReply</em>
+                                                ）
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="part_date parts mt15">
+                                    <div class="item_title">Trading information</div>
+                                    <div class="item_con">
+                                        <table class="table tac">
+                                            <tr>
+                                                <th></th>
+                                                <th>Deal quantity</th>
+                                                <th>Deal amount</th>
+                                                <th>User quantity</th>
+                                            </tr>
+                                            <tr>
+                                                <td class="tar">Yesterday</td>
+                                                <td>$!dealYesterday</td>
+                                                <td>$!amountYesterday</td>
+                                                <td>$!userYesterday</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="tar">The day before yesterday</td>
+                                                <td>$!dealBeforeYesd</td>
+                                                <td>$!amountBeforeYesd</td>
+                                                <td>$!userBeforeYesd</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="tar">Last week</td>
+                                                <td>$!dealLaWeek</td>
+                                                <td>$!amountLaWeek</td>
+                                                <td>$!userLaWeek</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fl">
+                                <div class="part_notice parts">
+                                    <div class="item_title">Wallet</div>
+                                    <div class="item_con" style="height:260px;">
+                                       <div style="margin-left: 75px; margin-top:20px;font-size:20px;"><b>Banlance</b></div>
+                                       <div style="text-align:center; margin-top:60px;font-size:40px;"> Rp</div>
+                                       <div style="text-align:center; margin-top:30px;font-size:40px;"> <span style="color:red;">$viewutil.moneyStringFormat($!wallet)</span></div>
+                                       <div style="text-align: center;">
+                                       		<input style="margin-top: 40px;" class="btn btn-xs" onclick="showBankPopup()" type="button" name="" value="withdraw" />
+                                       </div>
+                                    </div>
+                                </div>
+                                <div class="part_picspace parts mt15">
+                                    <div class="item_title">Image space</div>
+                                    <div class="item_con">
+                                        <div>
+                                            The image space size you have:
+                                            <span>20.00G</span>
+                                        </div>
+                                        <div>Current used size:$!{imageSpaceSize}M</div>
+                                        <div>
+                                        </div>
+                                        <div>
+                                            <input class="btn btn-xs" onclick="openImageSpace()" type="button" name="" value="use it!" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="shop2" class="tab_con con2">
+                        	
+                           
+                       </div>
+                   </div>
+               </div>
+		</div>
+	</div>	
+</div>	
+</div>						
+	<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="mobilePopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit mobile</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+                	<div><lebel class="colortitle">Mobile:</lebel><input type="text" style="width:300px" data-rules="{required:true}" name="mobile" id="mobile" value=""></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="button button-primary"  type="button" onclick="editMobile()" id="emobile" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="pop_windows" id="emailPopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit Email</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+                	<div><lebel class="colortitle">Email:</lebel><input type="text" style="width:300px" data-rules="{required:true}" name="email" id="email" value=""></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="button button-primary"  type="button" onclick="editEmail()" id="eemail" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="pop_windows" id="bankPopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Apply withdrawl</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+                	<div><lebel class="colortitle" style="margin-left:63px;">Bank Name:</lebel>$!rcMerchantVendor.bankName</div>
+                	<div style="margin-top:20px;"><lebel class="colortitle">Bank Account Number:</lebel>$!rcMerchantVendor.bankAccount</div>
+                	<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:13px;">Bank Account Name:</lebel>$!rcMerchantVendor.bankAccountName</div>
+                	<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:25px;">withdraw Amount:</lebel><input type="text" name="withdrawMoney" id="withdrawMoney" value=""></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btn btn-xs btn_gray"  type="button" onclick="withDrawl()" id="ewd" value="Apply" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="pop_windows" id="open_returnPop" style="display:none;">
+	</div>
+						
+  <!-- js code -->
+  
+ <script type="text/javascript"> 
+ 	function openImageSpace(){
+	   	 //打开绝对路径，可以是同域的，也可以是外部链接
+	   	  top.topManager.openPage({
+	   	    id : '2045000221',
+	   	    href : '$root/imageopt/init',
+	   	    title : 'Image space'
+	   	  });
+ 	}
+ 	function showMobilePopup(){
+ 		$(".shade_layout").show();
+ 		$("#mobilePopwin").show();
+ 		pop_center ('560');
+ 	}
+ 	
+ 	function showEmailPopup(){
+ 		$(".shade_layout").show();
+ 		$("#emailPopwin").show();
+ 		pop_center ('560');
+ 	}
+ 	
+ 	function editMobile(){
+ 		var mobile = $("#mobile").val();
+ 		if(mobile==""){
+ 			alert("Please input your mobile number!");
+ 			return 0;
+ 		}
+ 		$.post("$root/manager/editMobile", {"mobile":mobile},
+			function(data){
+ 				var jsonObjArr = JSON.parse(data);
+ 				if(jsonObjArr.code=="1")
+			    	$("#mobileSpan").text(mobile);
+ 					close();
+		    }
+		);
+ 	}
+ 	
+ 	function editEmail(){
+ 		var email = $("#email").val();
+ 		if(mobile==""){
+ 			alert("Please input your email!");
+ 			return 0;
+ 		}
+ 		$.post("$root/manager/editEmail", {"email":email},
+			function(data){
+ 				var jsonObjArr = JSON.parse(data);
+ 				if(jsonObjArr.code=="1")
+			    	$("#emailSpan").text(email);
+ 					close();
+		    }
+		);
+ 	}
+ 	
+ 	function withDrawl(){
+ 		var applyMoney = parseInt($("#mywallet").val());
+ 		if(0 == parseInt(applyMoney)){
+ 			alert("you have no money in wallet.");
+ 			return 0;
+ 		}
+ 		var withdrawMoney = $("#withdrawMoney").val();
+ 		if(withdrawMoney>applyMoney){
+ 			alert("you have not enough money in wallet.");
+ 			$("#withdrawMoney").focus();
+ 			return 0;
+ 		}
+ 		var bankName = $("#bankName").val();
+ 		var bankAccount = $("#bankAccount").val();
+ 		$.post("$root/withdrawl/apply", {"applyMoney":withdrawMoney,"bankName":bankName,"bankAccount":bankAccount},
+ 				function(data){
+ 	 				var jsonObjArr = JSON.parse(data);
+			    	alert(jsonObjArr.result);
+			    	close();
+		    }
+		);
+ 	}
+ 	
+ 	function tShowCanclePop(){
+ 		$(".shade_layout").show();
+ 		$("#open_returnPop").show();
+ 		var opt="Are you sure to whthdrawl from your wallet？";
+ 		var url="withDrawl()";
+ 		var htmls = "<div class='layout'>"+
+ 		"<b class='ico_close' onclick='closed()'>关闭</b>"+
+ 		"<div class='main'>"+
+ 			"<div class='bd_p10 clearfix'>"+
+ 	        	"<div class='popup_tips_title pl150 mt25 mb20 ml20'>"+
+ 	        	"<b class='ico fl'></b><span class='fl ml15'>Prompt</span></div>"+
+ 	            "<p class='tac fontSize120 colorOrange mb20'>"+opt+"</p>"+
+ 			"</div>"+
+ 			"<div class='freightTemplet_btns mt15'>"+
+ 				"<input type='button' value='OK' onclick=\""+url+"\"  class='btn btn-sm btn-sgGreen'>"+
+ 				"<input type='button' value='Cancel' class='btn btn-sm btn-grey' onclick='closed()'>"+
+ 			"</div>"+
+ 		"</div>"+
+ 	"</div>";
+// 		$("#merchantPopIframe").removeClass("height");
+ 		$('#open_returnPop').empty().html(htmls);
+// 		var height = $("#merchantPopIframe").height();
+// 		$("#merchantPopIframe").css({height:height});
+ 		pop_center ('560');
+ 	}
+ 	function closed(){
+ 		$("#open_returnPop").hide();
+ 		$(".shade_layout").hide();
+ 	}
+ 	
+ 	function showBankPopup(){
+ 		var applyMoney = $("#mywallet").val();
+ 		var myvendor = $("#myvendor").val();
+ 		if(myvendor==""){
+ 			alert("Please ask for the administrator to add your bank info!");
+ 			return 0;
+ 		}
+ 		if(0 == parseInt(applyMoney)){
+ 			alert("you have no money in wallet.");
+ 			return 0;
+ 		}
+ 		$(".shade_layout").show();
+ 		$("#bankPopwin").show();
+ 		pop_center ('560');
+ 	}
+ </script>
+ <script type="text/javascript" src="$root/static/js/common.js"></script>
+</body>
+</html>

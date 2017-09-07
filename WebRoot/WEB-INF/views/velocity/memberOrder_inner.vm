@@ -1,0 +1,37 @@
+<table class="table order_table mt10">
+	<tr>
+		<th width="14%">Order ID</th>
+		<th width="18%">Time</th>
+		<th width="14%">Buyer Username</th>
+		<th width="14%">Sub Total</th>
+		<th width="12%">Grand Total</th>
+		<th width="14%">store</th>
+		<th width="12%">status</th>
+	</tr>
+	#foreach($order in $list)
+		<tr>
+						<td>$!order.orderId</td>
+						<td>$!viewutil.dateFormat($!order.createTime)</td>
+						<td>$!order.member.name</td>
+						<td>$!order.productPrice</td>
+						<td>$!order.payPrice</td>
+						<td>$!order.merchant.name</td>
+						<td>
+							#if ($!{order.sellerStatus}==1)Unpaid#end 
+							#if ($!{order.sellerStatus}==2||$!{order.sellerStatus}==3)<span style="color:green">Undelivered</span>#end 
+								#if ($!{order.sellerStatus}==6)<span style="color:red">Send</span>#end 
+						<!-- 		#if ($!{order.orderStatus}==4)<span style="color:blue">Received</span>#end -->
+							    #if ($!{order.sellerStatus}==11||$!{order.sellerStatus}==8||$!{order.sellerStatus}==9||$!{order.sellerStatus}==7)Completed#end
+								#if ($!{order.sellerStatus}==5||$!{order.sellerStatus}==4)Rejected#end
+							<!-- 	#if ($!{order.sellerStatus}==12)Canceled#end -->
+							<!-- 	#if ($!{order.sellerStatus}==2)Waiting for pick up#end  -->
+								 <input type="hidden" value="${order.sellerStatus}">
+						</td>
+					</tr>
+	#end
+</table>
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<input type="hidden" value="$!page.currentPage" id="currentPage" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

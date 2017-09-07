@@ -1,0 +1,27 @@
+<table class="table order_table mt10">
+							<tr>
+								<th width="10%">Role ID</th>
+								<th width="10%">Role Name</th>
+								<th width="10%">Description</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.roleId}</td>
+								<td>$!{item.name}</td>
+								<td>$!{item.description}</td>
+								<td>
+								<a href="javascript:void(0)" onclick="javascript:editRoleWin('$!item.roleId',this)">Edit</a>		
+                               | <a href="javascript:void(0)" onclick="javascript:editPermissionsWin('$!item.roleId',this)">Edit Permissions</a>
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+	

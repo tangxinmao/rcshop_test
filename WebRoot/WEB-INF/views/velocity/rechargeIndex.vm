@@ -1,0 +1,83 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/recharge.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="">
+	 	<h1 class="fl">Top-up</h1>
+	</div> 
+	
+	<div class="data_logic ml30">
+		<div class="searchArea bht63">
+			<form id="searchForm">
+			<div class="mt35 ">
+				<div class="unit">
+					<label>Phone	</label>
+						<input type="text" name="mobile"  value="">
+				
+				</div>
+				
+					<!-- <div class="unit">
+					<label>Buyer ID	</label>
+						<input type="text" name="memberId"  value="">
+				
+				</div> -->
+					
+				
+			<div  style="float:right;">
+					<input class="button" type="button" value="Search" onclick="search()">
+				</div>
+			</div>
+			</form>
+		</div>
+
+		<div class="service_wrap mt10 clearfix" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+			<input type="hidden" name="memberId" >
+			<!-- <input type="hidden" name="memberAmount" > --> 
+					<input type="hidden" name="rechargeStationId" value="$!{rcRechargeStation.rechargeStationId}">
+						<table class="table order_table mt10">
+			<tr>
+				<th colspan="4">Top-up Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer ID</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="memberId"></td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Phone
+					Name</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="mobile"></td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer Username</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="name"></td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Balance</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%;color: green" id="balance"></td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Top-up Amount</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%"><input class="poptxt w18_" type="text" name="amount" ></td>
+				<td colspan="2" style="text-align: left; width: 20%; padding-right: 2%; color: #afafaf">
+					<input  type="button" class="btnG  " value="Confirm" style="width: 150px; height: 34px"onclick="javascript:recharge();"> 
+			</td>
+			</tr>
+		</table>
+	<span id="loginMemberNickname" ></span>	<span id="now" style="margin-left:20%"></span><span style="margin-left:20%">Top-up Center: $!{rcRechargeStation.stationName}</span>
+					  
+		</div>
+	<div class="entG">
+			<div id="screen3" style="text-align: center; margin-top: 100px; display:none;">
+				<h1 style="font-size: 70px; color: #3f326d;">Success!</h1>
+				<input type="button" class="btnG bwt100 bht30 bfz16" style="margin-bottom: 20px; margin-top: 100px;" value="Continue" onclick="javascript:location.reload();" style="margin-top: 100px;">
+			</div>
+			</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>

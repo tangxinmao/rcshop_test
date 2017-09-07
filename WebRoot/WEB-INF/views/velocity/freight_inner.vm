@@ -1,0 +1,55 @@
+	<table class="table order_table mt10">
+							<tr width="100%">
+								<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+									<div onclick="goThisPage('sort')" class="sortDiv">
+											<p class="sortP">Available Time</p>
+											<span class="item dot-top checked"></span> 
+											<span class="item dot-bottom checked"></span> 
+											<input style="display: none" type="checkbox" name="isDesc" id="isDesc" checked>
+											 
+									</div>
+								</th>
+							</tr>
+								<tr>
+								<th width="10%">City Name</th>
+								<th width="10%">Province</th>
+								<th width="10%">Status</th>
+								<th width="10%">Hot City</th>
+								<th width="10%">Is Default</th>
+								<th width="10%">Freight</th>
+								<th width="10%">Minimum</th>
+								<th width="20%">Available Time</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+						#if($citys&&!$citys.isEmpty())
+		                              #foreach($city in $citys)
+							<tr>
+							    <td>$!{city.name}</td>
+								<td>$!{city.provinceName}</td>
+								<td>#if (${city.isDredged}==1)<span style="color:#4ED321">Available</span> #else<span style="color:#9B9B9B"> Unavailable</span> #end <input type="hidden" value="${city.isDredged}"></td>
+								<td>#if (${city.isHot}==1)<span style="color:#4ED321">Yes</span> #else<span style="color:#9B9B9B"> No</span>#end <input type="hidden" value="${city.isHot}"></td>
+								<td>#if (${city.isDefault}==1)<span style="color:#4ED321">Yes</span> #else<span style="color:#9B9B9B"> No</span>#end <input type="hidden" value="${city.isDefault}"></td>
+								<td>Rp #if ($!{city.freight})$viewutil.moneyStringFormat($!{city.freight})#else 0 #end<input type="hidden" value="${city.freight}"></td>
+								<td>Rp #if ($!{city.freightBaseAmount})$viewutil.moneyStringFormat($!{city.freightBaseAmount})#else 0 #end <input type="hidden" value="${city.freightBaseAmount}"></td>
+									<td>
+								  #if(${city.dredgeTime})
+								    $viewutil.dateFormat(${city.dredgeTime})
+								  #else
+								    --
+								  #end
+								</td>
+								<td>
+								<a href="javascript:void(0)" onclick="javascript:editCityWin('$!city.cityId',this)">Edit</a>		
+									<!--|
+									<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete city?',&quot;deleteCity('$!{city.cityId}')&quot;)">Delete</a>
+									-->
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

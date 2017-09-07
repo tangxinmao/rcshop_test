@@ -1,0 +1,47 @@
+<table class="table order_table mt10" id="table">
+    <tbody>
+    <th>Category Name</th>
+    <th>Serial Number</th>
+    <th>Icon</th>
+    <th>Actions</th>
+		#set($num=1)
+		#foreach($cat in $list)
+        <tr class="dad" data-tt-id="$num">
+            <td style="text-align: left;">$!cat.name</td>
+            <td>$!cat.seq</td>
+            <td>
+                <img src="$!cat.icon" style="width:60px; height:60px;">
+            </td>
+            <td>
+                <a href="javascript:void(0)" onclick="showEditPopWin('$!cat.prodCatId',this)">Edit</a> |
+                <a href="javascript:void(0)" onclick="addChildPopWin('$!cat.prodCatId',this)">Add Sub Category</a> |
+                <a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the category? If you deleted,it\'s child category wiil be deleted.',&quot;deleteDad('$!cat.prodCatId')&quot;)">Delete</a> |
+                <a href="javascript:void(0)" onclick="openPropChoseBox('$!cat.prodCatId',1)">Bind Property</a> |
+                <a href="javascript:void(0)" onclick="openPropChoseBox('$!cat.prodCatId',2)">Bind SKU</a>
+            </td>
+        </tr>
+        <!-- 子分类 -->
+			#set($childnum=1)
+			#foreach($child in $cat.childProdCats)
+            <tr class="child" data-tt-id="$num-$childnum" data-tt-parent-id="$num">
+                <td style="text-align: left;">$!child.name</td>
+                <td>$!child.seq</td>
+                <td><img src="$!child.icon" style="width:60px; height:60px;"></td>
+                <td>
+                    <a href="javascript:void(0)" onclick="showEditPopWin('$!child.prodCatId',this)">Edit</a> |
+                    <a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the child category? If you deleted,The data can not be restore.',&quot;deleteChild('$!child.prodCatId')&quot;)">Delete</a> |
+                    <a href="javascript:void(0)" onclick="openPropChoseBox('$!child.prodCatId',1)">Bind Property</a> |
+                    <a href="javascript:void(0)" onclick="openPropChoseBox('$!child.prodCatId',2)">Bind SKU</a>
+                </td>
+            </tr>
+				#set($childnum=$childnum+1)
+			#end
+			#set($num=$num+1)
+		#end
+    </tbody>
+</table>
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-left: 10px">#vm_page2</div>

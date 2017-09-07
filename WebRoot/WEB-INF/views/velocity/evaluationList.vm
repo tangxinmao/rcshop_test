@@ -1,0 +1,331 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Review list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/jquery.ui.datepicker.js")
+#set($root=$request.getContextPath())
+<input type="hidden" name="isDesc" id="isDesc" value="1">
+<div class="rightContent fl">
+	<div class="tpos ml30  mt25">
+	 	<h1 class="fl">Review List</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<div class="mt35">
+				<div class="unit">
+					<label>Date From</label>
+					<input type="text" name="evaluationTimeStartStr" id="evaluationTimeStartStr">
+				</div>
+				<div class="unit">
+					<label>Date to</label>
+					<input type="text" name="evaluationTimeEndStr" id="evaluationTimeEndStr">
+				</div>
+				<div class="unit">
+					<label>Rating</label>
+					<select name="prodScore" id="prodScore">
+						<option value="" >All</option>
+						<option value="5">Very good(5)</option>
+						<option value="4">Good(4)</option>
+						<option value="3">Nomal(3)</option>
+						<option value="2">Bad(2)</option>
+					    <option value="1">Very bad(1)</option>
+					</select>
+				</div>
+			
+			
+			</div>
+			
+			<div class="clearfix">
+				<div class="mt10 unit">
+					<label>Product ID</label>
+					<input type="text" name="prodId" id="prodId"  value="">
+					
+				</div>
+				
+				<div class="mt10 unit">
+					<label>Order ID</label>
+					<input type="text" name="orderId" id="orderId"  value="">
+					
+				</div>
+				#if(!$session.getAttribute("RcMerchant"))
+					<div class="mt10 unit">
+						<label>Store ID</label>
+						<input type="text" name="merchantId" id="merchantId"  value="">
+					</div>
+				#end
+				<div class="mt10" style="float:right;">
+					<input class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+		</div>
+		<div class="service_wrap" id="reloadSearchMessages">
+            #parse("evaluationList_inner.vm")
+		</div>	
+	</div>
+</div>
+
+<div class="shade_layout" style="display: none;"></div>
+<!-- 回复评论弹窗 -->
+<div class="pop_windows" id="replaypopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Reply</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<input type="hidden" id="reviewId" value="">
+               	<div>
+               		<lebel class="colortitle" style="margin-left: -4px;"><span class="colorRed">*</span>Buyer Review:</lebel>
+               		<b id="reviewProd" style="margin-left: 20px;"></b>
+               	</div>
+				<div style="margin-top:20px;">
+					<lebel class="colortitle" style="margin-left: 8px;"><span class="colorRed">*</span>Seller Reply:</lebel>
+					<textarea class="poptxt" style="height:100px;" name="content" id="content" value="" maxlength="300"></textarea>
+				</div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type ="button" onclick="saveReplay()" id="addnewbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div>
+<script  type="text/javascript" >
+
+	function goThisPage(ta){
+		var currentPage = '';
+		var isDesc = "CREATE_TIME desc";
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else if(ta == 'sort1'){
+			currentPage = 1;
+			isDesc = "0"
+			if($("#isDesc").val()=="0"){
+				isDesc ="CREATE_TIME desc";
+			}
+			else if($("#isDesc").val()=="1"){
+				isDesc = "CREATE_TIME asc";
+			}
+			else{
+				isDesc = "CREATE_TIME desc";
+			}
+		}else{
+			currentPage = ta;
+		}
+		if( $("#evaluationTimeStartStr").val()&& $("#evaluationTimeStartStr").val()!='')
+		var evaluationTimeStartStr = $("#evaluationTimeStartStr").val();
+		if( $("#evaluationTimeEndStr").val()&& $("#evaluationTimeEndStr").val()!='')
+		var evaluationTimeEndStr = $("#evaluationTimeEndStr").val();
+		var prodScore = $("#prodScore").val();
+		var prodId = $("#prodId").val();
+		var orderId = $("#orderId").val();
+		var merchantId = $("#merchantId").val();
+		$.post("$root/evaluation/evaluationList", 
+			{"currentPage":currentPage,
+			 "createTimeFrom":evaluationTimeStartStr,
+			 "createTimeTo":evaluationTimeEndStr,
+			 "score":prodScore,
+			 "prodId":prodId,
+			 "orderId":orderId,
+			 "merchantId":merchantId,
+			 "orderBy":isDesc
+			},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+				
+					$(".tac").parent().nextAll().each(function(){
+						var action=	$(this).children().last();
+						var actionStr=action.html();
+							action.html(	formatStr(actionStr));
+					});
+			    if(isDesc=="CREATE_TIME asc"){
+					$("#isDesc").val("2");
+					if(!$(".dot-bottom").hasClass("checked")){
+						$(".dot-bottom").addClass("checked");
+					}
+					$(".dot-top").removeClass("checked");
+				}
+				else if(isDesc=="CREATE_TIME desc"){
+					$("#isDesc").val("1");
+					if(!$(".dot-top").hasClass("checked")){
+						$(".dot-top").addClass("checked");
+					}
+					$(".dot-bottom").removeClass("checked");
+				}
+		    }
+		);
+	}	
+	function formatStr(str){
+		var s=str.split('</a>');
+		var returnStr='';
+		if(str.length<=2){
+			return str;
+		}
+		for(var i=0;i<s.length-1;i++){
+			if(s.length-2==i)
+				returnStr+=s[i]+'</a>';
+				else
+					returnStr+=s[i]+'</a>|';
+		}
+		return returnStr;
+	}
+	/*
+	 * 动态绑定日期控件
+	 */
+	$(function() {
+			$(".tac").parent().nextAll().each(function(){
+				var action=	$(this).children().last();
+				var actionStr=action.html();
+					action.html(	formatStr(actionStr));
+			});
+		$( "#evaluationTimeStartStr" ).datepicker({
+			showOtherMonths: true,
+			//defaultDate: "+1w",
+			changeMonth: true,
+			dateFormat:"yy-mm-dd",
+			showButtonPanel: true,
+			numberOfMonths: 1,
+			beforeShow:function(){
+				$(this).datepicker( "option", "maxDate", new Date() );
+			},
+			onClose: function( selectedDate ) {
+				$( '#evaluationTimeEndStr' ).datepicker( "option", "minDate", selectedDate );
+			}
+		});
+		$( "#evaluationTimeEndStr" ).datepicker({
+			showOtherMonths: true,
+			//defaultDate: "+1w",
+			changeMonth: true,
+			dateFormat:"yy-mm-dd",
+			showButtonPanel: true,
+			numberOfMonths: 1,
+			beforeShow:function(){
+				$(this).datepicker( "option", "maxDate", new Date() );
+			},
+			onClose: function( selectedDate ) {
+				$( 'evaluationTimeStartStr' ).datepicker( "option", "maxDate", selectedDate );
+			}
+		});
+		
+		
+	});
+	
+	function showReplayPopup(evaluationId,obj){
+		$(".shade_layout").show();
+		$("#replaypopwin").show();
+		$("#reviewProd").parent().show();
+		var $td = $(obj).parent().parent().find("td");
+		$("#reviewId").val(evaluationId);
+		$("#reviewProd").text($.trim($td.eq(5).text()));
+		$('#content').val(null);
+		pop_center('560');
+		
+	}
+	
+	function saveReplay(){
+		var root = $("#rootsite").val();
+		var reviewId = $("#reviewId").val();
+		var content = $("#content").val();
+        if(content==''){
+            alertWarn("please input the value about Seller Reply!");
+            return ;
+        }
+		$.post(root+"/evaluation/storyReply", {"orderProdIds":reviewId,"merchantReply":content},
+				function(j){
+			var jsonObjArr=JSON.parse(j);
+				if(jsonObjArr.code=="1"){
+					close();
+					goThisPage($('#currentPage').val());
+				}
+				else{
+					alertWarn(jsonObjArr.result);
+				}
+		});
+	}
+
+	/**
+	 * 删除
+	 */
+	function removeEva(evaluationId){
+		var root = $("#rootsite").val();
+		$.post(root+"/evaluation/deleteEvaluation", {"orderProdId":evaluationId},
+				function(l){
+		     var 	jsonObjArr=JSON.parse(l);
+				if(jsonObjArr.code=="1"){
+					close();
+					goThisPage($('#currentPage').val());
+				}
+				else{
+					alertWarn(jsonObjArr.result);
+				}
+		});
+	}
+	function batsDelete(){
+		var flag = 0;
+		var prodIds = "";
+		$("input[name=radio]").each(function(){
+			if($(this).prop("checked")){
+				flag = 1;
+				if(prodIds == ""){
+					prodIds = $(this).val();
+				}
+				else{
+					prodIds =prodIds + "," + $(this).val();
+				}
+			}
+		});
+		if(flag ==0){
+			alertWarn("Please at lease chose a Evalution");
+			return 0;
+		}
+		showConfirm('Are you sure to delete these evalution?','deleteProd(\''+prodIds+'\')');
+	}
+	function deleteProd(prodId){
+		var root = $("#rootsite").val();
+		self.location=root+"/evaluation/deleteEvaluations?orderProdIds="+prodId;
+	}
+	function replys(){
+		var flag = 0;
+		var prodIds = "";
+		$("input[name=radio]").each(function(){
+			if($(this).prop("checked")){
+				flag = 1;
+				if(prodIds == ""){
+					prodIds = $(this).val();
+				}
+				else{
+					prodIds =prodIds + ",,," + $(this).val();
+				}
+			}
+		});
+		if(flag ==0){
+			alertWarn("Please at lease chose a Evalution");
+			return 0;
+		}
+		$(".shade_layout").show();
+		$("#replaypopwin").show();
+		$("#reviewId").val(prodIds);
+		$("#reviewProd").parent().hide();
+		$("#content").val(null);
+		pop_center('560');
+		
+	}
+</script>

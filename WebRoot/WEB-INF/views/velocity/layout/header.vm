@@ -1,0 +1,13 @@
+<div class="yheader">
+	<hr/ >
+	<img src="$root/static/images/logo.png">
+	<ul class="rightArea">
+		<li>
+			Welcome ! 
+			<span class="user">$!session.getAttribute("RcMemberInfo").account</span>
+			<span class="line"></span>
+			<a href="$root/user/#if($!session.getAttribute("userId"))logout#elseif($!session.getAttribute("merchantUserId"))merchantlogout#elseif($!session.getAttribute("vendorUserId"))vendorlogout#end">Exit</a>
+
+		</li>
+	</ul>
+</div>

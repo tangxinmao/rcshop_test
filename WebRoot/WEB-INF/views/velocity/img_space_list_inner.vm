@@ -1,0 +1,45 @@
+#set($root=$request.getContextPath())
+<div class="todo_wrap clearfix">
+								<div class="fl">
+									<span class="ml10">Image space contains $dirnum folder and $imagenum images in total.</span>
+									<!-- <a class="replace" href="#">替换</a>
+									<a class="move" href="#">移动</a> 
+									<a class="rename" href="#">重命名</a>-->
+									Current Position：<select id="showdir" onchange="list_showListOrImg()"><option value="0">root</option></select>
+									<a class="move" href="javascript:void(0)" onclick="showMoveForList()">Move</a>
+									<a class="delete"  href="javascript:void(0)" onclick="tShowCanclePop('','batchdelete')">Delete</a>
+									
+								</div>
+								<div class="show_type fr">
+									<input class="btn btn-xs btn-sgOrange" id="searchback" type="button" onclick="searchback()" value="Back" style="display:none">
+									<a class="showbylist crt" href="#">List</a>
+									<a  class="showbyimg" href="init">Image</a>
+								</div>
+							</div>
+							<input type="hidden" value="$!page.currentPage" id="currentPage">
+							<table class="table order_table">
+								<tr>
+									<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+									<th>Name</th>
+									<th>Resolution</th>
+									<th>Size</th>
+									<th>Actions</th>
+								</tr>
+								#foreach($image in $ImageObj)
+									<tr>
+										<td>
+											<input type="checkbox" name="radio" id="radio" value="$!image.imageSpaceId">
+										</td>
+										<td><div class="fl"><img src="$!image.imgUrl?rs=90_90"></div><p style="float:left;margin-top: 20px;" title="$!image.title">$!image.name</p></td>
+										<td>$!{image.imgWidth}*$!{image.imgHeight}</td>
+										<td>$!viewutil.bytesToK($!{image.imgSize})K</td>
+										<td><a href="javascript:void(0)" onclick="listrenameDia('$!image.imageSpaceId')">Rename</a> |
+											<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete it?',&quot;deleteimg('$!image.imageSpaceId')&quot;)">Delete</a>
+										</td>
+									</tr>
+								#end
+							</table>
+							<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+							<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+							<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+							<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

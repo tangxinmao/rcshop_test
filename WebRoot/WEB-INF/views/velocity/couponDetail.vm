@@ -1,0 +1,100 @@
+#set($layout = "layout/main.vm") 
+#set($title ="Brand list" ) 
+#set($extCss ="/static/css/jquery-ui-timepicker-addon.min.css") 
+#set($extJs ="/static/js/coupon.js,/static/js/jquery-ui-timepicker-addon.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom-width: 0px">
+		<h1 class="fl">Voucher Management > #if(!$!{coupon.couponId}) Add #else Edit #end Voucher</h1>
+		<div class="fr mt10">
+			<input type="button" value="Back to Voucher Management"
+				style="width: 200px; height: 32px; color: #213864; background-color: #f4f5f9; border: 1px solid #B8BDD3;"
+				onclick="javascript:window.location.href='$root/coupons/couponIndex'">
+		</div>
+	</div>
+	<div class="service_wrap clearfix entG" id="productListDiv" style="padding: 3%;margin: 0 2%;">
+	<div class="step_group">
+	<form id="couponDetailForm">
+	<input type="hidden" name="couponId" value="$!{coupon.couponId}" >
+     <input type="hidden" id="merchant" value="$!{dd}" >
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Voucher Owner:</span>
+					</label>
+					<input type="radio" name="type" value="2" id="deliveryTypeD" #if(!$!coupon.type||$!coupon.type==2)checked#end >
+					<label style="float:none;width:74px" for="deliveryTypeD">Beli Material</label>
+					<select class="poptxt" style="width:241px"  name="prodCatId"  #if($!coupon.type==1)disabled#end >
+						<option selected  value>All</option>
+						#foreach($category in $categoryList)
+									<option value="$category.prodCatId" #if($!coupon.categoryId==$category.prodCatId)selected#end>$category.name</option>
+								#end
+						</select>
+						<br>
+					 <input #if($!coupon.type==1)checked#end type="radio" name="type" id="deliveryTypeL" value="1" style="margin-left:161px;">
+					 <label style="float:none;width: 18px;text-align:left;" for="deliveryTypeL">Store</label>
+					<select class="poptxt" style="width:241px;margin-left:68px;"  name="merchantId" #if(!$!coupon.type||$!coupon.type==2)disabled#end >
+					<option hidden value="$!coupon.merchantId">$!{coupon.merchant.name}</option>
+						#foreach($merchant in $list)
+									<option value="$merchant.merchantId" #if($!coupon.merchantId==$!merchant.merchantId)selected#end >$merchant.name</option>
+								#end
+						</select>
+				</p>
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Voucher Name:</span>
+					</label>
+					<input type="text" value="$!{coupon.name}"  name="name" style="width:400px" class="text" maxlength="20">
+				</p>
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Voucher Quantity:</span>
+					</label>
+					<input type="text" value="$!{coupon.initCount}"  name="initCount" style="width:400px" class="text" maxlength="5">
+				</p>
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Date</span> From:
+					</label>
+				<input class="poptxt" type="text" value="$!viewutil.dateFormat($!{coupon.effectTime})" name="effectTime" style="margin-left: 0px;width: 175px;margin-right:18px">to
+				<label hidden>
+						<span class="colorRed">*</span>
+						<span>Date</span> From:
+					</label>
+				<input class="poptxt" type="text"value="$!viewutil.dateFormat($!{coupon.expireTime})" name="expireTime" style="width: 176px;">
+				</p>
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Minimum Buy Price:</span>
+					</label>
+					<input type="text" value="$!{coupon.baseAmount}" name="baseAmount" style="width:400px" class="text" maxlength="10">
+				</p>
+				<p>
+					<label>
+						<span class="colorRed">*</span>
+						<span>Voucher Discount:</span>
+					</label>
+					<input type="text" value="$!{coupon.amount}"  name="amount" style="width:400px" class="text" maxlength="10">
+				</p>
+			</form>
+			<div class="btns tac mt25 pb15">
+				<input type="button" class="btnG bwt100 bht30 bfz16" value="Save"  style="color: #ffffff; background-color: #27d0d8;" onclick="addCoupon()" style="margin-left:20px;">
+				<input type="button" value="Cancel" style="margin-left: 12px;color:#ffffff;background-color: #ff8b1e;" class="btnO bwt100 bht30 bfz16" onclick="javascript:window.location.href='$root/coupons/couponIndex'">
+			</div>
+			</div>
+		
+	
+</div>
+	<div class="entG">
+			<div id="screen3" style="text-align: center; margin-top: 100px;display:none;">
+				<h1 style="font-size: 70px; color: #3f326d;">Success!</h1>
+				<input type="button" class="btnG bwt100 bht30 bfz16" style="margin-bottom: 20px; margin-top: 100px;" value="Continue" onclick="javascript:location.reload();" style="margin-top: 100px;">
+			</div>
+			</div>
+</div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>

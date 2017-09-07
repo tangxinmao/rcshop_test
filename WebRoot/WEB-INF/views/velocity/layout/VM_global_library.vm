@@ -1,0 +1,165 @@
+#macro(SiteUrl $siteKey)$propConfig.getContextProperty($siteKey)#end
+
+#macro( vm_page $colspan)
+	#if( !$colspan )
+	  #set($colspan = 6)
+	#end
+	#if($page)
+		#set($max_page_count = $page.pageSize)
+		#set($current_pageNo = $page.currentPage)
+		#set($start_pageNo = 1)
+		#set($pageNoParamName = 'pgn')
+		#set($page_max_range = 5)
+		
+		#set($url = $request.getRequestURL())
+		
+		#set($urlParams = '')
+		#foreach($name in $request.getParameterMap().keySet())
+			#set($paramVal = $request.getParameter($name))
+			#if($name != $pageNoParamName)
+				#set($urlParams = "$urlParams&$name=$paramVal")
+			#end
+		#end
+		
+		<tfoot>
+			<tr>
+				<td  height="50" colspan="$colspan" align="center" class="yh" >
+					<div class="back_page">
+						
+						<div class="manu">
+							#if($current_pageNo <= $start_pageNo)
+							<span class="disabled">&lt; previous</span>
+							#else
+							#set($pageNo = $current_pageNo - 1 )
+							<a href="${url}?${pageNoParamName}=${pageNo}&$urlParams">previous</a>
+							#end
+							#set($min_page_no = ${current_pageNo}-${page_max_range})
+							#if($min_page_no > $start_pageNo)
+								<a href="${url}?${pageNoParamName}=${start_pageNo}${urlParams}">${start_pageNo}</a>
+								...
+							#end
+							#if($current_pageNo>$start_pageNo)
+								#set($start_no = $current_pageNo - $page_max_range)
+								#if($start_no < $start_pageNo)
+									#set($start_no = $start_pageNo)
+								#end
+								#set($end_no = $current_pageNo - 1)
+								#foreach($number in [$start_no..$end_no])
+									<a href="${url}?${pageNoParamName}=${number}${urlParams}">${number}</a>
+								#end
+							#end
+							<span class="current">$current_pageNo</span>
+							#set($end_pageNo = $current_pageNo+$page_max_range)
+							#set($max_page_number_allowed = $page.totalPages)
+							#if($end_pageNo > $max_page_number_allowed)
+							#set($end_pageNo = $max_page_number_allowed)
+							#end
+							#if($current_pageNo<$end_pageNo)
+								#set($start_no = $current_pageNo+1)
+								#foreach($number in [$start_no..$end_pageNo])
+									<a href="${url}?${pageNoParamName}=${number}${urlParams}">${number}</a>
+								#end
+							#end
+							#if($end_pageNo < $max_page_number_allowed)
+								...
+								<a href="${url}?${pageNoParamName}=${max_page_number_allowed}${urlParams}">${max_page_number_allowed}</a>
+							#end
+							#if($page.isHasNextPage())  
+								#set($pageNo = $current_pageNo+1 )
+								<a href="${url}?${pageNoParamName}=${pageNo}${urlParams}">next</a>
+							#else
+								<span class="disabled">&lt; next</span>
+							#end
+							<div class="page_infor fr grey">&nbsp;&nbsp;共$!{page.totalRows}条记录</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tfoot>
+	#else
+	分页上下文对象没有设置!
+	#end
+#end
+
+
+##分页控件
+#macro( vm_page2 $colspan)
+	#if( !$colspan )
+	  #set($colspan = 6)
+	#end
+	#if($page)
+		#set($max_page_count = $page.pageSize)
+		#set($current_pageNo = $page.currentPage)
+		#set($start_pageNo = 1)
+		#set($pageNoParamName = 'start')
+		#set($page_max_range = 2)
+		
+		#set($url = $request.getRequestURL())
+		
+		#set($urlParams = '')
+		#foreach($name in $request.getParameterMap().keySet())
+			#set($paramVal = $request.getParameter($name))
+			#if($name != $pageNoParamName)
+				#set($urlParams = "$urlParams&$name=$paramVal")
+			#end
+		#end
+							#if($current_pageNo <= $start_pageNo)
+							 <a href="javascript:void(0)">previous</a>
+							#else
+							#set($pageNo = $current_pageNo - 1 )
+							#set($lyt_pageNo = $pageNo - 1 )
+							<a href="javascript:void(0);" onclick="goThisPage('-')" class="canClick">previous</a>
+							#end
+							#set($min_page_no = ${current_pageNo}-${page_max_range})
+							#if($min_page_no > $start_pageNo)
+							#set($start_pageNo_1 = $start_pageNo - 1)
+								<a href="javascript:void(0);" onclick="goThisPage('${start_pageNo}')" class="canClick">${start_pageNo}</a>
+								#if($min_page_no > $start_pageNo +1)
+								<span>...</span>
+								#end
+							#end
+							#if($current_pageNo>$start_pageNo)
+								#set($start_no = $current_pageNo - $page_max_range)
+								#if($start_no < $start_pageNo)
+									#set($start_no = $start_pageNo)
+								#end
+								#set($end_no = $current_pageNo - 1)
+								#foreach($number in [$start_no..$end_no])
+								#set($number_1 = $number - 1)
+									<a href="javascript:void(0);" onclick="goThisPage('${number}')" class="canClick">${number}</a>
+								#end
+							#end
+							<a class="crt" href="javascript:void(0);">$current_pageNo</a>
+							#set($end_pageNo = $current_pageNo+$page_max_range)
+							#set($max_page_number_allowed = $page.totalPages)
+							#if($end_pageNo > $max_page_number_allowed)
+							#set($end_pageNo = $max_page_number_allowed)
+							#end
+							#if($current_pageNo<$end_pageNo)
+								#set($start_no = $current_pageNo+1)
+								#foreach($number in [$start_no..$end_pageNo])
+								#set($number_1 = $number - 1)
+									<a href="javascript:void(0);" onclick="goThisPage('${number}')" class="canClick">${number}</a>
+								#end
+							#end
+							#if($end_pageNo < $max_page_number_allowed)
+								#if($end_pageNo < $max_page_number_allowed - 1)
+								<span>...</span>
+								#end
+								#set($max_page_number_allowed_1 = $max_page_number_allowed - 1)
+								<a href="javascript:void(0);" onclick="goThisPage('${max_page_number_allowed}')" class="canClick">${max_page_number_allowed}</a>
+							#end
+							#if($page.isHasNextPage())  
+								#set($pageNo = $current_pageNo + 1 )
+								<a href="javascript:void(0)" name="nextPage" class="canClick mr30" onclick="goThisPage('+')">next</a>
+							#else
+								<a href="javascript:void(0)" name="nextPage" class="mr30" >next</a>
+							#end
+							<span>Goto</span>
+		<input class="page_num" type="text" name="" id="page_currentPage" maxlength=10 value="$page.currentPage"/>
+		<span>page</span>
+		<input class="btn_go" type="button" name="" value="go" onclick="goThisPage('=')"> 
+	#else
+	分页上下文对象没有设置!
+	#end
+#end

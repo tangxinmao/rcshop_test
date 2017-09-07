@@ -1,0 +1,86 @@
+	#set($root=$request.getContextPath())
+									<table class="table order_table mt10">
+							<tr width="100%"> 
+								<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+									<div onclick="goThisPage('sort')" class="sortDiv">
+											<p class="sortP">Order Time</p>
+											<span class="item dot-top checked"></span> 
+											<span class="item dot-bottom checked"></span> 
+											<input style="display: none" type="checkbox" name="orderTimeDesc" id="orderTimeDesc" checked>
+											 
+											 
+									</div>
+										<div onclick="goThisPage('sort1')" class="sortDiv">
+									<p class="sortP">Grand Total</p>
+											<span class="item dot-top checked"></span> 
+											<span class="item dot-bottom checked"></span> 
+											<input style="display: none" type="checkbox" name="orderPayPriceDesc" id="orderPayPriceDesc" checked>
+								</div>
+								<div class="fr">
+								<img class="refresh" src="/rcshop/static/images/ico/refresh.png" onclick="goThisPage('search')" style="margin-top: 2px">
+							<input class="sortBtn" type="button" value="Refresh" onclick="goThisPage('search')">
+							
+						</div>
+								</th>
+							</tr>
+							<tr>
+							<th style="display:none"><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+								<th width="10%">Order ID</th>
+								<th width="10%">Order Time</th>
+								<th width="10%">Buyer Username</th>
+								<th width="10%">Store</th>
+								<th width="10%">Sub Total</th>
+								<th width="10%">Grand Total</th>
+								<th width="20%">Status</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+								<td style="display:none"><input type="checkbox" name="radio" id="radio" value="$!item.orderId"></td>
+							    <td>$!{item.orderId}</td>
+								<td>#if(${item.createTime})$viewutil.dateFormat(${item.createTime})#else--#end</td>
+								<td>$!{item.member.name}</td>
+								<td>$!{item.merchant.name}</td>
+								<td>Rp #if ($!{item.productPrice})$viewutil.moneyStringFormat($!{item.productPrice})#else 0 #end<input type="hidden" value="${item.productPrice}"></td>
+								<td>Rp #if ($!{item.payPrice})$viewutil.moneyStringFormat($!{item.payPrice})#else 0 #end<input type="hidden" value="${item.payPrice}"></td>
+								
+								<td>#if ($!{item.sellerStatus}==1)Unpaid#end 
+							#if ($!{item.sellerStatus}==2||$!{item.sellerStatus}==3)<span style="color:green">Undelivered</span>#end 
+								#if ($!{item.sellerStatus}==6)<span style="color:red">Send</span>#end 
+						<!-- 		#if ($!{item.orderStatus}==4)<span style="color:blue">Received</span>#end -->
+							    #if ($!{item.sellerStatus}==10||$!{item.sellerStatus}==8||$!{item.sellerStatus}==9||$!{item.sellerStatus}==7)Completed#end
+								#if ($!{item.sellerStatus}==5||$!{item.sellerStatus}==4)Rejected#end
+								#if ($!{item.sellerStatus}==11)Canceled#end
+							<!-- 	#if ($!{item.sellerStatus}==2)Waiting for pick up#end  -->
+								 <input type="hidden" value="${item.sellerStatus}"></td>
+									
+								<td>
+					<a href="$root/order/orderDetail?orderId=${item.orderId}" >View Detail</a>	
+			      #if($session.getAttribute("RcMerchant"))
+						#if ($!{item.sellerStatus}==2||$!{item.sellerStatus}==3)
+										| <a href="javascript:void(0)" onclick="javascript:inputDeliveryWin($!{item.orderId})">Input Delivery</a>
+										| <a href="javascript:void(0)" onclick="javascript:rejectedTransactionWin($!{item.orderId})">Rejected Transaction</a>
+										#end
+										#end
+								
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+						<!-- <div class="batsOpt">
+							<h1>Bulk Action</h1>
+							   #if($session.getAttribute("RcMerchant"))
+							<input class="btnG bwt100 bht30 bfz12 fl" type="button" value="Export" onclick="batsExport()">
+
+                                       <input class="btnG bwt100 bht30 bfz12 fl ml10 batsInputDelivery" type="button" value="Input Delivery" onclick="batsInputDelivery()">
+                                       <input class="btnG bwt200 bht30 bfz12 fl ml10 batsInputDelivery" type="button" value="Rejected Transaction" onclick="batsRejectedTransaction()">
+
+						#end
+						</div> -->
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

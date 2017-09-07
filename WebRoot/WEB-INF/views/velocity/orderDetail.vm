@@ -1,0 +1,372 @@
+#set($layout = "layout/main.vm") #set($title =
+"Brand list" ) #set($extCss =
+"/static/css/jquery-ui-timepicker-addon.min.css") #set($extJs =
+"/static/js/order.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom-width: 0px">
+		<h1 class="fl">Order List > Order Detail</h1>
+		<div class="fr mt10">
+			<input type="button" value="Back to Order List"
+				style="width: 200px; height: 32px; color: #213864; background-color: #f4f5f9; border: 1px solid #B8BDD3;"
+				onclick="javascript:window.location.href='$root/order/orderIndex'">
+		</div>
+	</div>
+	<div class="service_wrap clearfix" id="productListDiv"
+		style="padding: 3%;">
+		<table class="table order_table ">
+			<tr>
+				<th colspan="4">Store Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Store
+					Name</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.merchant.name}</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Principal
+					Name</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.merchant.vendor.name}</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Store
+					ID</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.merchant.merchantId}</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">City</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.cityName}</td>
+			</tr>
+		</table>
+		<table class="table order_table mt10">
+			<tr>
+				<th colspan="4">Order Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Order
+					ID</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.orderId}</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer
+					Username</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.member.name}</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer
+					ID</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.member.memberId}</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer
+					Mobile</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.member.mobile}</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Order
+					Status</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="orderStatus">
+				    #if($!{order.sellerStatus}==1)Unpaid#end 
+					#if($!{order.sellerStatus}==2||$!{order.sellerStatus}==3)<span style="color: green">Undelivered</span>#end
+					 #if($!{order.sellerStatus}==6)<span style="color: red">Send</span>#end 
+					#if($!{order.sellerStatus}==11)<span  style="color: blue">Canceled</span>#end 
+					 #if($!{order.sellerStatus}==8||$!{order.sellerStatus}==9||$!{order.sellerStatus}==7||$!{order.sellerStatus}==10) Completed #end 
+					 #if($!{order.sellerStatus}==5||$!{order.sellerStatus}==4)Rejected #end 
+				
+				</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Review
+					Status</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">#if($!{order.sellerStatus}==9||$!{order.sellerStatus}==10) Review #else Unreview #end</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Order
+					Time</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">#if(${order.createTime})$viewutil.dateFormat(${order.createTime})#else--#end</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Received
+					Time</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">#if(${order.receiveTime})$viewutil.dateFormat(${order.receiveTime})#else--#end</td>
+			</tr>
+		</table>
+		<table class="table order_table mt10">
+			<tr>
+				<th colspan="4">Payment Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Paymemt
+					Method</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">
+				#if($!{order.paymentType}==1)
+				Wallet Balance
+				#end
+					#if($!{order.paymentType}==2)
+					Credit Card
+				#end
+					#if($!{order.paymentType}==3)
+					Virtual Account
+				#end
+					#if($!{order.paymentType}==4)
+					Internet Banking
+				#end
+			</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Payment
+					Time</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">#if(${order.payTime})$viewutil.dateFormat($!{order.payTime})#else--#end</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Sub Total</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">Rp
+					$viewutil.moneyStringFormat($!{order.productPrice})</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Discount</td>
+				#set($discount=$!{order.freight}+$!{order.productPrice}-$!{order.payPrice})
+				<td style="text-align: left; width: 30%; padding-left: 2%">Rp
+					$viewutil.moneyStringFormat($discount)</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Freight</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">Rp
+					$viewutil.moneyStringFormat($!{order.freight})</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Grand Total</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="orderPayPrice">Rp
+					$viewutil.moneyStringFormat($!{order.payPrice})</td>
+			</tr>
+
+		</table>
+		<table class="table order_table mt10">
+			<tr>
+				<th colspan="4">Delivery Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Delivery
+					Method</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="deliveryType">
+				#if($!{order.orderDelivery.deliveryType}==1)Delivery Man#end 
+				#if($!{order.orderDelivery.deliveryType}==2)Logistics Company#end</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Delivery
+					Time</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="deliveryTime" >#if(${order.orderDelivery.deliveryTime})$viewutil.dateFormat($!{order.deliveryTime})#else--#end</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Delivery
+					Man Name</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="deliveryName">#if($!{order.orderDelivery.dispatcherName})$!{order.orderDelivery.dispatcherName}#else-#end</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Phone</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="deliveryMobile">#if($!{order.orderDelivery.dispatcherMobile})$!{order.orderDelivery.dispatcherMobile}#else-#end</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Logistics
+					Company</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="logisticsCompany">#if($!{order.orderDelivery.logisticsCompany})$!{order.orderDelivery.logisticsCompany}#else-#end</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Delivery
+					ID</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%" id="trackingNumber">#if($!{order.orderDelivery.trackingNumber})$!{order.orderDelivery.trackingNumber}#else-#end</td>
+			</tr>
+
+		</table>
+		<table class="table order_table mt10">
+			<tr>
+				<th colspan="4">Consignee Information</th>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Consignee
+					Name</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.orderConsignee.name}</td>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Consignee
+					Mobile</td>
+				<td style="text-align: left; width: 30%; padding-left: 2%">$!{order.orderConsignee.mobile}</td>
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Adress</td>
+				<td colspan="4"
+					style="text-align: left; width: 30%; padding-left: 2%">$!{order.orderConsignee.address}.$!{order.orderConsignee.city.name}.$!{order.orderConsignee.city.provinceName}</td>
+
+			</tr>
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Buyer
+					Remark</td>
+				<td colspan="4"
+					style="text-align: left; width: 30%; padding-left: 2%">$!{order.buyerMemo}</td>
+			</tr>
+		</table>
+		<table class="table order_table mt10">
+			<tbody>
+				<tr width="100%">
+					<th colspan="9">Shopping List</th>
+				</tr>
+				<tr>
+					<th>Product ID</th>
+					<th>Product Name</th>
+					<th>SKU</th>
+					<th>Qty</th>
+					<th>Price</th>
+					<th>Sub Total</th>
+				</tr>
+					#if($order.orderProds&&!$order.orderProds.isEmpty())
+		                              #foreach($orderProd in $order.orderProds)
+				<tr>
+					<td>$!{orderProd.prodId}</td>
+					<td>
+					<div class="fl">
+				<img alt="" src="$!{orderProd.prodImgUrl}?rs=90_90" />
+				</div>
+					<div class="mt10">$!{orderProd.prod.name}</div>
+					</td>
+					<td>	#if($orderProd.orderProdSkuPropInfos&&!$orderProd.orderProdSkuPropInfos.isEmpty())
+					   #foreach($orderProdSkuPropInfo in $orderProd.orderProdSkuPropInfos)
+					      $!{orderProdSkuPropInfo.prodPropName} 
+					      #end
+					#end
+					</td>
+					<td>$!{orderProd.quantity}</td>
+					<td>Rp $viewutil.moneyStringFormat($!{orderProd.prodPrice})</td>
+					<td>Rp $viewutil.moneyStringFormat($!{orderProd.amount})</td>
+				</tr>
+#end#end
+			</tbody>
+		</table>
+		<table class="table order_table mt10">
+        #if($session.getAttribute("RcMerchant"))
+			<tr>
+				<th colspan="4">Actions</th>
+			</tr>
+
+			<tr>
+				<td
+					style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Seller Remark</td>
+				<td colspan="3"
+					style="text-align: left; width: 80%; padding-left: 2%">
+					<form id="merchantRemarkForm">
+					<input type="hidden" value="$!{order.orderId}" name="orderId">
+					<textarea name="sellerMemo" rows="5%" cols="100%" maxlength="200">$!{order.sellerMemo}</textarea>
+						</form>
+						 #if($session.getAttribute("RcMerchant"))
+					<div>
+						<input type="button" value="Save"
+							style="width: 50px; height: 32px; color: #213864; background-color: #f4f5f9; border: 1px solid #B8BDD3;"
+							onclick="javascript:saveMerchantRemark($!{order.orderId});">
+					</div>
+						#end
+					</td>
+
+			</tr>
+
+            #if ($!{order.sellerStatus}==1 || $!{order.sellerStatus}==2 || $!{order.sellerStatus}==3)
+			<tr>
+				<td style="text-align: right; width: 20%; padding-right: 2%; color: #afafaf">Actions</td>
+				<td colspan="4" style="text-align: left; width: 80%; padding-left: 2%">
+
+				#if ($!{order.sellerStatus}==2||$!{order.sellerStatus}==3)
+				<input id="inputDelivery" type="button" class="btnG  " value="Input delivery" style="width: 150px; height: 34px"onclick="javascript:inputDeliveryWin($!{order.orderId});"> 
+				#end
+				#if($!{order.sellerStatus}==1)
+				<input id="payAmount" type="button" value="Edit grand total" style="width: 150px; height: 32px; color: #213864; background-color: #f4f5f9; border: 1px solid #B8BDD3;"onclick="javascript:payAmountWin();"> 
+				#end
+		
+					#if ($!{order.sellerStatus}==2||$!{order.sellerStatus}==3)
+				<input id="rejectedTransaction" type="button" value="Rejected Transaction" style="width: 150px; height: 32px; color: #213864; background-color: #f4f5f9; border: 1px solid #B8BDD3;" onclick="javascript:rejectedTransactionWin($!{order.orderId})">
+				#end
+
+				</td>
+			</tr>
+			#end
+        #end
+		</table>
+
+	</div>
+</div>
+
+<div class="shade_layout" style="display: none;"></div>
+<!-- 娣诲姞鍝佺墝寮圭獥 -->
+<div class="pop_windows" id="inputDeliveryWin" style="display:none;">
+	<form id="inputDeliveryForm">
+<input type="hidden" name="orderIds" value="$!{order.orderId}">
+<!-- <input type="hidden" name="isDelivery" value="$!{order.isDelivery}"> -->
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Input Delivery</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  <div><lebel class="colortitle" style="margin-left: -34px;"><span class="colorRed">*</span><span style="margin-right:10px">Delivery Method:</span></lebel><input type="radio"  name="deliveryType" value="1" id="deliveryTypeD" checked><label for="deliveryTypeD"> Delivery Man </label> <input type="radio" name="deliveryType" id="deliveryTypeL" value="2" style="margin-left:40px"><label for="deliveryTypeL"> Logistics Company</label> </div>
+               	<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:27px"><span class="colorRed">*</span><span>Name:</span></lebel><input class="poptxt" type="text" name="dispatcherName" value="" maxlength="50"></div>
+               		<div style="margin-top:20px;"></div>
+               	<div><lebel class="colortitle" style="margin-left: 25px;"><span class="colorRed">*</span><span>Phone:</span></lebel><input class="poptxt" type="text" name="dispatcherMobile" value="" maxlength="20"></div>
+				<div hidden style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -39px;"><span class="colorRed">*</span><span>Tracking Number:</span></lebel><input disabled class="poptxt" type="text" name="trackingNumber" maxlength="50" value=""></div>
+				<div hidden style="margin-top:20px;"><lebel style="margin-left: -47px;" class="colortitle"><span class="colorRed">*</span><span>Logistics Company:</span></lebel><input disabled class="poptxt" type="text" name="logisticsCompany" value="" maxlength="100"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addInputDelivery()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>
+
+<div class="pop_windows" id="rejectedTransactionWin" style="display:none;">
+	<form id="rejectedTransactionForm">
+<input type="hidden" name="orderId" value="$!{order.orderId}">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Rejected Transaction</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  <div><lebel class="colortitle" style="margin-left: -28px;"><span class="colorRed">*</span><span style="margin-right:10px">Reason:</span></lebel>
+			  <input type="radio"  name="refundReason" value="Out of stock" id="refundReason1" checked><label for="refundReason1" style="vertical-align: middle;">Out of stock</label><br>
+			  <input type="radio" name="refundReason" id="refundReason2" value="Unable to deliver" style="margin-left:40px"><label for="refundReason2" style="vertical-align: middle;">Unable to deliver</label><br> 
+			   <input type="radio" name="refundReason" id="refundReason3" value="Store is closed" style="margin-left:40px"><label for="refundReason3" style="vertical-align: middle;">Store is closed</label><br>
+			    <input type="radio" name="refundReason" id="refundReason4" value="" style="margin-left:40px"><label for="refundReason4" style="vertical-align: middle;">Other:</label>
+			    <input disabled class="poptxt" type="text" id="refundReasonText" value="" maxlength="60">
+			  </div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addRejectedTransaction()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>
+
+<div class="pop_windows" id="payAmountWin" style="display:none;">
+	<form id="payAmountForm">
+<input type="hidden" name="orderId" value="$!{order.orderId}">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Edit Grand Total</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  
+				<div  style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -39px;"><span class="colorRed">*</span><span>Grand Total:</span></lebel><span style="margin-left: 13px;">Rp $viewutil.moneyStringFormat($!{order.payPrice})</span></div>
+				<div  style="margin-top:20px;"><lebel style="margin-left: 0px;" class="colortitle"><span class="colorRed">*</span><span>Eit To:</span></lebel><input  class="poptxt" type="text" name="payPrice" value="" maxlength="15"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addPayAmount()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>

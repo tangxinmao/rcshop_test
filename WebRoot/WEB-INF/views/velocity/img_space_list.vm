@@ -1,0 +1,288 @@
+#set($layout = "layout/main.vm")
+#set($extCss = "/static/css/jquery-ui.css,/static/css/jquery-ui-timepicker-addon.min.css,/static/css/lightbox.css,/static/css/uploadify.css")  
+#set($extJs = "/static/js/imagespace.js,/static/js/jquery-ui-timepicker-addon.js,/static/js/lightbox.min.js,/static/js/jquery.uploadify.js")
+#set($root=$request.getContextPath())
+<script type="text/javascript">
+		var merchantid="$merchantid";
+		var dirurl="$dirurl";
+		var imgurl="$imgurl";
+</script>
+</head>
+<body>
+<input type="hidden" id="rootPath" value="$root">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Image space</h1>
+	 	<div class="fr usage">
+	 		<label>Usage:</label>
+			<span>$!{spacesize}M/20G</span>
+		</div>
+	</div>
+	<div class="rdata_logic ml30">
+		<div class="service_wrap clearfix">
+			<div class="right_tab_wrap">
+				<div id="tab_container" class="tab_con">
+				
+						<div class="picturespace_search_wrap">
+								<a class="uploadpic" href="#">上传图片</a>
+								<a class="newfolder" href="#">新建文件夹</a>
+								<a class="trash" href="initdeletedlist">回收站</a>
+								<div>
+										File Name: <input class="ipttxt" type="text" name="searchkey" id="searchkey"/>
+										<input class="button" type="button"  onclick="goThisPage('search')" value="Search" />
+										<!-- <input class="btn" type="button"  value="" onclick="goThisPage('search')" /> -->
+								</div>
+						</div>
+						<div id="reloadSearchMessages">
+							<div class="todo_wrap clearfix">
+								<div class="fl">
+									<span class="ml10">Image space contains $dirnum folder and $imagenum images in total.</span>
+									<!-- <a class="replace" href="#">替换</a>
+									<a class="move" href="#">移动</a> 
+									<a class="rename" href="#">重命名</a>-->
+									Current Position：<select id="showdir" onchange="list_showListOrImg()"><option value="0">root</option></select>
+									<a class="move" href="javascript:void(0)" onclick="showMoveForList()">Move</a>
+									<a class="delete"  href="javascript:void(0)" onclick="tShowCanclePop('','batchdelete')">Delete</a>
+									
+								</div>
+								<div class="show_type fr">
+									<input class="btn btn-xs btn-sgOrange" id="searchback" type="button" onclick="searchback()" value="Back" style="display:none">
+									<a class="showbylist crt" href="#">List</a>
+									<a  class="showbyimg" href="init">Image</a>
+								</div>
+							</div>
+							<input type="hidden" value="$!page.currentPage" id="currentPage">
+							<table class="table order_table">
+								<tr>
+									<th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+									<th>Name</th>
+									<th>Resolution</th>
+									<th>Size</th>
+									<th>Actions</th>
+								</tr>
+								#foreach($image in $ImageObj)
+									<tr>
+										<td>
+											<input type="checkbox" name="radio" id="radio" value="$!image.imageSpaceId">
+										</td>
+										<td><div class="fl"><img src="$!image.imgUrl?rs=90_90"></div><p style="float:left;margin-top: 20px;" title="$!image.title">$!image.name</p></td>
+										<td>$!{image.imgWidth}*$!{image.imgHeight}</td>
+										<td>$!viewutil.bytesToK($!{image.imgSize})K</td>
+										<td><a href="javascript:void(0)" onclick="listrenameDia('$!image.imageSpaceId')">Rename</a> |
+											<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete it?',&quot;deleteimg('$!image.imageSpaceId')&quot;)">Delete</a>
+										</td>
+									</tr>
+								#end
+							</table>
+							<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+							<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+							<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+							<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+						<!-- main end -->
+					<input type="hidden" id="listPage" value="1">
+			
+			
+
+<!-- 弹出层 开始 -->
+	<div id="popuploading" style="display:none">
+		<div class="shade_layout"></div>
+		<div class="pop_windows">
+			<div class="layout">
+				<b class="ico_close">close</b>
+				<div class="main">
+					<div id="uploadshow" style="display:none">
+						<div class="hd">
+							<h2>Upload pictures</h2>
+						</div>
+						<div class="position clearfix">
+							<span class="fl" rel="" buz="" id="dirpos">position:root</span>
+							<!--<a class="fr" href="#">修改位置</a>-->
+						</div>
+						<div class="upload_area">
+		                	<ul class="upload_img_list" id="upload_img_list">
+		                		
+		                    </ul>
+		                	<div class="upload_btns_wrap">
+		                		<iframe frameborder="0" id="fileInput" name="fileInput" style="display:none"></iframe>
+								<form action="upload" name="picUploadForm" id="picUploadForm" enctype="multipart/form-data" method="post" target="fileInput">
+									<div class="button_up" style="position: relative;">
+										<input type="hidden" name="path" id="path">
+										<input type="hidden" name="merchantid" id="merchantid" value="$merchantid">
+										<span>
+										<input id="file_upload" name="file_upload" type="file" multiple="true">
+										<input class="uploadpics" type="button" id="saveimageinfo" value="" style="position: absolute;top: 2px;left: 115px;" /></span>
+									</div>
+								</form>
+		                    </div>
+		                </div>
+						<div class="tips">
+							<p>Little tip</p>
+							<p class="pl25">
+								1、Single picture support size below 5M 
+								<br />
+								2、Supported image formats:jpg、jpeg、png、gif、bmp
+							</p>
+						</div>
+					</div>
+					
+					<div id="newfoldershow" style="display:none">
+						<div class="hd">
+							<h2>New folor</h2>
+						</div>
+						<div class="position clearfix">
+							<span class="fl">Please enter a folder name</font></span>
+						</div>
+						<input class="newfolder_input" type="text" name="newfoldername" id="newfoldername" maxlength="10" />
+						<div class="popup_btn_con">
+							<input class="btn btn-xs btn_orange" type="button" name="newfoldersubmit" id="newfoldersubmit" value="Submit" />
+							<input class="btn btn-xs btn_gray" type="button" name="" value="cancel" onclick="$('.ico_close').trigger('click')" />
+						</div>
+					</div>
+					
+					<div id="renameshow" style="display:none">
+						<div class="hd">
+							<h2>rename</h2>
+						</div>
+						<div class="position clearfix">
+							<span class="fl">please input new name</span>
+						</div>
+						<input class="newfolder_input" type="text" name="rename" id="rename" maxlength="10" />
+						<div class="popup_btn_con">
+							<input class="btn btn-xs btn_orange" type="button" myvalue="" name="renamelistsubmit" id="renamelistsubmit"  onclick="renamelistSubmit()" value="Submit" />
+							<input class="btn btn-xs btn_gray" type="button" name="" value="Cancel" onclick="$('.ico_close').trigger('click')" />
+						</div>
+					</div>
+					<div id="moveshow" style="display:none">
+						<div class="hd">
+							<h2>move</h2>
+						</div>
+						<div class="position clearfix">
+							<span class="fl">please select target position:</span>
+							<select name="movepos" id="movepos">
+							<option value="0">root</option>
+						</select>
+						</div>
+						
+						
+						<div class="popup_btn_con">
+							<input class="btn btn-xs btn_orange" type="button" name="movesubmit" id="movesubmit" value="Submit" onclick="movesubmit()"  maxlength="10"/>
+							<input class="btn btn-xs btn_gray" type="button" name="" value="Cancel" onclick="$('.ico_close').trigger('click')" />
+						</div>
+					</div>
+					<div class="pop_windows"  id="open_returnPop" style="display:none">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+<script  type="text/javascript" >
+function goThisPage(ta){
+	var currentPage = '';
+	if(ta == 'search'){
+		currentPage = 1;
+	}else if(ta == '+'){//下一页
+		//当前页
+		currentPage = parseInt($('#currentPage').val()) + 1;
+	}else if(ta == '-'){
+		currentPage = parseInt($('#currentPage').val()) - 1;
+	}else if(ta == '='){
+		currentPage = $("#page_currentPage").val();
+		var reg =/^\d+$/;
+		if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+			$("#pageNm_tip").text('Please input Positive integer!');
+			return;
+		}
+		var pageSize = $("#page_pageSize").val();
+		var totalRow = $("#page_totalRows").val();
+		var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+		if (parseInt(currentPage) > totalPage) {
+			$("#pageNm_tip").text('The total page is :' + totalPage);
+			return;
+		}
+	}else{
+		currentPage = ta;
+	}
+	var searchKey=$("#searchkey").val();
+	var beginTime=$("#beginTime").val();
+	var endTime=$("#endTime").val();
+	$.post("initlist", {"currentPage":currentPage,"searchKey":searchKey,"parentId":$("#showdir").val(),"beginTime":beginTime,"endTime":endTime},
+		function(data){
+		    $("#reloadSearchMessages").empty().html(data);
+		    if(searchKey!="")
+		    	$("#searchback").show();
+		    $.post( getRootPath() + "/imageopt/listalldir",null,    
+					function(data){
+						var jsonObjArr = JSON.parse(data); 
+						for(var i in jsonObjArr)
+						$("#showdir").append('<option value="'+jsonObjArr[i].imagespaceId+'">'+jsonObjArr[i].dirPath+'</option>');
+			});
+	    }
+	);
+}
+$(function() {
+	$.post( getRootPath() + "/imageopt/listalldir",null,    
+			function(data){
+				var jsonObjArr = JSON.parse(data); 
+				for(var i in jsonObjArr)
+				$("#showdir").append('<option value="'+jsonObjArr[i].imageSpaceId+'">'+jsonObjArr[i].name+'</option>');
+	});
+	$('#file_upload').uploadify({
+		'formData'     : {
+			'timestamp' : '<%= new java.util.Date().getTime()%>',
+			'path'     : '',
+			'merchantId' : '$!encodeMerchantId'
+		},
+		'buttonText': "",
+		'fileTypeExts': '*.jpg;*.png;*.gif;*.bmp;*.jpeg',
+		'fileSizeLimit': '5MB',
+		'swf'      : '$root/static/js/uploadify.swf',
+		'uploader' : '$root/imageopt/flexupload;jsessionid=$session.getId()',
+		'onUploadProgress': function(file, fileBytesLoaded, fileTotalBytes, queueBytesLoaded, uploadSize){
+		    //var percentage       = Math.round(fileBytesLoaded / fileTotalBytes * 100);
+		    
+		},
+		height: 26,
+		width: 81,
+		buttonClass: 'img-space-upload-btn',
+		itemTemplate:"<li id='${fileID}'><img alt=''  src='$root/static/images/ico/o_loading.gif' rel='$!{fileid}' /><a href='javascript:void(0)' onclick='deleteuploadimage(this)' style='display:none' title='delete'>X</a>" +
+			"<div class='uploadify-progress'>" +
+				"<div class='uploadify-progress-bar'><!--Progress Bar--></div>" +
+				"</div></li>",
+		queueID: 'upload_img_list',
+		removeCompleted: false,
+		successTimeout: 3000,
+		onUploadError: function( file, errorCode, errorMsg, errorString ){
+		    alert('errorCode' + errorCode);
+		    alert('errorMsg' + errorMsg);
+		},
+		onUploadSuccess: function( file, data, response ){
+			/* $(".upload_img_list").append("<li><img alt=''  src='${URL}' rel='${fileid}' /><a href='javascript:void(0)' onclick='deleteuploadimage(this)' title='删除'>X</a>" +
+					"<div class='uploadify-progress'>" +
+					"<div class='uploadify-progress-bar'><!--Progress Bar--></div>" +
+					"</div></li>"); */
+				var jsonObjArr = JSON.parse(data);
+				$("#"+file.id).find("img").attr("src",jsonObjArr.url);
+				$("#"+file.id).find("img").attr("rel",jsonObjArr.fileid);
+				$("#"+file.id).find("a").show();
+				$("#"+file.id).find(".uploadify-progress").hide();
+		},
+		onUploadStart: function (file) { 
+			var rel = $("#dirpos").attr("rel");
+			$('#file_upload').uploadify("settings", "formData", { 'path': rel });
+			/* $(".upload_img_list").append("<li><img alt=''  src='${URL}' rel='${fileid}' /><a href='javascript:void(0)' onclick='deleteuploadimage(this)' title='删除'>X</a>" +
+					"<div class='uploadify-progress'>" +
+					"<div class='uploadify-progress-bar'><!--Progress Bar--></div>" +
+					"</div></li>"); */
+		} 
+	});
+	
+});
+</script>

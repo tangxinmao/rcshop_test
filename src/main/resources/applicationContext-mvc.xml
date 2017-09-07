@@ -1,0 +1,80 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    					http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+    					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	<!--自定义日期转化器-->
+	<bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean" id="conversionService">
+		<property name="converters">
+			<set>
+				<bean class="com.socool.soft.dataBind.DateConverter"/>
+			</set>
+		</property>
+	</bean>
+	
+    <mvc:annotation-driven conversion-service="conversionService">
+	    <mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/plain;charset=UTF-8</value>
+						<value>text/html;charset=UTF-8</value>
+					</list>
+				</property>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+				<property name="objectMapper">
+					<bean class="com.fasterxml.jackson.databind.ObjectMapper">
+						<property name="dateFormat">
+							<bean class="java.text.SimpleDateFormat">
+								<constructor-arg type="java.lang.String" value="yyyy.MM.dd HH:mm:ss 'WIB'" />
+							</bean>
+						</property>
+						<property name="timeZone" value="Asia/Jakarta" />
+						<property name="serializationInclusion">
+							<value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
+						</property>
+					</bean>
+				</property>
+            </bean>
+	    </mvc:message-converters>
+    </mvc:annotation-driven>
+    
+    <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/user/validateCode" />
+			<mvc:exclude-mapping path="/loginRegister/**" />
+			<mvc:exclude-mapping path="/prod/content/**" />
+			<mvc:exclude-mapping path="/help/help.html" />
+			<mvc:exclude-mapping path="/help/content/**" />
+			<mvc:exclude-mapping path="/static/**" />
+			<bean class="com.socool.soft.interceptor.LoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<context:component-scan base-package="com.socool.soft" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+    </context:component-scan>
+
+	<bean class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <property name="resourceLoaderPath" value="/WEB-INF/views/velocity/" />
+        <property name="configLocation" value="classpath:velocity.properties" />
+    </bean>
+
+    <bean class="com.commons.service.context.spring.view.SiteUrlMappingVelocityViewResovler">
+        <property name="suffix" value=".vm" />
+        <property name="toolboxConfigLocation" value="/WEB-INF/views/velocity/tools/tools.xml" />
+        <property name="contentType" value="text/html;charset=UTF-8" />
+        <property name="layoutUrl" value="layout/layout.vm" />
+    </bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+</beans>

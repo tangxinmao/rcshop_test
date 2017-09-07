@@ -1,0 +1,95 @@
+#set($root=$request.getContextPath())
+<table class="table order_table mt10" id="review">
+    <tr>
+        <th colspan="14" class="th_lev1"><span class="fl ml10">Sort By</span>
+            <div onclick="goThisPage('sort1')" class="sortDiv" id="sortDiv1">
+                <p class="sortP">Review Time</p>
+                <span class="item dot-top checked"></span>
+                <span class="item dot-bottom"></span>
+
+            </div>
+            <div class="fr" style="padding-right: 10px;">
+                <input class="sortBtn" type="button" value="Refresh" onclick="goThisPage('search')">
+                <img class="refresh" src="$root/static/images/ico/refresh.png" onclick="goThisPage('search')">
+            </div>
+
+        </th>
+    </tr>
+    <tr>
+        <th><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+        <th width="5%">Reviews ID</th>
+        <th width="8%">Product ID</th>
+        <th width="2%">Product</th>
+        <th width="5%">Rating</th>
+        <th width="10%">Review</th>
+        <th width="5%">Order ID</th>
+        <th width="5%">Buyer ID</th>
+        <th width="5%">Buyer Username</th>
+        <th width="5%">Store ID</th>
+        <th width="10%">Store</th>
+        <th width="10%">Reply</th>
+        <th width="10%">Review Time</th>
+        <th width="20%" class="tac">Actions</th>
+    </tr>
+
+
+    #foreach($review in $list)
+        <tr>
+            <td>
+                #if($session.getAttribute("RcMerchant") && $review.merchantReply)
+                    <input type="checkbox" name="radio" id="radio" disabled="disabled" value="$!review.orderProdId">
+                #else
+                    <input type="checkbox" name="radio" id="radio" value="$!review.orderProdId">
+                #end
+            </td>
+            <td>$!review.orderProdId</td>
+            <td>$!review.prod.prodId</td>
+            <td>$!review.prod.name</td>
+            <td>
+                #if($!review.score > 3)
+                    <font color="#4fd321">$review.score</font>
+                #else
+                    <font color="red">$!review.score</font>
+                #end
+            </td>
+            <td style="word-break: break-word">$!review.content</td>
+            <td>$!review.orderId</td>
+            <td>$!review.member.memberId</td>
+            <td>$!review.member.name</td>
+            <td>$!review.merchant.merchantId</td>
+            <td>$!review.merchant.name</td>
+            <td>$!review.merchantReply</td>
+            <td>$!viewutil.dateFormat($!review.createTime)</td>
+            <td>
+                <!-- #if($session.getAttribute("RcMerchant"))
+							<a href="javascript:void(0);"onclick="storeReply(\''+json+'\')">Reply</a>
+						#else
+							<a href="javascript:void(0);"onclick="Remove(\''+json+'\')">Delete</a>
+						#end -->
+                #if($session.getAttribute("RcMerchant"))
+                    #if(!$!review.merchantReply)
+                        <a href="javascript:void(0);" onclick="showReplayPopup('$review.orderProdId',this)">Reply</a>
+                    #end
+                #end
+                #if(!$session.getAttribute("RcMerchant")&&!$session.getAttribute("RcVendor"))
+                    <a href="javascript:void(0);"
+                       onclick="showConfirm('Are you sure to delete the review? If you deleted,The data can not be restore.',&quot;removeEva('$review.orderProdId')&quot;)">Delete</a>
+                #end
+            </td>
+        </tr>
+    #end
+</table>
+<div class="batsOpt">
+    <h1>Bulk Action</h1>
+    #if($session.getAttribute("RcMerchant"))
+        <input class="btnG bwt100 bht30 bfz12 fl" type="button" value="Reply" onclick="replys()">
+    #end
+    #if($!loginMemberInfo.roles[0].roleId!=4&&$!loginMemberInfo.roles[0].roleId!=5)
+        <input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+    #end
+</div>
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize"/>
+<input id="page_totalRows" type="hidden" value="$page.totalRows"/>
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

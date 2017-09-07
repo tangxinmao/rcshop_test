@@ -1,0 +1,90 @@
+<div class="service_wrap" >
+	<table class="table order_table mt10" id="review" >
+		<th>Store ID</th>
+		<th>Store Name</th>
+		<th>Logo</th>
+		<th>Delivery</th>
+		<th>Service</th>
+		<th>Quality</th>
+		<th>Principal</th>
+		<th>City</th>
+		<th>Contact</th>
+		<th>Phone</th>
+		<th>Username</th>
+		<th style="width:8%;">Create Time</th>
+		<th style="width:10%;">Actions</th>
+		#foreach($merchant in $list)
+		<tr>
+			<td>$merchant.merchantId</td>
+			<td>$merchant.name</td>
+			<td>
+				<img src="$!{merchant.logoUrl}?rs=90_90" style="max-width:50px;">
+				<input type="hidden" name="logoUrl" value="$!{merchant.logoUrl}">
+				<input type="hidden" name="logoId" value="$!merchant.logoUrl">
+				<input type="hidden" name="mdesc" value="$!merchant.description">
+			</td>
+			<td>
+				#if($merchant.deliveryScore>=4)
+					<b style="color:#4ED321;">$!merchant.deliveryScore</b>
+				#else
+					<b style="color:#FF8B1D;">$!merchant.deliveryScore</b>
+				#end
+			</td>
+			<td>
+				#if($merchant.serviceScore>=4)
+					<b style="color:#4ED321;">$!merchant.serviceScore</b>
+				#else
+					<b style="color:#FF8B1D;">$!merchant.serviceScore</b>
+				#end
+			</td>
+			<td>
+				#if($merchant.productScore>=4)
+					<b style="color:#4ED321;">$!merchant.productScore</b>
+				#else
+					<b style="color:#FF8B1D;">$!merchant.productScore</b>
+				#end
+			</td>
+			<td>
+				<input type="hidden" name="vendorId" value="$!merchant.vendorId">
+				$!merchant.vendor.name
+			</td>
+			<td>
+				<input type="hidden" name="province" value="$!merchant.city.name">
+				<input type="hidden" name="cityId" value="$!merchant.cityId">
+				<input type="hidden" name="myaddress" value="$!merchant.address">
+				$!merchant.city.name
+			</td>
+			<td>$!merchant.contactPerson</td>
+			<td>$merchant.mobile</td>
+			<td>$!merchant.member.account</td>
+			<td>$!viewutil.dateFormat($!merchant.createTime)</td>
+			<td>
+				#if($!merchant.delFlag == 0)
+					#if(!$session.getAttribute("RcVendor"))
+						<a href="javascript:void(0)" onclick="showModifyPopupWin('$!merchant.merchantId',this)">Edit</a> |
+						<a href="javascript:void(0)" onclick="showAccountPopupWin('$!merchant.merchantId',this)">Edit User</a> |
+						<a href="javascript:void(0)" onclick="showBankPopupWin('$!merchant.merchantId',this)">Edit Bank</a> |
+						<a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable the merchant? If you disable,The data can not be restore.',&quot;deleteOne('$!merchant.merchantId',this)&quot;)">Disable</a> |
+						<!--<a href="javascript:void(0)" onclick="authBrandChoseBox('$!merchant.merchantId')">Authorize Brand</a>-->
+					<!-- 	<a href="javascript:void(0)" onclick="authApplicator('$!merchant.merchantId')">Auth Applicator</a>  --> 
+					#else
+						<span>Edit</span> |
+						<span>Edit User</span> |
+						<span>Edit Bank</span> |
+						<span>Delete</span> |
+						<span>Authorize Brand</span>
+					#end
+				#else
+                    <a href="javascript:void(0)" onclick="showConfirm('Are you sure to enable the merchant?', 'enableOne($!merchant.merchantId,this)')">Enable</a>
+				#end
+			</td>
+			
+		</tr>
+		#end
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

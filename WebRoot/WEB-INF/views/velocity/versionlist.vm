@@ -1,0 +1,253 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Version List" )
+#set($extCss = "/static/css/uploadify.css") 
+#set($extJs = "/static/js/jquery.uploadify.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Version List</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="service_wrap mt10" id="reloadSearchMessages">
+			<table class="table order_table mt10">
+				<th width="40">Version Number</th>
+				<th width="40">System</th>
+				<th style="width: 100px;">Force Update</th>
+				<th>Infomation</th>
+				<th width="150">Update Time</th>
+				<th>Down Url</th>
+				<th>Actions</th>
+				
+				#foreach($ves in $list)
+				<tr>
+					<td>$!ves.verNo</td>
+					<td><p style="color:red">#if($ves.system==0)Android#else IOS#end</p></td>
+					<td>#if($ves.forceFlag==1)Yes #else No #end</td>
+					<td>$!ves.verInfo</td>
+					<td>$!viewutil.dateFormat($!ves.updateTime)</td>
+					<td>$!ves.downloadUrl</td>
+					<td><a href="javascript:void(0)" onclick="versionpopup($!ves.system,this)">Edit Infomation</a>
+					|
+						#if($ves.system==0)
+							<a href="javascript:void(0)" onclick="uploadfypopup()">Upload File</a>
+						#else
+							<a href="javascript:void(0)" onclick="aKeypopup()">not available</a>
+						#end
+					</td>
+				</tr>
+				#end
+			</table>
+			<input type="hidden" value="$!page.currentPage" id="currentPage">
+			<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+			<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+			<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+			<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>	
+<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="addVesDiv" style="display:none;">
+		<div class="layout">
+			<a class="ico_close" href="javascript:close();" ></a><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2>Edit version info</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+                	<div style="padding-top: 20px;">
+                		<lebel class="colortitle" style="margin-left: 5px;">
+                		Version Number:<input class="poptxt" type="text" name="vernum" id="vernum">
+                		</lebel>
+                	</div>
+					<div style="padding-top: 20px;">
+						<lebel class="colortitle" style="margin-left: 30px;">
+							System:
+						</lebel>
+						<span id="versionshow" style="margin-left: 10px;"></span>
+					</div>
+					<div style="margin-top: 20px;">
+						<lebel class="colortitle" style="margin-left: -4px;">
+							Force update:
+						</lebel>
+						<input type="checkbox" name="flag" id="flag" value="1" style="margin-left: 6px;">
+					</div>
+				<div style="margin-top:20px">
+					<lebel class="colortitle">
+					Infomation:
+					</lebel>
+					<textarea class="poptxt" rows="300" cols="100" name="vesInfo" id="vesInfo" style="width:317px; height:155px"></textarea></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="addversion()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="uploadfile" style="display:none;">
+		<div class="layout">
+			<a class="ico_close" href="javascript:close();" ></a><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2>Upload version file</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:109px">
+					<form>
+						<div id="queue"></div>
+						<input id="file_upload" name="file_upload" type="file" multiple="true">
+					</form>
+					<div id="file_upload_status">
+						
+					</div>
+				</div>
+				<div class="popup_btn_con" id="update_file" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="completeUpload()" id="completebtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="updateaKey" style="display:none;">
+		<div class="layout">
+			<b class="ico_close" onclick="close()"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2 style="padding-top:8px;">更新Akey</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:109px">
+					aKey：<input type="text" name="akey" id="akey" value="">
+				</div>
+				<div class="popup_btn_con" id="update_aKey" myvalue="">
+					<input class="button button-primary"  type="button" onclick="beginupdateaKey()" id="aKeybtn" value="确定" />
+				</div>
+			</div>
+		</div>
+	</div>
+<script  type="text/javascript" >
+$(function() {
+	$('#file_upload').uploadify({
+		'formData'     : {
+			'timestamp' : '<%= new java.util.Date().getTime()%>',
+			'token'     : '11111'
+		},
+		'buttonText': "Upload",
+		'fileTypeExts': '*.apk',
+		'fileSizeLimit': '50MB',
+		'swf'      : '$root/static/js/uploadify.swf',
+		'sizeLimit': '99999999999',
+		'uploader' : '$root/manager/uploadvesfile',
+		'onUploadProgress': function(file, fileBytesLoaded, fileTotalBytes, queueBytesLoaded, uploadSize){
+		    //var percentage       = Math.round(fileBytesLoaded / fileTotalBytes * 100);
+		    
+		},
+		height: 25,
+		width: 100,
+		successTimeout : 3000000,//上传时的timeout
+		itemTemplate: '<div id="${fileID}" class="uploadify-queue-item">' +
+			'<div class="cancel">' +
+				'<a href="javascript:$(\'#${instanceID}\').uploadify(\'cancel\', \'${fileID}\')">X</a>' +
+			'</div>' +
+			'<span class="fileName">${fileName} (${fileSize})</span><span class="data"></span>' +
+			'<div class="uploadify-progress">' +
+				'<div class="uploadify-progress-bar"><!--Progress Bar--></div>' +
+			'</div>' +
+		'</div>',
+		queueID: 'file_upload_status',
+		removeCompleted: false,
+		onUploadError: function( file, errorCode, errorMsg, errorString ){
+		    alertWarn('Error' + file.id);
+		},
+		onUploadSuccess: function( file, data, response ){
+		    alertWarn("Upload success！");
+		}
+	});
+});
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		$.post("$root/manager/versionlist", {"currentPage":currentPage},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}
+	function versionpopup(system,obj){
+		$(".shade_layout").show();
+		$("#addVesDiv").show();
+		$("#popup_btn_con").attr("myvalue",system);
+		if(system==1)
+			$("#versionshow").text("IOS");
+		else
+			$("#versionshow").text("Android");
+		var $td = $(obj).parent().parent().find("td");
+		$("#vernum").val($td.eq(0).text());
+		$("#vesInfo").val($td.eq(3).text());
+		pop_center ('560');
+	}
+	function addversion(){
+		var vernum = $("#vernum").val();
+		if($("#flag").prop('checked')==true){
+			var flag = 1;
+		}
+		else{
+			var flag = 0;
+		}
+		
+		var vesInfo = $("#vesInfo").val();
+		var system = $("#popup_btn_con").attr("myvalue");
+		$.post("$root/manager/addversion", {"vernum":vernum,"flag":flag,"vesInfo":vesInfo,"system":system},
+				function(data){
+						alertWarn("Update success！");
+						close();
+						goThisPage($('#currentPage').val());
+			
+			    }
+			);
+	}
+	function uploadfypopup(){
+		$(".shade_layout").show();
+		$("#uploadfile").show();
+		pop_center ('560');
+	}
+	function completeUpload(){
+		close();
+		goThisPage($('#currentPage').val());
+	}
+	function aKeypopup(){
+		$(".shade_layout").show();
+		$("#updateaKey").show();
+		pop_center ('560');
+	}
+	function beginupdateaKey(){
+		var akey = $("#akey").val(); 
+		$.post("$root/updateaKey", {"akey":akey},
+				function(data){
+						alertWarn("Update success!");
+						close();
+						goThisPage($('#currentPage').val());
+			
+			    }
+			);
+	}
+</script>

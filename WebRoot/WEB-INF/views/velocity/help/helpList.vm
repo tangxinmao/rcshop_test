@@ -1,0 +1,149 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Banner list" )
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Help List</h1>
+	 	<div class="fr">
+			<input class="btnG bwt163 bht39 bfz16 fr mt12" type="button" value="Add Help" onclick="javascript:self.location='$root/help/add'">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div id="reloadSearchMessages">
+			<div class="service_wrap">
+				<table class="table order_table mt10">
+					<th>Title</th>
+					<th>Serial Number</th>
+					<th>Type</th>
+					<th>Actions</th>
+					
+					#foreach($help in $list)
+					<tr>
+						<td style="text-align: left;">$help.name</td>
+						<td>$help.seq</p></td>
+						<td>$help.description</td>
+						<td><a href="javascript:void(0)" onclick="javascript:self.location='$root/help/pccontent?helpId=$help.helpId'"">Preview</a> |
+							<a href="javascript:void(0)" onclick="javascript:self.location='$root/help/edit?helpId=$help.helpId'">Edit</a> |
+							<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the data? If you deleted,The data can not be restore.',&quot;deleteHelp('$help.helpId')&quot;)">Delete</a>
+						</td>
+					</tr>
+					#end
+				</table>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>	
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="addVesDiv" style="display:none;">
+		<div class="layout">
+			<b class="ico_close" onclick="close()"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2 style="padding-top:8px;">Edit version info</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:109px">
+                	<div style="padding-left: 10px;">Version#:<input type="text" name="vernum" id="vernum"></div><br/>
+					<div style="padding-left: 23px;">System:<span id="versionshow"></span></div>
+					<div style="margin-left: -12px;">Force update:<input type="checkbox" name="flag" id="flag" value="1" style="margin-top:20px"></div>
+				<div style="margin-top:20px">Infomation:<textarea rows="300" cols="100" name="vesInfo" id="vesInfo" style="width:317px; height:155px"></textarea></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="button button-primary"  type="button" onclick="addversion()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="uploadfile" style="display:none;">
+		<div class="layout">
+			<b class="ico_close" onclick="close()"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2 style="padding-top:8px;">Upload version file</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:109px">
+					<form>
+						<div id="queue"></div>
+						<input id="file_upload" name="file_upload" type="file" multiple="true">
+					</form>
+					<div id="file_upload_status">
+						
+					</div>
+				</div>
+				<div class="popup_btn_con" id="update_file" myvalue="">
+					<input class="button button-primary"  type="button" onclick="completeUpload()" id="completebtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="updateaKey" style="display:none;">
+		<div class="layout">
+			<b class="ico_close" onclick="close()"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+			<div class="main">
+				<div class="hd">
+					<h2 style="padding-top:8px;">更新Akey</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:109px">
+					aKey：<input type="text" name="akey" id="akey" value="">
+				</div>
+				<div class="popup_btn_con" id="update_aKey" myvalue="">
+					<input class="button button-primary"  type="button" onclick="beginupdateaKey()" id="aKeybtn" value="确定" />
+				</div>
+			</div>
+		</div>
+	</div>
+<script  type="text/javascript" >
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('the total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		$.post("$root/help/detail", {"currentPage":currentPage},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}
+	function deleteHelp(helpId){
+		$.post("$root/help/delete", {"helpId":helpId},
+				function(data){
+				var jsonObjArr = JSON.parse(data);
+				if(jsonObjArr.code=="1"){
+					 goThisPage($("#currentPage").val());
+				}
+				   
+			    }
+			);
+	}
+</script>
+<script type="text/javascript" src="$root/static/js/common.js"></script>
+<script type="text/javascript" src="$root/static/assets/js/bui-min.js"></script>
+<script type="text/javascript" src="$root/static/assets/js/config-min.js"></script>
+<script type="text/javascript" src="$root/static/js/message.js"></script>
+</body>
+</html>

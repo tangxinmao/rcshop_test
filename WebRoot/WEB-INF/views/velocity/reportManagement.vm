@@ -1,0 +1,569 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/vue.min.js,/static/js/echarts.js,/static/assets/js/bootstrap3.3.7.min.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<style>
+.isHide{
+display: none;
+}
+.isWidth{
+float:left;
+width:100%;
+}
+.isLess{
+float:right;
+width:48.5%;
+}
+.service_wrap .table tr th {
+    background: #f4f5f9;
+    color: #444;
+    font-weight: bold;
+    border-right: solid 1px #e4e4e4;
+    color: #7589af;
+    padding: 6px;
+}
+.nav-tabs > li.active > a, .web_box_tab li.active a:hover, .web_box_tab li.active a:focus {
+background-color:white;
+    background-image:none;
+    border: 0px;
+}
+.nav-tabs>li>a {
+font-size:20px;
+    margin-right: 10px;
+    line-height: 1.42857143;
+    border: 0px solid transparent;
+    font-weight: bold;
+}
+.nav>li>a:hover, .nav>li>a:focus {
+    text-decoration: none;
+    background-color: #fff;
+}
+a:hover {
+    color: #000;
+    text-decoration: none;
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    color: #555;
+    cursor: default;
+    background-color: #fff;
+    border: 0px solid #ddd;
+    border-bottom: 1px solid #213864;
+
+}
+</style>
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Statistics Management</h1>
+	</div> 
+	<div class="data_logic ml30">
+		<div class="service_wrap mt10" id="productListDiv">
+		<ul style="text-align: center;margin-top:20px">
+    <li style="width:24%;float: left"><h3 style="color:#337ab7;font-weight: bold;">Rp $!viewutil.moneyStringFormat($!{overview.totalOrderAmount})</h3><h6 style="margin-top:5px;color:#9B9B9B">Total Transaction Amount</h6></li>
+    <li style="width:24%;float: left;border-left:1px solid #9B9B9B;"><h3  style="font-weight: bold;color:#337ab7">$!{overview.totalOrderCount}</h3><h6 style="margin-top:5px;color:#9B9B9B">Total Transactions</h6></li>
+    <li style="width:24%;float: left;border-left:1px solid #9B9B9B;"><h3 style="font-weight: bold;color:#337ab7">Rp $!viewutil.moneyStringFormat($!{overview.orderAmountPerCustomer})</h3><h6 style="margin-top:5px;color:#9B9B9B">Per Customer Transaction</h6></li>
+    <li style="width:24%;float: left;border-left:1px solid #9B9B9B;"><h3 style="font-weight: bold;color:#337ab7">Rp $viewutil.moneyStringFormat($!{overview.orderAmountPerProduct})</h3><h6 style="margin-top:5px;color:#9B9B9B">Product Average Price</h6></li>
+</ul>
+<hr style="width:100%;height:1px;background-color: #dddddd;margin-top:80px">
+
+    <ul id="myTabs" class="nav nav-tabs" role="tablist" style="margin-top:20px;">
+      <li role="presentation" class="active"><a href="#week" id="week-tab" role="tab" data-toggle="tab" aria-controls="week" aria-expanded="false">Week</a></li>
+      <li role="presentation" class=""><a href="#month" role="tab" id="month-tab" data-toggle="tab" aria-controls="month" aria-expanded="true">Month</a></li>
+       <li role="presentation" class=""><a href="#year" role="tab" id="year-tab" data-toggle="tab" aria-controls="year" aria-expanded="true">Year</a></li>
+    </ul>
+    <div id="myTabContent" class="tab-content" style="margin-top:20px">
+      <div role="tabpanel" class="tab-pane fade active in" id="week" aria-labelledby="week-tab">
+      <runoob  
+     v-bind:reversedtransactionamount="reversedTransactionAmount"
+            v-bind:reversedtopupamount="reversedTopupAmount"
+                  v-bind:report="report"
+                 v-bind:ishide="isHide"
+              	#if($!loginMemberInfo.roles[0].roleId!=4 && $!loginMemberInfo.roles[0].roleId!=5)
+                ok="true"
+                #end
+          >
+        </runoob>
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="month" aria-labelledby="month-tab">
+        <runoob  
+   v-bind:reversedtransactionamount="reversedTransactionAmount"
+            v-bind:reversedtopupamount="reversedTopupAmount"
+
+ 
+                  v-bind:report="report"
+                    v-bind:ishide="isHide"
+                  	#if($!loginMemberInfo.roles[0].roleId!=4 && $!loginMemberInfo.roles[0].roleId!=5)
+                ok="true"
+                #end
+          >
+        </runoob>
+      </div>
+       <div role="tabpanel" class="tab-pane fade" id="year" aria-labelledby="year-tab">
+    <runoob 
+
+   v-bind:reversedtransactionamount="reversedTransactionAmount"
+            v-bind:reversedtopupamount="reversedTopupAmount"
+
+                   v-bind:report="report"
+                    v-bind:ishide="isHide"
+                    	#if($!loginMemberInfo.roles[0].roleId!=4 && $!loginMemberInfo.roles[0].roleId!=5)
+                ok="true"
+                #end
+                
+          >
+        </runoob>
+  
+      </div>
+     
+    </div>
+
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>
+<script>
+$(function(){
+	var root = $("#rootsite").val();
+	 var   option = {
+			    title: {
+			       show:false,
+			    	text: '未来一周气温变化',
+			        subtext: '纯属虚构'
+			    },
+			    tooltip: {
+			    	show:false,
+			        trigger: 'axis'
+			    },
+
+			    grid: {
+		            left: '0%',
+		            right: '1%',
+		            bottom: '0%',
+		            top: '10%',
+		            containLabel: true
+		        },
+			    toolbox: {
+			        show: false,
+			        feature: {
+			            dataZoom: {
+			                yAxisIndex: 'none'
+			            },
+			            dataView: {readOnly: false},
+			            magicType: {type: ['line', 'bar']},
+			            restore: {},
+			            saveAsImage: {}
+			        }
+			    },
+			    xAxis:  {
+			        type: 'category',
+			        boundaryGap: false
+			   
+			    },
+			    yAxis: {
+			    	type: 'value',
+			        axisLabel: {
+			        	show:false,
+			            formatter: '{value} °C'
+			        }
+			    },
+			    series: [
+			    	 {
+			             name:'',
+			             type:'line',
+			             itemStyle: {
+			                    normal: {
+			　　　　　　　　　　　　　　//好，这里就是重头戏了，定义一个list，然后根据所以取得不同的值，这样就实现了，
+			                        color:'#337ab7'
+			                        }
+			    	 },
+			    	 label: {
+			                normal: {
+			                    show: true,
+			                    position: 'top',
+			                    formatter:function(a,b,c){
+			                    return formatNum(a.data);
+			                    }
+			                }
+			            },
+			          
+			             markPoint: {
+			                 data: [
+			                     
+			                 ]
+			             },
+			             markLine: {
+			                 data: [
+			                   
+			                 ]
+			             }
+			         },
+			    ]
+			};
+//采用模板引擎进行渲染
+var Child = {
+		 directives: {
+			  width: {
+			      inserted: function (el) {
+			    	  el.style.width=document.body.scrollWidth*0.75+'px'
+			    	  el.style.height='200px';
+			      }
+			    }
+			  },
+  props: ['report','ishide','ok','reversedTopupAmount','reversedTransactionAmount'],
+  template: '<div><table class="table table-bordered table-hover text-center text-justify" style="width:64%;float: left;">'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px"><img src="$root/static/images/ico/sale.png"  style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Sales</label></caption>'+
+	  '<thead >'+
+	    '<tr >'+
+	      '<th class="text-center" >Transaction Amount</th>'+
+	      '<th class="text-center" >Transactions</th>'+
+	      '<th class="text-center" >Buyers</th>'+
+	      '<th class="text-center" >Sold Products</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	'<tbody>'+
+	    '<tr>'+
+	      '<td>Rp {{report.totalOrderAmount}}</td>'+
+	      '<td>{{report.totalOrderCount}}</td>'+
+	      '<td>{{report.customerCount}}</td>'+
+	      '<td>{{report.productCount}}</td>'+
+	    '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	 '<table  class="table table-bordered table-hover text-center text-justify" style="width:33%;float: right;" >'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px"><img src="$root/static/images/ico/product.png"  style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Product</label></caption>'+
+	'<thead>'+
+	  '<tr>'+
+	    '<th class="text-center" >All Products</th>'+
+	     '<th class="text-center" >New Products</th>'+
+	  '</tr>'+
+	  '</thead>'+
+	'<tbody>'+
+	   '<tr>'+
+	    '<td>{{report.allProductCount}}</td>'+
+	    '<td style="color:orange">↑ {{report.newProductCount}}</td>'+
+	   '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	
+	'<table v-if="ok" class="table table-bordered table-hover text-center text-justify" style="width:30%;float: left;">'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/member.png" style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Member</label></caption>'+
+	  '<thead >'+
+	    '<tr>'+
+	      '<th class="text-center" >All Members</th>'+
+	      '<th class="text-center" >New Members</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	 '<tbody>'+
+	    '<tr>'+
+	      '<td>{{report.allCustomerCount}}</td>'+
+	      '<td style="color:orange">↑ {{report.newCustomerCount}}</td>'+
+	    '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	
+	 '<table v-if="ok" class="table table-bordered table-hover text-center text-justify" style="width:31%;float: left;margin-left: 3%">'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/store.png"  style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Store</label></caption>'+
+	  '<thead >'+
+	    '<tr >'+
+	      '<th class="text-center" >All Stores</th>'+
+	      '<th class="text-center" >New Stores</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	 '<tbody>'+
+	    '<tr>'+
+	      '<td>{{report.allMerchantCount}}</td>'+
+	      '<td style="color:orange">↑ {{report.newMerchantCount}}</td>'+
+	    '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	 '<table v-if="ok" class="table table-bordered table-hover text-center text-justify" style="width:33%;float: right;">'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/topup.png" style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Top-up</label></caption>'+
+	  '<thead >'+
+	   ' <tr >'+
+	      '<th class="text-center" >Top-up Amount</th>'+
+	      '<th class="text-center" >Top-up Times</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	 '<tbody>'+
+	    '<tr>'+
+	      '<td>Rp {{report.rechargeAmount}}</td>'+
+	      '<td>{{report.rechargeCount}}</td>'+
+	    '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	 '<table class="table table-bordered table-hover text-center text-justify" style="width:100%;">'+
+	  '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/charts.png" style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Sales Amount Charts</label></caption>'+
+	  '<tbody>'+
+	  '<tr>'+
+	  '<td>'+
+	 	'<div class="echarts" v-width>'+
+	 	'</div>'+
+	 	'</td>'+
+	 	'</tr>'+
+	 	'</tbody>'+
+	'</table>'+
+	 '<table class="table table-bordered table-hover text-center text-justify" style="width:48.5%;float: right;" v-bind:class="{isHide:ishide}" >'+
+	 '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/top10.png"  style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Top10 Stores</label></caption>'+
+	  '<thead >'+
+	    '<tr >'+
+	      '<th class="text-center" style="width:5%" >Ranking</th>'+
+	      '<th class="text-center" >ID</th>'+
+	      '<th class="text-center" >Store</th>'+
+	      '<th class="text-center" >Sales</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	 '<tbody>'+
+	    '<tr v-for="(site,key) in report.topMerchants">'+
+	      '<td  v-if="key===0"><img src="$root/static/images/ico/top1.png" /> </td>'+
+	      '<td  v-else-if="key===1"><img   src="$root/static/images/ico/top2.png" /> </td>'+
+	      '<td  v-else-if="key===2"><img   src="$root/static/images/ico/top3.png" /> </td>'+
+	      '<td  v-else>{{key+1}}</td>'+
+	      '<td>{{site.merchantId}}</td>'+
+	      '<td>{{site.merchantName}}</td>'+
+	      '<td>{{site.merchantAmount}}</td>'+
+	  
+	    '</tr>'+
+	    
+	  '</tbody>'+
+	'</table>'+
+	'<!--  -->'+
+	   '<table class="table table-bordered table-hover text-center text-justify" style="width:48.5%;float:left">'+
+	 '<caption style="height:16px;background-color: #f4f5f9;border: solid 1px #e4e4e4;border-bottom-width: 0px">	<img src="$root/static/images/ico/top10.png"  style="width:24px;height:24px;margin-top: -4px"><label style="font-weight: bold;">Top10 Products</label></caption>'+
+	  '<thead >'+
+	    '<tr >'+
+	      '<th class="text-center" style="width:5%" >Ranking</th>'+
+	      '<th class="text-center" >ID</th>'+
+	      '<th class="text-center" >Product</th>'+
+	      '<th class="text-center" >Sales</th>'+
+	    '</tr>'+
+	  '</thead>'+
+	 '<tbody>'+
+	  '<tr v-for="(site,key) in report.topProducts">'+
+      '<td  v-if="key===0"><img src="$root/static/images/ico/top1.png" /> </td>'+
+      '<td  v-else-if="key===1"><img   src="$root/static/images/ico/top2.png" /> </td>'+
+      '<td  v-else-if="key===2"><img   src="$root/static/images/ico/top3.png" /> </td>'+
+      '<td  v-else>{{key+1}}</td>'+
+      '<td>{{site.prodId}}</td>'+
+      '<td >{{site.prodName}}</td>'+
+      '<td>{{site.prodCount}}</td>'+
+    '</tr>'+
+	  '</tbody>'+
+	'</table>'+
+	  '</div>'
+}
+
+//构建当前月的查询条件
+var now =new Date();
+//创建根实例
+new Vue({
+  el: '#year',
+  components: {
+    'runoob':Child
+  },
+  data:function(){
+	  var dd;
+	  var startTime = new Date(now.getFullYear(),0, 1, 0, 0, 0, 0);//开始时间
+	  var endTime = new Date(now.getFullYear()+1, 0,1, 0, 0, 0, 0);//结束时间
+	  console.log(startTime+endTime)
+	  $.ajax({  
+	         type : "post",  
+	          url : root+'/report/transaction',  
+	          data : {type:3},  
+	           async : false,  
+	           success : function(data){  
+	        	dd=data;
+	          }
+	     }); 
+	  return dd;
+  } ,
+     mounted:function(){
+    	 var myChart = echarts.init($('#year .echarts')[0]);
+	 	 var yAxisData=[];
+         var yAxisData=new Array(0,0,0,0,0,0,0,0,0,0,0,0);
+    	 for(i in this.report.orderAmountDetail){
+    		// xAxisData.push(parseInt(i)+1);
+    		yAxisData[parseInt(i.split('-')[1])-1]=this.report.orderAmountDetail[i];
+    		/* console.log(i+this.report.orderAmountDetail[i])
+    		 yAxisData.push(this.report.orderAmountDetail[i]); */
+    	 }
+    	    myChart.showLoading();
+    		myChart.setOption(option);
+    	    optionx = {
+    	    	    xAxis:  {
+    	    	        data: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec']
+    	    	    },
+    	    	    series: [
+    	    	    	 {  data:yAxisData
+    	    	         }
+    	    	    ]
+    	    	};
+    		   myChart.setOption(optionx);
+    			 myChart.hideLoading();
+    	
+	  },
+	  computed: {
+		  reversedTopupAmount: function () {
+		      return formatNum(this.report.rechargeAmount);
+		    },
+		    reversedTransactionAmount: function () {
+		      return formatNum(this.report.totalOrderAmount);
+		    }
+		  }
+
+  
+})
+//创建根实例
+new Vue({
+  el: '#week',
+  components: {
+    'runoob':Child
+  },
+  data:function(){
+	  var dd;
+	  var startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()-now.getDay()+1, 0, 0, 0, 0);//开始时间
+	  var endTime = new Date(now.getFullYear(), now.getMonth(),  now.getDate()+7-now.getDay()+1, 0, 0, 0, 0)//结束时间
+	  $.ajax({  
+	         type : "post",  
+	          url : root+'/report/transaction',  
+	          data : {type:1},  
+	           async : false,  
+	           success : function(data){  
+	        	dd=data;
+	          }
+	     }); 
+	  return dd;
+  } ,
+     mounted:function(){
+    	 var myChart = echarts.init($('#week .echarts')[0]);
+    	 var xAxisData=['Sun','Mon','Tues','Wed','Thur','Fri','Sat'];
+    	 var yAxisData=new Array(0,0,0,0,0,0,0);
+    	 for(i in this.report.orderAmountDetail){
+    		var yyr= i.split('-');
+    		var date=new Date(parseInt(yyr[0]),parseInt(yyr[1]),parseInt(yyr[2]));
+    		yAxisData[date.getDay()]=this.report.orderAmountDetail[i];
+    	
+    	 }
+    	    myChart.showLoading();
+    		myChart.setOption(option);
+    	    optionx = {
+    	    	    xAxis:  {
+    	    	        data: xAxisData
+    	    	    },
+    	    	    series: [
+    	    	    	 {  data:yAxisData
+    	    	         }
+    	    	    ]
+    	    	};
+    		   myChart.setOption(optionx);
+    			 myChart.hideLoading();
+    	
+	  },
+	  computed: {
+		  reversedTopupAmount: function () {
+		      return formatNum(this.report.rechargeAmount);
+		    },
+		    reversedTransactionAmount: function () {
+		      return formatNum(this.report.totalOrderAmount);
+		    }
+		  }
+
+  
+})
+// 创建根实例
+new Vue({
+  el: '#month',
+  components: {
+    'runoob':Child
+  },
+  data:function(){
+	  var dd;
+	  var startTime = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);//开始时间
+	  var endTime = new Date(now.getFullYear(), now.getMonth()+1, 1, 0, 0, 0, 0)//结束时间
+	  $.ajax({  
+	         type : "post",  
+	          url : root+'/report/transaction',  
+	          data : {type:2},  
+	           async : false,  
+	           success : function(data){  
+	        	dd=data;
+	          }
+	     }); 
+	  return dd;
+  } ,
+     mounted:function(){
+    	 var myChart = echarts.init($('#month .echarts')[0]);
+    	 var xAxisData=[];
+    	 var yAxisData=[];
+    	 var d= new Date();
+    	 d.setDate(0);
+        var sum= d.getDate();
+        for(var j=1;j<=sum;j++){
+        	xAxisData.push(j);
+        	yAxisData.push(0);
+        }
+    
+    	 for(i in this.report.orderAmountDetail){
+    		var yyr= i.split('-');
+    		yAxisData[parseInt(yyr[2])]=this.report.orderAmountDetail[i];
+    	
+    	 }
+    	    myChart.showLoading();
+    		myChart.setOption(option);
+    	    optionx = {
+    	    	    xAxis:  {
+    	    	        data: xAxisData
+    	    	    },
+    	    	    series: [
+    	    	    	 {  data:yAxisData
+    	    	         }
+    	    	    ]
+    	    	};
+    		   myChart.setOption(optionx);
+    			 myChart.hideLoading();
+    	
+	  },
+	  computed: {
+		  reversedTopupAmount: function () {
+		      return formatNum(this.report.rechargeAmount);
+		    },
+		    reversedTransactionAmount: function () {
+		      return formatNum(this.report.totalOrderAmount);
+		    }
+		  }
+
+  
+});
+/*格式化金额  */
+function formatNum(strNum) {
+
+	if(!strNum){
+		return "0";
+	}
+	if (strNum.length <= 3) {
+	return strNum;
+	}
+	if (!/^(\+|-)?(\d+)(\.\d+)?$/.test(strNum)) {
+	return strNum;
+	}
+	var a = RegExp.$1, b = RegExp.$2, c = RegExp.$3;
+	var re = new RegExp();
+	re.compile("(\\d)(\\d{3})(,|$)");
+	while (re.test(b)) {
+	b = b.replace(re, "$1,$2$3");
+	}
+	return a + "" + b + "" + c;
+	}
+//tab切换事件
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) { 
+	  e.target // newly activated tab 
+	  e.relatedTarget // previous active tab
+	});
+		$('#myTabs a').click(function (e) {
+			  e.preventDefault()
+			  $(this).tab('show')
+			})
+})
+
+</script>

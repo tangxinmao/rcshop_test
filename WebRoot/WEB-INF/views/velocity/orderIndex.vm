@@ -1,0 +1,258 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/order.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Order List</h1>
+	</div> 
+	
+	<div class="data_logic ml30">
+		<div class="searchArea bht150">
+			<form id="searchForm">
+			<div class="mt35">
+				<div class="unit">
+					<label>Date From</label>
+					<input  type="text" name="orderTimeStart">
+				</div>
+				<div class="unit">
+					<label >Date to</label>
+					<input  type="text" name="orderTimeEnd">
+				</div> 
+				<div class="unit">
+					<label >Status</label>
+						<select   name="orderStatus">
+							<option value="" >All</option>
+							<option value="1">Unpaid</option>
+							<option value="2,3">Undelivered</option>
+							<option value="6">Send</option>
+							<option value="7,8,9,10">Complete</option>
+						    <option value="4,5">Rejected</option>
+						 <!--<option value="Completed">Complete</option> -->
+						</select>
+				</div>
+				
+			
+			
+			</div>
+			
+			<div class="clearfix">
+				<div class="mt10 unit">
+					<label >Order ID	</label>
+						<input type="text" name="orderId"  value="">
+				
+				</div>
+				
+				<div class="mt10 unit">
+					<label >Phone</label>
+						<input  type="text" name="mobile"  value="">
+					
+				</div>
+					<div class="mt10 unit">
+					<label>City</label>
+					<input  type="text" name="city"  value="">
+					
+				</div>
+				
+			
+			</div>
+				<div class="clearfix">
+						<div class="mt10 unit">
+					<label >Store ID</label>
+					<input  type="text" name="merchantId"  value="">
+					
+				</div>
+					<div class="mt10 unit">
+					<label >Store</label>
+						<input  type="text" name="merchantName"  value="">
+					
+				</div>
+					<div class="mt10" style="float:right;">
+					<input  class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+				</div>
+			</form>
+		</div>
+		
+		<div class="sortArea">
+			<ul>
+				<li  style="width:10%" class="selcted">All</li>
+				<li style="width:10%">Unpaid</li>
+				<li  style="width:10%">Undelivered</li>
+				<li  style="width:10%">Send</li>
+				<li  style="width:10%">Complete</li>
+				<li  style="width:10%">Rejected</li>
+				<!-- <li  style="width:10%">Complete</li> -->
+			</ul>
+			   #if($session.getAttribute("RcMerchant"))
+					<input  class="button btnG" style="width: 100px;height: 32px;color: white; background-color: #27d0d8; float:right" type="button" value="Export" onclick="exportExcel('search')">
+		#end
+		</div>
+
+		<div class="service_wrap mt10 clearfix" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+						<table class="table order_table mt10">
+							<tr width="100%"> 
+								<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+									<div onclick="goThisPage('sort')" class="sortDiv">
+											<p class="sortP">Order Time</p>
+											<span class="item dot-top checked"></span>
+											<span class="item dot-bottom checked"></span>
+											<input style="display: none" type="checkbox" name="orderTimeDesc" id="orderTimeDesc" >
+											 
+											 
+									</div>
+										<div onclick="goThisPage('sort1')" class="sortDiv">
+									<p class="sortP">Grand Total</p>
+											<span class="item dot-top checked"></span>
+											<span class="item dot-bottom checked"></span>
+											<input style="display: none" type="checkbox" name="orderPayPriceDesc" id="orderPayPriceDesc">
+								</div>
+								<div class="fr">
+								<img class="refresh" src="/rcshop/static/images/ico/refresh.png" onclick="goThisPage('search')" style="margin-top: 2px">
+							<input class="sortBtn" type="button" value="Refresh" onclick="goThisPage('search')">
+							
+						</div>
+								</th>
+							</tr>
+							<tr>
+							<th style="display:none"><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+								<th width="10%">Order ID</th>
+								<th width="10%">Order Time</th>
+								<th width="10%">Buyer Username</th>
+								<th width="10%">Store</th>
+								<th width="10%">Sub Total</th>
+								<th width="10%">Grand Total</th>
+								<th width="20%">Status</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+								<td style="display:none"><input type="checkbox" name="radio" id="radio" value="$!item.orderId"></td>
+							    <td>$!{item.orderId}</td>
+								<td>#if(${item.createTime})$viewutil.dateFormat(${item.createTime})#else--#end</td>
+								<td>$!{item.member.name}</td>
+								<td>$!{item.merchant.name}</td>
+								<td>Rp #if ($!{item.productPrice})$viewutil.moneyStringFormat($!{item.productPrice})#else 0 #end<input type="hidden" value="${item.productPrice}"></td>
+								<td>Rp #if ($!{item.payPrice})$viewutil.moneyStringFormat($!{item.payPrice})#else 0 #end<input type="hidden" value="${item.payPrice}"></td>
+								
+								<td>#if ($!{item.sellerStatus}==1)Unpaid#end 
+							#if ($!{item.sellerStatus}==2||$!{item.sellerStatus}==3)<span style="color:green">Undelivered</span>#end 
+								#if ($!{item.sellerStatus}==6)<span style="color:red">Send</span>#end 
+						<!-- 		#if ($!{item.orderStatus}==4)<span style="color:blue">Received</span>#end -->
+							    #if ($!{item.sellerStatus}==10||$!{item.sellerStatus}==8||$!{item.sellerStatus}==9||$!{item.sellerStatus}==7)Completed#end
+								#if ($!{item.sellerStatus}==5||$!{item.sellerStatus}==4)Rejected#end
+								#if ($!{item.sellerStatus}==11)Canceled#end
+							<!-- 	#if ($!{item.sellerStatus}==2)Waiting for pick up#end  -->
+								 <input type="hidden" value="${item.sellerStatus}"></td>
+									
+								<td>
+					<a href="$root/order/orderDetail?orderId=${item.orderId}" >View Detail</a>	
+			      #if($session.getAttribute("RcMerchant"))
+						#if ($!{item.sellerStatus}==2||$!{item.sellerStatus}==3)
+										| <a href="javascript:void(0)" onclick="javascript:inputDeliveryWin($!{item.orderId})">Input Delivery</a>
+										| <a href="javascript:void(0)" onclick="javascript:rejectedTransactionWin($!{item.orderId})">Rejected Transaction</a>
+										#end
+										#end
+								
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+<!-- 						<div class="batsOpt">
+							<h1>Bulk Action</h1>
+							     #if($session.getAttribute("RcMerchant"))
+							<input class="btnG bwt100 bht30 bfz12 fl" type="button" value="Export" onclick="batsExport()">
+							<input class="btnG bwt100 bht30 bfz12 fl ml10 batsInputDelivery" type="button" value="Input Delivery" onclick="batsInputDelivery()">
+							<input class="btnG bwt200 bht30 bfz12 fl ml10 batsInputDelivery" type="button" value="Rejected Transaction" onclick="batsRejectedTransaction()">
+
+						#end
+						</div>
+ -->					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>
+<!-- 娣诲姞鍝佺墝寮圭獥 -->
+<div class="pop_windows" id="inputDeliveryWin" style="display:none;">
+	<form id="inputDeliveryForm">
+<input type="hidden" name="orderIds" value="$!{order.orderId}">
+<!-- <input type="hidden" name="isDelivery" value="$!{order.isDelivery}"> -->
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Input Delivery</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  <div><lebel class="colortitle" style="margin-left: -34px;"><span class="colorRed">*</span><span style="margin-right:10px">Delivery Method:</span></lebel><input type="radio"  name="deliveryType" value="1" id="deliveryTypeD" checked><label for="deliveryTypeD"> Delivery Man </label> <input type="radio" name="deliveryType" id="deliveryTypeL" value="2" style="margin-left:40px"><label for="deliveryTypeL"> Logistics Company</label> </div>
+               	<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left:27px"><span class="colorRed">*</span><span>Name:</span></lebel><input class="poptxt" type="text" name="dispatcherName" value="" maxlength="50"></div>
+               		<div style="margin-top:20px;"></div>
+               	<div><lebel class="colortitle" style="margin-left: 25px;"><span class="colorRed">*</span><span>Phone:</span></lebel><input class="poptxt" type="text" name="dispatcherMobile" value="" maxlength="20"></div>
+				<div hidden style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -39px;"><span class="colorRed">*</span><span>Tracking Number:</span></lebel><input disabled class="poptxt" type="text" name="trackingNumber" value="" maxlength="50"></div>
+				<div hidden style="margin-top:20px;"><lebel style="margin-left: -47px;" class="colortitle"><span class="colorRed">*</span><span>Logistics Company:</span></lebel><input disabled class="poptxt" type="text" name="logisticsCompany" value="" maxlength="100"></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addInputDelivery()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>
+
+<div class="pop_windows" id="rejectedTransactionWin" style="display:none;">
+	<form id="rejectedTransactionForm">
+<input type="hidden" name="orderId" value="$!{order.orderId}">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Rejected Transaction</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  <div><lebel class="colortitle" style="margin-left: -28px;"><span class="colorRed">*</span><span style="margin-right:10px">Reason:</span></lebel>
+			  <input type="radio"  name="refundReason" value="Out of stock" id="refundReason1" checked><label for="refundReason1" style="vertical-align: middle;">Out of stock</label><br>
+			  <input type="radio" name="refundReason" id="refundReason2" value="Unable to deliver" style="margin-left:40px"><label for="refundReason2" style="vertical-align: middle;">Unable to deliver</label><br> 
+			   <input type="radio" name="refundReason" id="refundReason3" value="Store is closed" style="margin-left:40px"><label for="refundReason3" style="vertical-align: middle;">Store is closed</label><br>
+			    <input type="radio" name="refundReason" id="refundReason4" value="" style="margin-left:40px"><label for="refundReason4" style="vertical-align: middle;">Other:</label>
+			    <input disabled class="poptxt" type="text" id="refundReasonText" value="" maxlength="60">
+			  </div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addRejectedTransaction()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>
+
+<div class="pop_windows" id="payAmountWin" style="display:none;">
+	<form id="payAmountForm">
+<input type="hidden" name="orderId" value="$!{order.orderId}">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Edit Grand Total</h2>
+			</div>
+		<div class="bd_p10" style="padding-left:82px">
+			  
+				<div  style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -39px;"><span class="colorRed">*</span><span>Grand Total:</span></lebel><span style="margin-left: 13px;">Rp $viewutil.moneyStringFormat($!{order.payPrice})</span></div>
+				<div  style="margin-top:20px;"><lebel style="margin-left: 0px;" class="colortitle"><span class="colorRed">*</span><span>Eit To:</span></lebel><input  class="poptxt" type="text" name="payPrice" value=""></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addPayAmount()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>

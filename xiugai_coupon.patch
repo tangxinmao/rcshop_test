@@ -1,0 +1,435 @@
+Index: WebRoot/WEB-INF/views/velocity/couponIndex.vm
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- WebRoot/WEB-INF/views/velocity/couponIndex.vm	(revision 357)
++++ WebRoot/WEB-INF/views/velocity/couponIndex.vm	(revision )
+@@ -1,7 +1,7 @@
+ #set($layout = "layout/main.vm")  
+ #set($title = "Brand list" )
+ #set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+-#set($extJs = "/static/js/coupon.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
++#set($extJs = "/static/js/coupon.js,/static/js/jquery-ui-timepicker-addon.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+ #set($root=$request.getContextPath())
+ <input type="hidden" value="$root" id="rootPath">
+ <div class="rightContent fl">
+Index: src/main/java/com/socool/soft/controller/CouponsController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/socool/soft/controller/CouponsController.java	(revision 357)
++++ src/main/java/com/socool/soft/controller/CouponsController.java	(revision )
+@@ -1,51 +1,35 @@
+ package com.socool.soft.controller;
+ 
+-import java.io.UnsupportedEncodingException;
+-import java.math.BigDecimal;
+-import java.text.ParseException;
+-import java.util.ArrayList;
+-import java.util.Calendar;
+-import java.util.Collection;
+-import java.util.Date;
+-import java.util.List;
+-import java.util.Map;
+-
+-import javax.servlet.http.HttpServletRequest;
+-import javax.servlet.http.HttpServletResponse;
+-import javax.servlet.http.HttpSession;
+-
+-import org.apache.commons.collections.CollectionUtils;
+-import org.apache.commons.lang.StringUtils;
+-import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.stereotype.Controller;
+-import org.springframework.ui.Model;
+-import org.springframework.web.bind.annotation.RequestMapping;
+-import org.springframework.web.bind.annotation.ResponseBody;
+-
+ import com.fasterxml.jackson.core.JsonProcessingException;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+-import com.socool.soft.bo.RcBuyerCoupon;
+-import com.socool.soft.bo.RcCoupon;
+-import com.socool.soft.bo.RcMerchant;
+-import com.socool.soft.bo.RcMerchantUser;
+-import com.socool.soft.bo.RcProdCat;
++import com.socool.soft.bo.*;
+ import com.socool.soft.bo.constant.CouponStatusEnum;
+ import com.socool.soft.bo.constant.YesOrNoEnum;
+ import com.socool.soft.exception.ErrorValue;
+ import com.socool.soft.param.Coupon;
+-import com.socool.soft.service.IBuyerCouponService;
+-import com.socool.soft.service.ICouponService;
+-import com.socool.soft.service.IMerchantService;
+-import com.socool.soft.service.IMerchantUserService;
+-import com.socool.soft.service.IProdCatService;
++import com.socool.soft.service.*;
+ import com.socool.soft.vo.Page;
+ import com.socool.soft.vo.Result;
+ import com.socool.soft.vo.constant.CouponBVOStatusEnum;
+ import com.socool.soft.vo.constant.CouponVOStatusEnum;
+ import com.socool.soft.vo.constant.CouponVOTypeEnum;
+-
+ import net.sf.json.JSONArray;
+ import net.sf.json.JSONObject;
++import org.apache.commons.collections.CollectionUtils;
++import org.apache.commons.lang.StringUtils;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.stereotype.Controller;
++import org.springframework.ui.Model;
++import org.springframework.web.bind.annotation.RequestMapping;
++import org.springframework.web.bind.annotation.ResponseBody;
++
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++import javax.servlet.http.HttpSession;
++import java.io.UnsupportedEncodingException;
++import java.math.BigDecimal;
++import java.text.ParseException;
++import java.util.*;
+ 
+ @RequestMapping(value = "/coupons")
+ @Controller
+@@ -291,19 +275,22 @@
+ 	/**
+ 	 * 修改和新增卡券
+ 	 * 
+-	 * @param couponsListVO
++	 * @param coupon
+ 	 * @return
+ 	 */
+ 	@RequestMapping(value = "addCoupon")
+ 	@ResponseBody
+ 	public String addCoupon(RcCoupon coupon) {
+-		if(coupon.getExpireTime() != null) {
++		if(coupon.getEffectTime().compareTo(coupon.getExpireTime())>0){
++			return "{\"code\":\"0\",\"result\":\"The voucher effect time must more than effect time.\"}";
++		}
++		/*if(coupon.getExpireTime() != null) {
+ 			Calendar cal = Calendar.getInstance();
+ 			cal.setTime(coupon.getExpireTime());
+ 			cal.add(Calendar.DATE, 1);
+ 			cal.add(Calendar.SECOND, -1);
+ 			coupon.setExpireTime(cal.getTime());
+-		}
++		}*/
+ 		if(coupon.getExpireTime().compareTo(new Date()) < 0){
+ 			return "{\"code\":\"0\",\"result\":\"The voucher can not be overdue.\"}";
+ 		}
+Index: src/main/java/com/socool/soft/dataBind/DateConverter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/socool/soft/dataBind/DateConverter.java	(revision )
++++ src/main/java/com/socool/soft/dataBind/DateConverter.java	(revision )
+@@ -0,0 +1,26 @@
++package com.socool.soft.dataBind;
++
++import org.springframework.core.convert.converter.Converter;
++
++import java.text.ParseException;
++import java.text.SimpleDateFormat;
++import java.util.Date;
++
++/**
++ * Created by geely on 2015/11/22.
++ */
++public class DateConverter implements Converter<String, Date> {
++    public Date convert(String source) {
++        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
++        SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
++        try {
++            return sdfDate.parse(source);
++        } catch (ParseException e) {
++            try {
++                return sdfDateTime.parse(source);
++            } catch (ParseException e1) {
++                return null;
++            }
++        }
++    }
++}
+Index: WebRoot/static/js/coupon.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- WebRoot/static/js/coupon.js	(revision 357)
++++ WebRoot/static/js/coupon.js	(revision )
+@@ -258,10 +258,10 @@
+ 			return;
+ 		}
+ 	
+-		if(serializeArray[i].name=="effectTime")
++	/*	if(serializeArray[i].name=="effectTime")
+ 			serializeArray[i].value=	serializeArray[i].value;
+ 		if(serializeArray[i].name=="expireTime")
+-			serializeArray[i].value=	serializeArray[i].value;
++			serializeArray[i].value=	serializeArray[i].value;*/
+ 		}
+ 	
+ }
+@@ -441,7 +441,7 @@
+ 	});
+     $( '#couponDetailForm input[name="effectTime"]' ).datetimepicker({showSecond:true,showButtonPanel:true,changeMonth : true,dateFormat:"yy-mm-dd",timeFormat: "HH:mm:ss",
+         beforeShow:function(){
+-            $( '#couponDetailForm input[name="effectTime"]' ).datepicker( "option", "minDate", new Date() );
++            $( '#couponDetailForm input[name="effectTime"]' ).datetimepicker( "option", "minDate", new Date() );
+ 
+         },
+         onClose: function( selectedDate ) {
+@@ -453,7 +453,7 @@
+         beforeShow:function(){
+ 
+            // $( "#date1" ).datepicker( "option", "minDate", new Date() );
+-            $(this).datetimepicker( "option", "minDate", new Date() );
++            $(this).datetimepicker( "option", "minDate",  $( '#couponDetailForm input[name="effectTime"]' ).val());
+         },
+         onClose: function( selectedDate ) {
+             //$( "#date1" ).datepicker( "option", "minDate", selectedDate );
+@@ -570,7 +570,7 @@
+ 		else{
+ 			orderTimeDesc = "CREATE_TIME　desc";
+ 		}
+-		
++
+ 	}	else if(ta == 'sort1'){
+ 		currentPage = 1;
+ 		var orderPayPriceDesc = "";
+@@ -580,7 +580,7 @@
+ 		else{
+ 			orderPayPriceDesc = "1";
+ 		}
+-		
++
+ 	}
+ 	else{
+ 		currentPage = ta;
+@@ -598,7 +598,7 @@
+ 			amountFrom:couponAmountStart,
+ 			amountTo:couponAmountEnd,
+ 			merchantName:merchantName
+-		
++
+ 	},
+ 	function(data){
+ 		$("#productListDiv").empty().html(data);
+@@ -607,7 +607,7 @@
+ 			var actionStr=action.html();
+ 				action.html(	formatStr(actionStr));
+ 		});
+-		
++
+ 		//切换tab
+ 		$(".sortArea ul").find("li").each(function(){
+ 			$(this).removeClass("selcted");
+@@ -640,13 +640,13 @@
+ 			$('#orderPayPriceDesc').prop('checked',true);
+ 			$('#orderPayPriceDesc').prevAll('.dot-top').addClass('checked');
+ 			$('#orderPayPriceDesc').prevAll('.dot-bottom').removeClass('checked');
+-			
++
+ 		}
+ 		}
+ 	/*	var status = $("#status_hide").val();
+-		$("select option").each(function (){  
+-			if($(this).val()==status){   
+-				$(this).attr("selected",true); 
++		$("select option").each(function (){
++			if($(this).val()==status){
++				$(this).attr("selected",true);
+ 		}}); */
+ 	});
+ };
+@@ -671,7 +671,7 @@
+ 				var info = "<tr><td width='152'>" + jsonArr[i].PROD_ID + "</td><td width='149'>" + jsonArr[i].PROD_PROP_VAL + "</td><td width='205'>" + jsonArr[i].PROD_STORAGE + "</td><td style='padding-left: 30px;'>" + jsonArr[i].SKU_PRICE + "</td></tr>";
+ 				returnInfo += info;
+ 			}
+-			
++
+ 			$("#skuStorageTbody").html(returnInfo);
+ 			$("#skuStorageDiv1").css("display","block");
+ 			$(".shade_layout").show();
+@@ -696,7 +696,7 @@
+ 				var info = "<tr><td width='182'>" + jsonArr[i].PROD_ID + "</td><td width='119'>" + jsonArr[i].CITY_NAME + "</td><td width='115'>" + jsonArr[i].PROD_STORAGE + "</td><td width='105'>" + jsonArr[i].PROD_NAME + "</td></tr>";
+ 				returnInfo += info;
+ 			}
+-			
++
+ 			$("#skuStorageTbody4").html(returnInfo);
+ 			$("#skuStorageDiv4").css("display","block");
+ 			$(".shade_layout").show();
+@@ -712,7 +712,7 @@
+  */
+ function updateSkuStorage(prodId) {
+ 	$.ajax({
+-		url : getRootPath() + "/product/search_sku_storage?prodId=" + prodId + '&time='+ new Date().getTime(), 
++		url : getRootPath() + "/product/search_sku_storage?prodId=" + prodId + '&time='+ new Date().getTime(),
+ 		type : "GET",
+ 		dataType : "json",
+ 		success : function(result) {
+@@ -722,7 +722,7 @@
+ 				var info = "<tr><td width='152'>" + jsonArr[i].PROD_ID + "</td>" + jsonArr[i].CITY_NAME + "</td><td width='149'>" + jsonArr[i].PROD_PROP_VAL + "</td><td width='205'><div class='amount_wrap'><a class='minus_ico' id='reduce' href='javascript:void(0)' onclick='reduceNum(this)'>-</a><input type='text' maxlength='8' class='width40' name='prodStorage' id='prodStorage' value='" + jsonArr[i].PROD_STORAGE + "'><a class='plus_ico'  id='increase' href='javascript:void(0)'  onclick='increaseNum(this)'>+</a></div></td><td style='padding-left: 30px;'>" + jsonArr[i].SKU_PRICE + "</td></tr>";
+ 				returnInfo += info;
+ 			}
+-			
++
+ 			$("#skuStorageTbody2").html(returnInfo);
+ 			$("#skuStorageDiv2").show();
+ 			$(".shade_layout").show();
+@@ -745,7 +745,7 @@
+ 				var info = "<tr><td width='182'>" + jsonArr[i].PROD_ID + "</td><td width='119'><input type='hidden' name='cityId' value='"+jsonArr[i].ADDRESS_ID+"'>" + jsonArr[i].CITY_NAME + "</td><td width='115'><div class='amount_wrap'><a class='minus_ico' id='reduce' href='javascript:void(0)' onclick='reduceNum(this)'>-</a><input type='text' maxlength='8' class='width40' name='prodStorage' id='prodStorage' value='" + jsonArr[i].PROD_STORAGE + "'><a class='plus_ico'  id='increase' href='javascript:void(0)'  onclick='increaseNum(this)'>+</a></div></td><td width='105'>" + jsonArr[i].PROD_NAME + "</td></tr>";
+ 				returnInfo += info;
+ 			}
+-			
++
+ 			$("#skuStorageTbody3").html(returnInfo);
+ 			$("#skuStorageDiv3").css("display","block");
+ 			$(".shade_layout").show();
+@@ -761,7 +761,7 @@
+ 		return 0;
+ 	}
+ 	 $(e).parent().children("input").attr("value",parseInt(value)-1);
+-	
++
+ }
+ function increaseNum(e){
+ 	var value = $(e).parent().children("input").val();
+@@ -795,7 +795,7 @@
+ 			}
+ 		}
+ 	});
+-	
++
+ }
+ /**
+  * 修改商品库存
+@@ -828,7 +828,7 @@
+ 			}
+ 		}
+ 	});
+-	
++
+ }
+ 
+ /**
+@@ -838,18 +838,18 @@
+ 	$(".shade_layout").hide();
+ 	$(".pop_windows").hide();
+ }
+-//去左空格;   
+-function ltrim(s){     
+-   return s.replace(/(^\s*)/, "");  
+-}   
+-//去右空格;   
+-function rtrim(s){   
+- return s.replace(/(\s*$)/, "");  
+-}   
+-//去左右空格;   
+-function trim(s){  
+-  //s.replace(/(^\s*)|(\s*$)/, "");  
+- return rtrim(ltrim(s));   
++//去左空格;
++function ltrim(s){
++   return s.replace(/(^\s*)/, "");
++}
++//去右空格;
++function rtrim(s){
++ return s.replace(/(\s*$)/, "");
++}
++//去左右空格;
++function trim(s){
++  //s.replace(/(^\s*)|(\s*$)/, "");
++ return rtrim(ltrim(s));
+ 
+ }
+ 
+@@ -862,16 +862,16 @@
+ 	var url = getRootPath()+"/product/prod_put_up_down?prodId="+prodId+"&action=up&currentPage="+currentPage;
+ 	$.post(url,{},function(data){
+ 		if(data=="-1"){
+-			
++
+ 		}
+ 		if(opt=="putUpPublish"){
+ 			self.location.href = getRootPath()+"/product/init";
+ 		}
+ 		$("#productListDiv").empty().html(data);
+ 		var status = $("#status_hide").val();
+-		$("select option").each(function (){  
+-			if($(this).val()==status){   
+-				$(this).attr("selected",true); 
++		$("select option").each(function (){
++			if($(this).val()==status){
++				$(this).attr("selected",true);
+ 		}});
+ 		closed();
+ 	});
+@@ -879,13 +879,13 @@
+ function begiputUpDownGoods(Obj){
+ 	var prodId = $(Obj).attr("myvalue");
+ 	var currentPage = $("#currentPage").val();
+-	
++
+ 	var putawayTime = $("#timeupupup").val();
+ 	var putdownTime = $("#timedowndowndown").val();
+ 	var startdate=new Date(putawayTime.replace(/-/g,"/"));
+-    var enddate=new Date(putdownTime.replace(/-/g,"/"));             
+-   // var date = new Date(); 
+-       
++    var enddate=new Date(putdownTime.replace(/-/g,"/"));
++   // var date = new Date();
++
+        if(startdate>enddate)
+        {
+     	   $(".shade_layout").hide();
+@@ -898,14 +898,14 @@
+ 	$.post(url,{},function(data){
+ 		$("#productListDiv").empty().html(data);
+ 		var status = $("#status_hide").val();
+-		$("select option").each(function (){  
+-			if($(this).val()==status){   
+-				$(this).attr("selected",true); 
++		$("select option").each(function (){
++			if($(this).val()==status){
++				$(this).attr("selected",true);
+ 		}});
+ 		$(".shade_layout").hide();
+ 		$("#putgoodsup").hide();
+ 	});
+-	
++
+ }
+ //定时上下架
+ function putUpDownGoodsByTime(prodId){
+@@ -916,7 +916,7 @@
+ }
+ function putUpGoods(prodId,operation){
+ 	tShowCanclePop(prodId,operation);
+-	
++
+ //	var url=getRootPath()+"/product/checktempate/"+prodId;
+ //	$.post(url,{},function(data){
+ //		var jsonObjArr = JSON.parse(data);
+@@ -934,9 +934,9 @@
+ 	$.post(url,{},function(data){
+ 		$("#productListDiv").empty().html(data);
+ 		var status = $("#status_hide").val();
+-		$("select option").each(function (){  
+-			if($(this).val()==status){   
+-				$(this).attr("selected",true); 
++		$("select option").each(function (){
++			if($(this).val()==status){
++				$(this).attr("selected",true);
+ 		}});
+ 		closed();
+ 	});
+@@ -1048,6 +1048,6 @@
+ 	window.location.href = url;
+ }
+ 
+-$(document).delegate(".sortDiv","click",function(){  
++$(document).delegate(".sortDiv","click",function(){
+ });
+ 

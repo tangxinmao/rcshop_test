@@ -1,0 +1,549 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<input type="hidden" value="$!marketType" id="marketType">
+<input type="hidden" name="isDesc" id="isDesc" value="0">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Store Withdrawl</h1>
+	 	<div class="fr">
+			<input class="btnG bht39 bfz16 fr mt12" type="button" value="Manually Generated Bill" style="width: 201px;" onclick="manuallyBill()">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<div class="mt35">
+				<div class="unit">
+					<label>Month:</label>
+					<input type="text" name="calTimeStr" id="calTimeStr" readonly>
+				</div>
+				<div class="unit">
+					<label>Status</label>
+					<select name="widStatus" id="widStatus">
+						<option value="0" >All</option>
+						<option value="1">Unconfirmed</option>
+						<option value="2">Confirmed</option>
+						<option value="4">Audited</option>
+						<option value="6">Paid</option>
+					</select>
+				</div>
+				#if(!$session.getAttribute("RcMerchant"))
+					<div class="unit">
+						<label>Store ID</label>
+						<input type="text" name="merchantId" id="merchantId" value="">
+					</div>
+				#end
+				
+			</div>
+		
+			<div class="clearfix">
+				#if(!$session.getAttribute("RcMerchant"))
+					<div class="mt10 unit">
+						<label>Store</label>
+						<input type="text" name="merchantName" id="merchantName" value="">
+					</div>
+				#end
+				<div style="float:right;" class="mt10">
+					<input class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+			
+		</div>
+		
+		<div class="sortArea">
+			<ul>
+				<li onclick="goThisPage('status0')" class="selcted">All</li>
+				<li onclick="goThisPage('status1')">Unconfirmed</li>
+				<li onclick="goThisPage('status2')">Confirmed</li>
+				<li onclick="goThisPage('status3')">Audited</li>
+				<li onclick="goThisPage('status4')">Paid</li>
+			</ul>
+		</div>
+	
+		<div id="reloadSearchMessages">
+			<div class="service_wrap">
+                #parse("withdrawl/auditWithdrawlList_inner.vm")
+			</div>
+		</div>	
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<!-- 添加弹窗 -->
+<div class="pop_windows" id="addpopwin" style="display:none;">
+	<div class="layout" id="pop1">
+		<a  class="ico_close" href="javascript:close();" ></a>
+		<div class="main">
+			<div class="hd">
+				<h2>Manually generated bill</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div>
+               		<lebel class="colortitle" style="margin-left:9px;">
+               			<span class="colorRed">*</span>
+               			Store:
+               		</lebel>
+					<select class="poptxt" name="addmerchantId" id="addmerchantId">
+						<option value="">All</option>
+						#foreach($store in $storeList)
+							<option value="$store.merchantId">$!store.name</option>
+						#end
+					</select>
+               	</div>
+               	<div style="margin-top:20px;">
+               		<lebel class="colortitle">
+               			<span class="colorRed">*</span>
+               			Month:
+               		</lebel>
+					<input type="text" class="poptxt" name="addcalTimeStr" id="addcalTimeStr" value="" readonly>
+               	</div>
+				
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="manually()" id="readnumbtn" value="submit" />
+			</div>
+		</div>
+	</div>
+	<div class="layout" id="pop2"style="display: none"></div>
+</div>
+<script  type="text/javascript" >
+/*
+ * 动态绑定日期控件
+ */
+$(function() {
+		$(".tac").parent().nextAll().each(function(){
+			var action=	$(this).children().last();
+			var actionStr=action.html();
+				action.html(	formatStr(actionStr));
+		});
+	$( "#calTimeStr" ).datepicker({
+		 changeMonth: true,  
+         changeYear: true,  
+         dateFormat: 'mm-yy',  
+         showButtonPanel: true,  
+         monthNamesShort: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],  
+         currentText: 'now',  
+         isSelMon:'true',  
+         onClose: function (dateText, inst) {  
+             var month = +$("#ui-datepicker-div .ui-datepicker-month :selected").val() + 1,  
+                 year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();  
+             if (month < 10) {  
+                 month = '0' + month;  
+             }  
+             this.value = year + '-' + month;  
+             if (typeof this.blur === 'function') {  
+                 this.blur();  
+             }  
+         }  
+	});
+	
+	$( "#addcalTimeStr" ).datepicker({
+		 changeMonth: true,  
+        changeYear: true,  
+        dateFormat: 'mm-yy',  
+        showButtonPanel: true,  
+        monthNamesShort: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],  
+        currentText: 'now',  
+        isSelMon:'true',  
+        onClose: function (dateText, inst) {  
+            var month = +$("#ui-datepicker-div .ui-datepicker-month :selected").val() + 1,  
+                year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();  
+            if (month < 10) {  
+                month = '0' + month;  
+            }  
+            this.value = year + '-' + month;  
+            if (typeof this.blur === 'function') {  
+                this.blur();  
+            }  
+        }  
+	});
+	
+	
+});
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == 'city'){
+			currentPage = $("#currentPage").val();
+		}
+		else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else if(ta == 'status0'){
+			currentPage = 1;
+			$("#widStatus").find("option[value='0']").prop("selected",true);
+		}else if(ta == 'status1'){
+			currentPage = 1;
+			$("#widStatus").find("option[value='1']").prop("selected",true);
+		}else if(ta == 'status2'){
+			currentPage = 1;
+			$("#widStatus").find("option[value='2']").prop("selected",true);
+		}else if(ta == 'status3'){
+			currentPage = 1;
+			$("#widStatus").find("option[value='4']").prop("selected",true);
+		}else if(ta == 'status4'){
+			currentPage = 1;
+			$("#widStatus").find("option[value='6']").prop("selected",true);
+		}else{
+			currentPage = ta;
+		}
+		var calTimeStr = $("#calTimeStr").val();
+		var widStatus = $("#widStatus").val();
+		if(widStatus=="0"){
+			widStatus = null;
+		}
+		var merchantId = $("#merchantId").val();
+		var merchantName = $("#merchantName").val();
+		$.post("$root/withdrawl/list", 
+				{"currentPage":currentPage,
+				 "balanceMonth":calTimeStr,
+				 "merchantId":merchantId,
+				 "merchantName":merchantName,
+				 "status":widStatus},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+	function addBannerPopWin(){
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		pop_center ('560');
+	}
+	function choseType(){
+		if($("#hrefType").val()=="1"){
+			$("#UrlDiv").hide();
+			$("#prodIdDiv").show();
+		}
+		else{
+			$("#UrlDiv").show();
+			$("#prodIdDiv").hide();
+		}
+	}
+	
+	function chosemodifyType(){
+		if($("#modifyhrefType").val()=="1"){
+			$("#modifyUrlDiv").hide();
+			$("#modifyprodIdDiv").show();
+		}
+		else{
+			$("#modifyUrlDiv").show();
+			$("#modifyprodIdDiv").hide();
+		}
+	}
+	
+	function uploadCover(){
+		var root = $("#rootsite").val();
+		$.ajaxFileUpload
+		(
+			{
+				url:root+'/general/uploadcover',
+				secureuri:false,
+				fileElementId:'cover',
+				dataType: 'json',
+				data:{},
+				success: function (data, status)
+				{
+					if( data.success )
+					{
+						$("#coverPto").prop("src",data.imgUrl);
+						$("#fileId").attr("value",data.fileid);
+					} else {
+						alert("333");
+//						alert(data.errorMsg);
+						closed_add_shade_layout();
+						alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+					}
+					createColverUploadHtml();
+				},
+				error: function (data, status, e)
+				{
+					alert("444");
+				}
+			}
+		);
+	}
+	/**
+	 * 重新绑定onchange事件
+	 */
+	function createColverUploadHtml(){
+		var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="cover" id="cover" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;top:18px;left: 163px; width: 89px;height: 29px;" />');
+		$('#cover').replaceWith( $new );
+		$new.change(uploadCover);
+	}
+	
+	function saveBanner(){
+		var hrefType = $("#hrefType").val();
+		var banSerNum = $("#banSerNum").val();
+		var url = $("#url").val();
+		var prodId = $("#prodId").val();
+		var coverPto = $("#coverPto").attr("src");
+		var objId = ""; 
+		var city = $("#addcity").val();
+		
+		$.post("$root/general/saveBanner", {"hrefType":hrefType,"banSerNum":banSerNum,"objId":prodId,"banHref":url,"banPto":coverPto,"cityId":city,"banType":"1"},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					alert(jsonObjArr.result);
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+		
+	}
+	
+	function deleteBanner(banId){
+		if(confirm("Are you sure to delete the data? If you deleted,The data can not be restore.")){
+			$.post("$root/general/delBanner", {"banId":banId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							alert("success!");
+						}
+						else{
+							alert("error!");
+						}
+						goThisPage($('#currentPage').val());
+						close();
+				    }
+			);
+		}
+	}
+	
+	function showModyfyPopup(banId,obj){
+		var $tr = $(obj).parent().parent().find("td");
+		$("#banId").val(banId);
+		var hrefType = $tr.eq(3).find("input[name='bbhrefType']").val();
+		$("#modifyhrefType").find("option[value='"+hrefType+"']").prop("selected",true); 
+		$("#modifybanSerNum").val($tr.eq(2).text());
+		if(hrefType==1){
+			$("#modifyprodIdDiv").show();
+			$("#modifyUrlDiv").hide();
+			$("#modifyprodId").val($.trim($tr.eq(4).text()));
+		}
+		else{
+			$("#modifyprodIdDiv").hide();
+			$("#modifyUrlDiv").show();
+			$("#modifyurl").val($.trim($tr.eq(4).text()));
+		}
+		var cityId = $tr.eq(5).find("input[name='theCityId']").val();
+		$("#upcity").find("option[value='"+cityId+"']").prop("selected",true);
+		$("#modifycoverPto").attr("src",$tr.eq(1).find("img").attr("src"));
+		$("#modifycoverPto").attr("url",$tr.eq(1).find("img").attr("url"));
+		$(".shade_layout").show();
+		$("#modifypopwin").show();
+		pop_center ('560');
+		
+	}
+	function modifyBanner(){
+		var banId = $("#banId").val();
+		var modifyhrefType = $("#modifyhrefType").val();
+		var modifybanSerNum = $("#modifybanSerNum").val();
+		var modifyprodId = $("#modifyprodId").val();
+		var modifyurl = $("#modifyurl").val();
+		var modifycoverPto = $("#modifycoverPto").attr("url");
+		var city = $("#upcity").val();
+		
+		$.post("$root/general/saveBanner", {"banId":banId,"hrefType":modifyhrefType,"banSerNum":modifybanSerNum,"objId":modifyprodId,"banHref":modifyurl,"banPto":modifycoverPto,"cityId":city},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					alert(jsonObjArr.result);
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	function uploadmodifyCover(){
+		var root = $("#rootsite").val();
+		$.ajaxFileUpload
+		(
+			{
+				url:root+'/general/uploadmodifycover',
+				secureuri:false,
+				fileElementId:'modifycover',
+				dataType: 'json',
+				data:{},
+				success: function (data, status)
+				{
+					if( data.success )
+					{
+						$("#modifycoverPto").prop("src",data.imgUrl);
+						$("#modifycoverPto").prop("url",data.imgUrl);
+						$("#modifyfileId").attr("value",data.fileid);
+					} else {
+						alert("333");
+//						alert(data.errorMsg);
+						closed_add_shade_layout();
+						alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+					}
+					createmodifyColverUploadHtml();
+				},
+				error: function (data, status, e)
+				{
+					alert("444");
+				}
+			}
+		);
+	}
+	/**
+	 * 重新绑定onchange事件
+	 */
+	function createmodifyColverUploadHtml(){
+		var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="modifycover" id="modifycover" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;top:18px;left: 163px; width: 89px;height: 29px;" />');
+		$('#cover').replaceWith( $new );
+		$new.change(uploadCover);
+	}
+	
+	function changeStatus(merchantWidId,status){
+		$.post("$root/withdrawl/changeStatus", {"merchantWidId":merchantWidId,"status":status},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+						goThisPage($("#currentPage").val());
+						close();
+					}
+			    }
+		);
+	}
+	
+	function cancelApply(merchantWidId){
+		if(confirm("Are you sure to cancel your request?")){
+			$.post("$root/withdrawl/cancel", {"merchantWidId":merchantWidId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							goThisPage($("#currentPage").val());
+							close();
+						}
+				    }
+			);
+		}
+	}
+	
+	function approvedApply(merchantWidId){
+		if(confirm("Are you sure to approved the request?")){
+			$.post("$root/withdrawl/approved", {"merchantWidId":merchantWidId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							goThisPage($("#currentPage").val());
+							close();
+						}
+				    }
+			);
+		}
+	}
+	
+	function unapprovedApply(merchantWidId){
+		if(confirm("Are you sure to approved the request?")){
+			$.post("$root/withdrawl/unapproved", {"merchantWidId":merchantWidId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							goThisPage($("#currentPage").val());
+							close();
+						}
+				    }
+			);
+		}
+	}
+	
+	function paid(merchantWidId){
+			$.post("$root/withdrawl/paid", {"buzId":merchantWidId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							goThisPage($("#currentPage").val());
+							close();
+						}
+				    }
+			);
+	}
+	
+	function reapply(merchantWidId){
+		if(confirm("Do you want to reapply the record?")){
+			$.post("$root/withdrawl/reapply", {"merchantWidId":merchantWidId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+							goThisPage($("#currentPage").val());
+							close();
+						}
+				    }
+			);
+		}
+	}
+	
+	function orderBoxPopup(merchantId,dateStr){
+		var iTop = (window.screen.availHeight-30-350)-500;
+		var iLeft = (window.screen.availWidth-10-500)/2-200; 
+		window.open ('$root/withdrawl/orderHistory?merchantId='+merchantId+"&dateStr="+dateStr,'newwindow','height=600,width=1000,top='+iTop+',left='+iLeft+',toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no')
+	
+	}
+/**
+ * 处理中提示框
+ */
+function processPrompt(message){
+
+    var htmls = ""+
+            ""+
+            "<div class='main'>"+
+            "<div class='bd_p10 clearfix'>"+
+            "<div class='popup_tips_title pl150 mt25 mb20 ml20'><span class='fl ml15'><img src='$root/static/images/ico/loading.gif'>"+message+"！</span></div>"+
+            "</div>"+
+            "</div>"+
+            "";
+   // $(".shade_layout").show();
+    $("#pop2").css("display","block");
+    $("#pop1").css("display","none");
+    $('#pop2').empty().html(htmls);
+   // pop_center ('500');
+}
+	function manuallyBill(){
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		pop_center ('560');
+	}
+	
+	function manually(){
+		var addmerchantId = $("#addmerchantId").val();
+		var addcalTimeStr = $("#addcalTimeStr").val();
+		if(addcalTimeStr == ""){
+			alertWarn("Please chose a month");
+			return 0;
+		}
+
+        processPrompt("In processing...");
+		$.post("$root/withdrawl/workflow", {"merchantId":addmerchantId,"calTimeStr":addcalTimeStr},
+				function(data){
+                    $("#pop2").css("display","none");
+                    $("#pop1").css("display","block");
+		         //close();
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+						goThisPage($("#currentPage").val());
+						close();
+					}
+			    }
+		);
+	}
+</script>

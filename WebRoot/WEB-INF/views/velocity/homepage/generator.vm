@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Expires" CONTENT="0">
+<meta http-equiv="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="Pragma" CONTENT="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>merchant list</title>
+#set($root=$request.getContextPath())
+<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+<link href="$root/static/css/seller_center.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/common.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<input type="hidden" id="rootsite" value="$root">
+<div style="text-align: center; margin-top: 100px;">
+	<h1 style="font-size: 70px; color: #3f326d;">Home Page Generator</h1>
+	<p style="margin-top: 50px; font-size: 30px; color: #37538d;">When you finish editing the homepage infomation,</p>
+	<p style="margin-top: 50px; font-size: 30px; color: #37538d;">you need to click the "Generate" button to rebuild homepage.</p>
+	<input type="button" onclick="generator()" id="generator" value="Generate" style="margin-top: 100px;background-image:url('$root/static/images/generator.png');height: 100px;
+    width: 640px;
+    font-size: 70px;
+    color: white;">
+</div>
+<script type="text/javascript" >
+	function generator(){
+		$.post("$root/general/generating", {},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					if(jsonObjArr.code=="1"){
+						alert("success!")
+					}
+					else{
+						alert("error!");
+					}
+			    }
+		);
+	}
+</script>
+</body>
+</html>

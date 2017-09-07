@@ -1,0 +1,39 @@
+<table class="table order_table mt10" id="review">
+	<tr>
+		<th>Top-up ID</th>
+		<th>Top-up Amount</th>
+		<th>Buyer ID</th>
+		<th>Buyer Username</th>
+		<th>Operator ID</th>
+		<th>Operator</th>
+		<th hidden>City</th>
+		<th>Top-up Center</th>
+		<th>Top-up Time</th>
+		<th hidden>Actions</th>
+	</tr>
+
+	
+#foreach($record in $list)
+				<tr>
+					<td>$!record.rechargeRecordId</td>
+					<td>Rp #if ($!record.amount)$viewutil.moneyStringFormat($!record.amount)#else 0 #end</td>
+					<td>$!record.member.memberId</td>
+					<td>$!record.member.name</td>
+					<td>$!record.rechargeMember.memberId</td>
+					<td>$!record.rechargeMember.account</td>
+					<td hidden>$!record.rechargeStation.city.name</td>
+					<td>$!record.rechargeStation.stationName</td>
+					<td>$!viewutil.dateFormat($!record.createTime)</td>
+					<td hidden>
+						<a href="javascript:void(0)" onclick="showModifyPopup('$!record.stationId',this)">Edit</a>
+						|
+						<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete the station? If you deleted,The data can not be restore.',&quot;deleteStation('$!record.stationId')&quot;)">Delete</a>
+					</td>
+				</tr>
+				#end
+</table>
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

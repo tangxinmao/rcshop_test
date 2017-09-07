@@ -1,0 +1,375 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Navigation Bar</h1>
+	 	<div class="fr">
+			<!-- <input class="btnG bwt163 bht39 bfz16 fr mt12" type="button" name="" onclick="addMenuPopWin()" value="Add"> -->
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div id="reloadSearchMessages" class="mt5">
+			<div class="service_wrap">
+				<table class="table order_table mt10" id="table">
+				<tbody>
+					<th>ID</th>
+					<th>Icon</th>
+					<th>Serial Number</th>
+					<th>Name</th>
+					<th>Value</th>
+				#*	<th>Actions</th>*#
+					#set($num=1)
+					#foreach($menu in $list)
+					<tr>
+						<td>$num</td>
+						<td><img src="$!menu.icon" style="max-height: 60px;"></td>
+						<td>
+							$!menu.seq
+						</td>
+						<td>$!menu.name</td>
+						<td>
+							<input type="hidden" name="amnVal" value="$!menu.amnVal">
+							#if($!menu.location=="page1")
+								Top up Center page
+							#elseif($!menu.location=="page2")
+								coupon page
+							#else
+								other
+							#end
+						</td>
+						#*<td>
+							<span>Edit</span> |
+							<span>Delete</span>
+							<!--  <a href="javascript:void(0)" onclick="showModyfyPopup('$!menu.appMenuId',this)">Edit</a> |
+							<a href="javascript:void(0)" onclick="deleteMenu('$!menu.appMenuId')">Delete</a>-->
+						</td>*#
+					</tr>
+					#set($num=$num+1)
+					#end
+					
+				</tbody>
+				</table>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>	
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+	<!-- 添加弹窗 -->
+	<div class="pop_windows" id="addpopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Add Menu</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+				<form id="jform">
+                	<div>
+                		<lebel class="colortitle">
+                			<span class="colorRed">*</span>
+                			Name:
+                		</lebel>
+						<input type="text" style="width:300px" data-rules="{required:true}" name="amnName" id="amnName" value="">
+                	</div>
+					<div style="margin-top:20px;"></div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: -40px;">
+							<span class="colorRed">*</span>
+							Serial Numer:
+						</lebel>
+						<input type="text" style="width:300px" data-rules="{required:true}" name="serNum" id="serNum" value="">
+					</div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: -22px;">
+							<span class="colorRed">*</span>
+							Href Page:
+						</lebel>
+						<input type="text" style="width:300px" name="amnVal" id="amnVal" value="">
+					</div>
+					<div style="margin-top:20px;"></div>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 15px;"><span class="colorRed">*</span>Icon:</lebel>
+						
+						<img src="$root/static/images/head_img.png" id="coverPto" style="height:70px; width:70px;">
+						<input type="button" class="button" value="Upload">
+				        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 129px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+				</form>
+				</div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="button button-primary"  type="button" onclick="saveMenu()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div> 
+	
+	<!-- 修改弹窗 -->
+	<div class="pop_windows" id="modifypopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Update Menu</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<input type="hidden" name="amnId" id="amnId" value="">
+					<div>
+                		<lebel class="colortitle">
+                			<span class="colorRed">*</span>
+                			Name:
+                		</lebel>
+						<input type="text" style="width:300px" data-rules="{required:true}" name="modifyamnName" id="modifyamnName" value="">
+                	</div>
+					<div style="margin-top:20px;"></div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: -40px;">
+							<span class="colorRed">*</span>
+							Serial Numer:
+						</lebel>
+						<input type="text" style="width:300px" data-rules="{required:true}" name="modifyserNum" id="modifyserNum" value="">
+					</div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: -22px;">
+							<span class="colorRed">*</span>
+							Href Page:
+						</lebel>
+						<input type="text" style="width:300px" name="modifyamnVal" id="modifyamnVal" value="">
+					</div>
+					<div style="margin-top:20px;"></div>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 15px;"><span class="colorRed">*</span>Icon:</lebel>
+						
+						<img src="$root/static/images/head_img.png" id="modifycoverPto" style="height:70px; width:70px;">
+						<input type="button" class="button" value="Upload">
+				        <input type="file" name="modifycover" size="1" id="modifycover" onchange="uploadmodifyCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 129px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+				</div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+					<input class="button button-primary"  type="button" onclick="modifyMenu()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div> 
+<script  type="text/javascript" >
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		$.post("$root/general/menuList", {"currentPage":currentPage},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+	function addMenuPopWin(){
+		$(".shade_layout").show();
+		$("#addpopwin").show();
+		pop_center ('560');
+	}
+	function choseType(){
+		if($("#hrefType").val()=="1"){
+			$("#UrlDiv").hide();
+			$("#prodIdDiv").show();
+		}
+		else{
+			$("#UrlDiv").show();
+			$("#prodIdDiv").hide();
+		}
+	}
+	
+	function uploadCover(){
+		var root = $("#rootsite").val();
+		$.ajaxFileUpload
+		(
+			{
+				url:root+'/general/uploadcover',
+				secureuri:false,
+				fileElementId:'cover',
+				dataType: 'json',
+				data:{"flag":"1"},
+				success: function (data, status)
+				{
+					if( data.success )
+					{
+						$("#coverPto").prop("src",data.imgUrl);
+						$("#fileId").attr("value",data.fileid);
+					} else {
+						alertWarn("333");
+//						alertWarn(data.errorMsg);
+						closed_add_shade_layout();
+						alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+					}
+					createColverUploadHtml();
+				},
+				error: function (data, status, e)
+				{
+					alertWarn("444");
+				}
+			}
+		);
+	}
+	/**
+	 * 重新绑定onchange事件
+	 */
+	function createColverUploadHtml(){
+		var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="cover" id="cover" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;top:18px;left: 129px; width: 89px;height: 29px;" />');
+		$('#cover').replaceWith( $new );
+		$new.change(uploadCover);
+	}
+	
+	function saveMenu(){
+		var amnName = $("#amnName").val();
+		var serNum = $("#serNum").val();
+		var amnVal = $("#amnVal").val();
+		var coverPto = $("#coverPto").attr("src");
+		var fileId = $("#fileId").val();
+		if(amnName==""){
+			alertWarn("Please input the Name");
+			return 0;
+		}
+        var regInt = /^[0-9]+[0-9]*]*$/;  //正整数
+        if(!regInt.test(serNum)){
+            if(serNum != ''){
+                alertWarn("Serial Numer  must be positive integer!");
+                $("#serNum").focus();
+                return 0;
+            }else{
+                alertWarn("please input a Serial Numer!")
+            }
+
+        }
+		if(amnVal==""){
+			alertWarn("Please input the href page.");
+			return 0;
+		}
+		if(fileId==""){
+			alertWarn("Please upload image");
+			return 0;
+		}
+		$.post("$root/general/saveMenu", {"name":amnName,"seq":serNum,"location":amnVal,"icon":coverPto},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					alertWarn(jsonObjArr.result);
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+		
+	}
+	
+	function deleteMenu(appMenuId){
+		if(confirm("Are you sure to delete the data? If you deleted,The data can not be restore.")){
+			$.post("$root/general/delMenu", {"appMenuId":appMenuId},
+					function(data){
+						var jsonObjArr = JSON.parse(data);
+						if(jsonObjArr.code=="1"){
+						}
+						else{
+							alertWarn("error!");
+						}
+						goThisPage($('#currentPage').val());
+						close();
+				    }
+			);
+		}
+	}
+	
+	function showModyfyPopup(amnId,obj){
+		var $tr = $(obj).parent().parent().find("td");
+		$("#amnId").val(amnId);
+		$("#modifyserNum").val($.trim($tr.eq(3).text()));
+		$("#modifyamnName").val($tr.eq(2).text());
+		$("#modifycoverPto").attr("src",$tr.eq(1).find("img").attr("src"));
+		$("#modifyamnVal").val($tr.eq(4).find("input[name='amnVal']").val());
+		$(".shade_layout").show();
+		$("#modifypopwin").show();
+		pop_center ('560');
+		
+	}
+	function modifyMenu(){
+		var amnId = $("#amnId").val();
+		var amnName = $("#modifyamnName").val();
+		var serNum = $("#modifyserNum").val();
+		var amnVal = $("#modifyamnVal").val();
+		var coverPto = $("#modifycoverPto").attr("src");
+		
+		$.post("$root/general/saveMenu", {"amnId":amnId,"amnName":amnName,"serNum":serNum,"amnVal":amnVal,"amnIcon":coverPto},
+				function(data){
+					var jsonObjArr = JSON.parse(data);
+					goThisPage($('#currentPage').val());
+					close();
+			    }
+		);
+	}
+	function uploadmodifyCover(){
+		var root = $("#rootsite").val();
+		$.ajaxFileUpload
+		(
+			{
+				url:root+'/general/uploadmodifycover',
+				secureuri:false,
+				fileElementId:'modifycover',
+				dataType: 'json',
+				data:{},
+				success: function (data, status)
+				{
+					if( data.success )
+					{
+						$("#modifycoverPto").prop("src",data.imgUrl);
+						$("#modifyfileId").attr("value",data.fileid);
+					} else {
+						alertWarn("333");
+//						alertWarn(data.errorMsg);
+						closed_add_shade_layout();
+						alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+					}
+					createmodifyColverUploadHtml();
+				},
+				error: function (data, status, e)
+				{
+					alertWarn("444");
+				}
+			}
+		);
+	}
+	/**
+	 * 重新绑定onchange事件
+	 */
+	function createmodifyColverUploadHtml(){
+		var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="modifycover" id="modifycover" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;top:18px;left: 129px; width: 89px;height: 29px;" />');
+		$('#modifycover').replaceWith( $new );
+		$new.change(uploadCover);
+	}
+</script>

@@ -1,0 +1,378 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/base_prod_put_updown.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<input type="hidden" value="$!marketType" id="marketType">
+<input type="hidden" name="isDesc" id="isDesc" value="0">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Product List</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<div class="mt35">
+				<div class="unit">
+					<label>Product ID</label>
+					<input type="text" name="prodId" id="prodId" value="$!{productParam.prodId}">
+				</div>
+				<div class="unit">
+					<label>Product Name</label>
+					<input type="text" name="prodName" id="prodName" value="$!{productParam.prodName}">
+				</div>
+				<div class="unit">
+					<label>Type</label>
+					<select  id="productType" name="productType" >
+						<option value="" >All</option>
+						<option value="1" >Product</option>
+						<option value="2" >Package</option>
+					</select>
+					
+				</div>
+				<div class="mt10" style="float:right;">
+					<input  class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+		</div>
+		
+		<div class="service_wrap mt10" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+						<table class="table order_table mt10">
+							<tr>
+								<th width="6%"><a href="javascript:void(0)" onclick="chooseAllCheckbox()">All</a></th>
+								<th>Product Name</th>
+								<th width="10%">Product ID</th>
+								<th width="10%">Price</th>
+								<th width="20%">Brand</th>
+								<th width="10%">Type</th>
+								<!--  <th width="9%">Remove from Shelves Time</th>-->
+								<th width="10%" class="tac">Actions</th>
+							</tr>
+							#if($productList&&!$productList.isEmpty())
+		                              #foreach($product in $productList)
+		                              	#if ( "00" != ${product.prodStatus})
+							<tr>
+								<td>
+									<input type="checkbox" name="radio" id="radio" value="$!{product.prodId}">
+								</td>
+								<td>
+                                    <div class="media">
+                                        <div class="media-left media-middle">
+                                            <img class="media-object" src="$!{product.prodImgUrl}?rs=90_90" alt="$!{product.prodImgUrl}?rs=90_90" style="width:60px;height: 60px">
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 title="$!{product.name}" class="media-heading" style="width: 100px; white-space: nowrap; overflow: hidden;text-overflow: ellipsis;">
+												$!{product.name}
+                                            </h4>
+
+                                        </div>
+                                    </div>
+								#*	<div class="fl">
+										<img alt="" src="$!{product.prodImgUrl}?rs=90_90" />
+									</div>
+									<div class="mt10">$!{product.name}</div>*#
+								</td>
+								<td>$!{product.prodId}</td>
+								<td>Rp $viewutil.moneyStringFormat($!{product.price})</td>
+								<td>$!{product.prodBrand.name}</td>
+								<td>
+									#if($product.type==1)
+										Product
+									#elseif($product.type==2)
+										Package
+									#elseif(!$product.type)
+										Product
+									#end
+								</td>
+								<!-- <td>
+								  #if(${product.prodOutOfStockTime})
+								    $viewutil.dateFormat(${product.prodOutOfStockTime})
+								  #else
+								    --
+								  #end
+								</td> -->
+								<td>
+									#if($!loginMemberInfo.roleId!='1')
+								#if(!$session.getAttribute("RcVendor"))
+									#if ( 2 != ${product.status})
+									<form id="updategoods" method="post" action="$root/product/initbaseupdate">
+										<input type="hidden" id="formprodId" name="prodId" value="$!{product.prodId}">
+									</form>
+									#end
+									<!-- |
+									<a href="#">定时上下架</a> -->
+									#if ( 2 == ${product.status})
+										<span>Edit</span> 
+										| <span>Delete</span>
+									#else
+										<!-- <a href="javascript:void(0)" onclick="checkstore('$!{product.prodId}','updategoods');">Edit</a> -->
+										<a href="javascript:void(0)" onclick="javascript:$(this).parent().find('form').submit();">Edit</a>
+										
+									#if(!$session.getAttribute("RcMerchant"))
+									|
+									<a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete product?',&quot;deleteProd('$!{product.prodId}')&quot;)">Delete</a>
+									#end
+									#end
+									
+									<!-- #if ( "04" == ${product.prodStatus})
+									|
+										<a href="javascript:void(0)" onclick="putUpDownGoodsByTime('$!{product.prodId}')">定时上下架</a>
+									#end -->
+								#else
+									<span>Edit</span> |
+									<span>Delete</span> |
+									<span>Remove from Shelves</span> |
+									<span>Update Stock</span> 
+								#end
+								#end
+								</td>
+							</tr>
+							#end
+							#end
+							#end
+						</table>
+						<div class="batsOpt">
+							<h1>Bulk Action</h1>
+							<input class="btnG bwt60 bht30 bfz12 fl ml10" type="button" value="Copy" onclick="batsCopy()">
+							#if(!$session.getAttribute("RcMerchant"))
+							<input class="btnO bwt60 bht30 bfz12 fl ml10" type="button" value="Delete" onclick="batsDelete()">
+					   		#end
+					   </div>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<!-- 添加品牌弹窗 -->
+<div class="pop_windows" id="addpopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Add Brand</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle"><span class="colorRed">*</span>Brand Name:</lebel><input class="poptxt" type="text" name="prodBrandName" id="prodBrandName" value=""></div>
+				<div style="margin-top:20px;"></div>
+				<input type="hidden" name="fileId" id="fileId" value="">
+				<div style="position:relative;">
+					<lebel class="colortitle" style="margin-left: 40px;"><span class="colorRed">*</span>Logo:</lebel> 
+					
+					<img class="ml13" src="$root/static/images/ico/icon_image.png" id="photocover" style="width:70px; height:70px;">
+					<input type="button" class="button" value="Upload">
+			        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+				</div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 8px;"><span class="colorRed">*</span>Description:</lebel><textarea class="poptxt" style="height:100px;" name="prodBrandDesc" id="prodBrandDesc" value=""></textarea></div>
+			</div>
+		</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="addNewBrand()" id="addnewbtn" value="Submit" />
+			</div>
+	</div>
+</div>
+
+
+	<!-- 查看库存 div begin -->
+<div class="pop_windows" id="skuStorageDiv1" style="display:none;">
+	<div class="layout">
+		<b class="ico_close" onclick="closeStorageDiv();"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+		<div class="main">
+			<div class="hd">
+				<h2>Check Storage</h2>
+			</div>
+			<div class="bd_p10">
+               	<div class="scrollTable_hd">
+                       <table class="table" id="skuStorageTable">
+                           <tr>
+	                           <th class="tac" style="width:20%">Sku ID#</th>
+	                           <th class="tac" style="width:20%">Sku Value</th>
+	                           <th class="tac" style="width:20%">Sku Stock</th>
+	                           <th class="tac" style="width:20%">Sku Origin Price</th>
+	                           <th class="tac" style="width:20%">Sku Price</th>
+                           </tr>
+                       </table>
+                   </div>
+                   <div class="scrollTable_bd tac">
+                       <table class="table" id="skuStorageTbody">
+                       </table>
+                   </div>
+			</div>
+			<div class="popup_btn_con">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="closeStorageDiv();" name="" value="OK" />
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 查看库存 div end -->
+<!-- 修改SKU库存 div begin -->
+<div class="pop_windows" id="skuStorageDiv2" style="display:none;">
+	<div class="layout">
+		<b class="ico_close" onclick="closeStorageDiv();"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+		<div class="main">
+			<div class="hd">
+				<h2>Update Storage</h2>
+			</div>
+			<div class="bd_p10">
+               	<div class="scrollTable_hd">
+                       <table class="table" id="skuStorageTable2">
+                           <tr>
+                               <th class="tac" style="width:20%">Sku ID#</th>
+	                           <th class="tac" style="width:20%">Sku Value</th>
+	                           <th class="tac" style="width:20%">Sku Stock</th>
+	                           <th class="tac" style="width:20%">Sku Origin Price</th>
+	                           <th class="tac" style="width:20%">Sku Price</th>
+                           </tr>
+                       </table>
+                   </div>
+                   <div class="scrollTable_bd tac">
+                       <table class="table" id="skuStorageTbody2">
+                       </table>
+                   </div>
+			</div>
+			<div class="popup_btn_con">
+				<input class="btnG bwt100 bht30 bfz16" type="button" id="updateStorage" onclick="beginUpdateSkuStorage()"  value="Submit" />
+				<input class="btnC bwt100 bht30 bfz16" type="button" name="" onclick="closeStorageDiv();" value="Cancel" />
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 修改SKU库存 div end -->
+<!-- 修改商品库存 div begin -->
+<div class="pop_windows" id="skuStorageDiv3" style="display:none;">
+	<div class="layout">
+		<b class="ico_close" onclick="closeStorageDiv();"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+		<div class="main">
+			<div class="hd">
+				<h2>Update Storage</h2>
+			</div>
+			<div class="bd_p10">
+               	<div class="scrollTable_hd">
+	                <table class="table" id="skuStorageTable3">
+	                    <tr>
+                        	<th class="tac" style="width:20%">Product ID</th>
+	                        <th class="tac" style="width:20%">Product Name</th>
+	                        <th class="tac" style="width:20%">Stock</th>
+	                        <th class="tac" style="width:20%">Origin Price</th>
+	                        <th class="tac" style="width:20%">Current Price</th>
+	                    </tr>
+	                </table>
+                 </div>
+                 <div class="scrollTable_bd tac">
+	                 <table class="table" id="skuStorageTbody3">
+		                 <tr>
+			               	  <td width='202'></td>
+			               	  <td width='189'></td>
+			               	  <td width='105'>
+			               	  <div class='amount_wrap'>
+				               	  <a class='minus_ico' id='reduce' href='javascript:void(0)' onclick='reduceNum(this)'>-</a>
+				               	  <input type='text' class='width40' name='prodStorage' id='prodStorage' value='" + jsonArr[i].PROD_STORAGE + "'>
+				             	  <a class='plus_ico'  id='increase' href='javascript:void(0)'  onclick='increaseNum(this)'>+</a>
+			               	  </div>
+			               	  </td>
+			               	  <td></td>
+		                 </tr>
+	                 </table>
+                 </div>
+			</div>
+			<div class="popup_btn_con">
+				<input class="btnG bwt100 bht30 bfz16" type="button" id="updateStorage" onclick="beginUpdateProdStorage()"  value="Submit" />
+				<input class="btnC bwt100 bht30 bfz16" type="button" name="" onclick="closeStorageDiv();" value="Cancel" />
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 修改商品库存 div end -->
+
+<!-- 查看商品库存 div begin -->
+<div class="pop_windows" id="skuStorageDiv4" style="display:none;">
+	<div class="layout">
+		<b class="ico_close" onclick="closeStorageDiv();"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+		<div class="main">
+			<div class="hd">
+				<h2>Update Storage</h2>
+			</div>
+			<div class="bd_p10">
+               	<div class="scrollTable_hd">
+                       <table class="table" id="skuStorageTable4">
+                           <tr>
+                               <th class="tac" style="width:20%">Product ID</th>
+		                       <th class="tac" style="width:20%">Product Name</th>
+		                       <th class="tac" style="width:20%">Stock</th>
+		                       <th class="tac" style="width:20%">Origin Price</th>
+		                       <th class="tac" style="width:20%">Current Price</th>
+                           </tr>
+                       </table>
+                   </div>
+                   <div class="scrollTable_bd tac">
+                       <table class="table" id="skuStorageTbody4">
+                       </table>
+                   </div>
+			</div>
+			<div class="popup_btn_con">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="closeStorageDiv();" name="" value="OK" />
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 查看商品库存 div end -->
+<div class="pop_windows" id="putgoodsup" style="display:none;">
+	<div class="layout">
+		<b class="ico_close" onclick="closeStorageDiv();"><!-- <a href="javascript:closeStorageDiv();" >关闭</a> --></b>
+		<div class="main">
+			<div class="hd">
+				<h2>定时上下架</h2>
+			</div>
+			<div class="bd_p10">
+               	上架时间：<input class="short" readonly type="text" name="timeupupup" id="timeupupup" value="">
+               	下架时间：<input class="short" readonly type="text" name="timedowndowndown" id="timedowndowndown" value="">
+			</div>
+			<div class="popup_btn_con">
+				<input class="btn btn-xs btn_orange" type="button" myvalue="" id="upupsubmit" onclick="begiputUpDownGoods(this)"  value="确定" />
+				<input class="btn btn-xs btn_gray" type="button" name="" onclick="closeStorageDiv();" value="取消" />
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 复制商品弹窗 -->
+<div class="pop_windows" id="copypopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Copy products to Other Stores</h2>
+			</div>
+			<div class="bd_p10">
+				<div class="picturespace_search_wrap">
+					<span style="float: inherit;">
+						<input style="width: 381px; padding-left: 42px;" class="ipttxt" type="text" name="" id="searchk" placeholder="Search store">
+						<input class="btn" type="button" name="" value="" disabled="disabled" style="top: 4px; left: 10px;">
+					</span>
+				</div>
+				<div class="scrollTable_hd">
+                     <table class="table" id="storeTable">
+                         <tr>
+                             <th class="tac">Store</th>
+                         </tr>
+                     </table>
+                 </div>
+                 
+                 <div class="scrollTable_bd tac">
+                     <table class="table" id="storeTbody">
+                     </table>
+                 </div>
+			</div>
+		</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="" style="text-align:center; height:40px;">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="beginCopyOpt()" id="addnewbtn" value="Submit" />
+			</div>
+	</div>
+</div>
+<div class="pop_windows"  id="open_returnPop" style="display:none;">
+
+</div>

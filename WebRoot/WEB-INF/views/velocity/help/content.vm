@@ -1,0 +1,21 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Banner list" )
+#set($root=$request.getContextPath())
+<style type="text/css">
+body{font-size: 20px;}
+</style>
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Help List</h1>
+	 	<div class="fr">
+			<input class="button" type="button" value="Exit to Preview" onclick="javascript:self.location='$root/help/detail'">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG" style="min-height:460px;">
+			<div class="mt25 ml20 mr20">
+			$html
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Expires" CONTENT="0">
+<meta http-equiv="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="Pragma" CONTENT="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>merchant list</title>
+#set($root=$request.getContextPath())
+<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+<link href="$root/static/css/seller_center.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="$root/static/css/common.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<input type="hidden" id="rootsite" value="$root">
+<div class="entryGoods_selectType">
+	<div class="tit">
+		
+	</div>
+	<input type="hidden" name="prodCatId" id="prodCatId" value="$!prodCatId">
+	<div class="bd">
+		Binding properties to:
+		<span class="sel_item colorRed">
+			$!categoryName
+		</span>
+	</div>
+</div>
+<div>
+	<div class="goodsSelect_area">
+		<div id="all" class="selectItem entryGoodsSelect" style="margin-left: 137px;">
+			<h3>Unselected</h3>
+			<ul>
+				#foreach($prop in $list)
+					<li mydata="$!prop.prodPropId">$!prop.name</li>
+				#end
+			</ul>
+		</div>
+		<div style="float: left;">
+			<input style="margin-left:25px;margin-right:28px;margin-top:70px;width: 49px;" class="submit ml10" type="button" name="" onclick="addProp()" value="Add >>">
+			<input style="position: absolute;margin-top:51px;margin-left:25px;width: 49px;" class="submit2 ml10" type="button" name="" onclick="removeProp()" value="<< Remove">
+		</div>
+		<div id="mine" class="selectItem entryGoodsSelect">
+			<h3>Selected</h3>
+			<ul>
+				#foreach($result in $resultList)
+					<li mydata="$!result.prodPropId">$!result.name</li>
+				#end
+			</ul>
+		</div>
+	</div>
+</div>
+<div style="text-align: center; margin-top:60px;">
+<input class="btnG bwt125 bht39 bfz16 mt12"  type="button" onclick="saveModify()" id="" value="Submit" />
+</div>
+<script  type="text/javascript" >
+$(document).delegate("#all ul li","click",function(){
+	$("#thirdItems ul").html("");
+//	$("#fourItems ul").html("");
+//	$("#fiveItems ul").html("");
+	$(this).parent().find("li").each(function(){
+		$(this).removeClass("selected");
+	});
+	$(this).addClass("selected");
+});
+
+$(document).delegate("#mine ul li","click",function(){
+	$("#thirdItems ul").html("");
+//	$("#fourItems ul").html("");
+//	$("#fiveItems ul").html("");
+	$(this).parent().find("li").each(function(){
+		$(this).removeClass("selected");
+	});
+	$(this).addClass("selected");
+});
+
+function addProp(){
+	var name = $("#all ul").find("li[class='selected']").text();
+	var id = $("#all ul").find("li[class='selected']").attr("mydata");
+	var li = "<li mydata='"+id+"'>"+name+"</li>";
+	$("#mine ul").append(li);
+	$("#all ul").find("li[class='selected']").remove();
+}
+function removeProp(){
+	var name = $("#mine ul").find("li[class='selected']").text();
+	var id = $("#mine ul").find("li[class='selected']").attr("mydata");
+	var li = "<li mydata='"+id+"'>"+name+"</li>";
+	$("#all ul").append(li);
+	$("#mine ul").find("li[class='selected']").remove();
+}
+
+function saveModify(){
+	var ids = "";
+	var root = $("#rootsite").val();
+	var prodCatId = $("#prodCatId").val();
+	var type = getUrlParam("type");
+	$("#mine ul").find("li").each(function(){
+		if(ids==""){
+			ids = $(this).attr("mydata");
+		}
+		else{
+			ids = ids + ",,," + $(this).attr("mydata");
+		}
+	});
+	$.post(root+"/prodprop/catBindProp", {"prodPropIds":ids,"prodCatId":prodCatId,"type":type},
+			function(data){
+			var jsonObjArr = JSON.parse(data);
+			if(jsonObjArr.code="1"){
+				alertWarn("Bind success!")
+			}
+			
+	});
+}
+//获取url中的参数
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    if (r != null) return unescape(r[2]); return null; //返回参数值
+}
+//警告提示框
+function alertWarn(message){
+	closed_add_shade_layout();
+	var htmls = '<div id="BDIWFYBUIWBFNQP" class="shade_layout" ></div><div id="NIUGSIHNAWQIPOHFC" class="pop_windows" style="width: 560px; margin-left: -280px; margin-top: -81px;"> <div class="layout"> <b class="ico_close" onclick="closed_add_shade_layout()">关闭</b> <div class="main"> <div class="bd_p10 clearfix"> <div class="popup_tips_title mt25 mb20 ml20"> <b class="ico"></b> </div><p class="tac fontSize120 mb20">'+message+'</p>  </div> <div class="freightTemplet_btns mt15"> <input type="button" onclick="closed_add_shade_layout()" value="OK" class="btnG bwt100 bht30 bfz16 btrau">  </div> </div> </div>';
+	$('body').append(htmls);
+	pop_center ('560');
+}
+//清除提示框
+function closed_add_shade_layout(){
+	//清除提示框
+	if($('#BDIWFYBUIWBFNQP').length>0){
+		$('#BDIWFYBUIWBFNQP').detach();
+	}
+	if($('#NIUGSIHNAWQIPOHFC').length>0){
+		$('#NIUGSIHNAWQIPOHFC').detach();
+	}
+	if($('.shade_layout').length>0){
+		 $('.shade_layout').hide();
+		 $(".pop_windows").hide();
+	}
+}
+/* 
+弹出窗口居中插件
+pop_center ('330') 调用
+*/
+function pop_center(width) {
+	var $ml = -width / 2,
+		$w = $(document).width(),
+		$h = $(document).height();
+	$(".shade_layout").css({
+		width: $w,
+		height: $h,
+		opacity: 0.5
+	});
+	$(".shade_layout").show();
+	$(".pop_windows").css({
+		width: width,
+		'margin-left': $ml
+	});
+	var $height = $(".pop_windows").height(),
+		$mt = -$height / 2;
+	$(".pop_windows").css({
+		'margin-top': $mt
+	});
+};
+</script>
+</body>
+</html>

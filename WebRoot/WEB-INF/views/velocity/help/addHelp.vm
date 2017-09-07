@@ -1,0 +1,182 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Product Release" )
+#set($extJs = "/static/js/ckeditor/ckeditor.js")
+#set($root=$request.getContextPath())
+<script type="text/javascript">
+	$(document).ready(function() {
+		//初始化demo中的数据
+		//restoreData();
+		
+		//初始化CKEDITOR
+		CKEDITOR.disableAutoInline = true;
+		var contenthandle = CKEDITOR.replace( 'content' ,{
+			toolbar :
+	             [
+	                //加粗     斜体，     下划线      穿过线      下标字        上标字
+	                ['Bold','Italic','Underline','Strike','Subscript','Superscript'],
+	                // 数字列表          实体列表            减小缩进    增大缩进
+	                ['NumberedList','BulletedList','-','Outdent','Indent'],
+	                //左对 齐             居中对齐          右对齐          两端对齐
+	                ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+	                //超链接  取消超链接 锚点
+	                ['Link','Unlink','Anchor'],
+	                //   表格       水平线            表情       特殊字符        分页符
+	                ['Table','HorizontalRule','Smiley','SpecialChar'],
+	                '/',
+	                // 样式       格式      字体    字体大小
+	                ['Styles','Format','Font','FontSize'],
+	                //文本颜色     背景颜色
+	                ['TextColor','BGColor'],
+	                //全屏           显示区块
+	                ['Maximize', 'ShowBlocks','Source']
+	             ],
+			language: 'en-au',
+			height:300,
+			allowedContent: true
+		});
+	}); 
+</script>
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25" style="border-bottom: none;">
+	 	<h1 class="fl">Help List > Add Help</h1>
+	 	<div class="fr">
+			<input style="font-size: 18px;" class="button" type="button" value="Back to Help List" onclick="javascript:self.location='$root/help/detail'">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="entG">
+			<div class="step_group">
+				<input type="hidden" name="helpId" id="helpId" value="$help.helpId">
+				<p>
+					<label class="colortitle"><span class="colorRed">*</span>Title:</label>
+					<input type="text" class="text" style="width:400px" name="title" id="title" value="">
+				</p>
+				<p>
+					<label class="colortitle"><span class="colorRed">*</span>Type:</label>
+					<input type="text" class="text" style="width:400px" name="type" id="type" value="">
+				</p>
+				<p>
+					<label class="colortitle"><span class="colorRed">*</span>Serial Number</label>
+					<input type="text" class="text" style="width:400px" name="serialNum" id="serialNum" value="">
+				</p>
+				<div class="goodsAttr goodsImg">
+					<div class="goodsAttr_hd">
+						<span class="colorRed">*</span>Content:
+					</div>
+					<div class="goodsAttr_bd">
+						<textarea id="content">$!html</textarea>
+					<div class="imgManage">
+						<div class="imgManage_hd">
+							<!-- <input type="button"  id="yhtest" value="测试">-->
+							<div class="button_up" style="position: relative;">
+							
+								<i class="btn_upfile" onclick="javascript:void(0)">Upload</i>
+								<input type="file" name="image" size="1" id="image" onchange="uploadImage('new')" style="opacity:0; filter: Alpha(Opacity=0); height:24px; cursor:pointer;z-index:1;position: absolute;left: 1px; width:62px; overflow:hidden; top: 0;" size=1/>
+							</div>
+						</div>
+					</div>
+					<div class="imgManage_bd" style="display:none">
+								<ul class="imgList" id="ckeditorspace">
+								</ul>
+							</div>
+					</div>
+				</div>
+				<div id="image_tip"></div>
+			</div>
+			<div class="btns tac mt25 pb15">
+					<input type="button" class="btnG bwt100 bht30 bfz16" value="Save" onclick="submit11()" style="margin-left:170px;">
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+function submit11(){
+	var root = $("#rootsite").val();
+	var title = $("#title").val();
+	var type = $("#type").val();
+	var serialNum = $("#serialNum").val();
+	var content =  CKEDITOR.instances['content'].getData();
+	var regInt = /^[0-9]+[0-9]*]*$/;  //正整数
+	if(title==""){
+		alertWarn("Please input Title value!");
+		return 0;
+	}
+	if(type==""){
+		alertWarn("Please input Type value!");
+		return 0;
+	}
+	if(serialNum==""){
+		alertWarn("Please input serial number value!");
+		return 0;
+	}
+	if(!regInt.test(serialNum)){
+		alertWarn("Serial Number must be positive integer!");
+		return 0;
+	}
+	if(content==""){
+		alertWarn("Please input content value!");
+		return 0;
+	}
+	
+	$.post(root+"/help/save", {"name":title,"description":type,"content":content,"seq":serialNum},
+			function(data){
+			var jsonObjArr = JSON.parse(data);
+			if(jsonObjArr.code=="1"){
+				alert("success!");
+				self.location="$root/help/detail";
+			}
+	});
+}
+
+//上传图片
+function uploadImage(flag){
+	var root = $("#rootsite").val();
+	$.ajaxFileUpload
+	(
+		{
+			url:root+'/help/uploadimage',
+			secureuri:false,
+			fileElementId:'image',
+			dataType: 'json',
+			data:{},
+			success: function (data, status)
+			{
+				if( data.success )
+				{
+					CKEDITOR.instances['content'].insertHtml("<img style='max-width: 260px; height: auto;' src="+data.imgUrl+">");
+				} else {
+					if(data.imgUrl=="001"){
+						alert("上传的图片大于5M，请压缩后再上传！");
+					}
+					else if(data.imgUrl=="002"){
+						alert("请选择正确的图片上传！");
+					}
+					else{
+						alert("data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员'");
+					}
+					//alert(data.errorMsg);
+					//closed_add_shade_layout();
+					//alertWarn( data.errorMsg != '' ? data.errorMsg : '上传图片出错,请联系管理员');
+				}
+				//if(flag=="new")
+					createNewUploadHtml();
+				//else
+				//	createupdateUploadHtml();
+			},
+			error: function (data, status, e)
+			{
+				//alert("444");
+			}
+		}
+	);
+}
+
+//重新绑定onchange事件
+function createNewUploadHtml(){
+	var $new = $('<input t="'+ new Date().getTime() +'" size="1" type="file" name="image" id="image" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 0; top: 0; width: 89px;height: 29px;" />');
+	$('#image').replaceWith( $new );
+	$new.change(uploadImage);
+}
+</script>
+</body>
+</html>

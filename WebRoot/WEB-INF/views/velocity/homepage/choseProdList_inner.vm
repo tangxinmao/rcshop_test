@@ -1,0 +1,53 @@
+<input type="hidden" value="$!page.currentPage" id="currentPage" />
+	<table class="table order_table mt10">
+		<tr>
+			<th width="20%">Product Name</th>
+			<th width="10%">Product ID</th>
+			<th width="15%">Store</th>
+			<th width="8%">Price</th>
+			<th width="8%">Type</th>
+			<th width="9%">Status</th>
+		</tr>
+		#if($productList&&!$productList.isEmpty())
+                           #foreach($product in $productList)
+                           	#if ( "00" != ${product.prodStatus})
+		<tr onclick="choose(this)" style="cursor: pointer;">
+			<td>
+				<div class="fl">
+					<img alt="" src="$!{product.prodImgUrl}?rs=90_90" />
+				</div>
+				<div class="mt10">$!{product.name}
+					<input type="hidden" name="prodId" value="$!product.prodId">
+					<input type="hidden" name="prodName" value="$!product.name">
+				</div>
+			</td>
+			<td>$!{product.prodId}</td>
+			<td>$!{product.merchant.name}</td>
+			<td>Rp $!{product.price}</td>
+			<td>
+				#if($product.type==1)
+					Product
+				#elseif($product.type==2)
+					Package
+				#elseif(!$product.type)
+					Product
+				#end
+			</td>
+			<td>
+			  #if (1 == ${product.status}) 										 
+				<b style="color:#FF8B1D;">Not On Shelves</b>
+			  #elseif (2 == ${product.status})
+			    <b style="color:#4ED321;">On Shelves</b>
+			  #end
+			</td>
+		</tr>
+		#end
+		#end
+		#end
+	</table>
+   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+  </div>

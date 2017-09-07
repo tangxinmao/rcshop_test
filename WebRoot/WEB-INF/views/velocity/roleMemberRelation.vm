@@ -1,0 +1,131 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extCss = "/static/css/jquery-ui-timepicker-addon.min.css")
+#set($extJs = "/static/js/member.js,/static/js/jquery.ui.datepicker.js,/static/js/ajaxfileupload.js")
+#set($root=$request.getContextPath())
+<input type="hidden" value="$root" id="rootPath">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">User List</h1>
+	 	<div class="fr">
+			<input class="btnG bwt125 bht39 bfz16 fr mt12" type="button" value="Add User" onclick="addMemberWin()">
+		</div>
+	</div> 
+	<div class="data_logic ml30">
+		<div class="searchArea bht62">
+		<form id="searchForm">
+			<div class="mt35">
+			<div class="unit">
+				<label >User ID	</label>
+				<input  type="text"  name="memberId" value="">
+			
+				</div>
+				
+					<div class="unit">
+					<label >User Name</label>
+						<input  type="text" name="memberAccount" id="vendorContact" value="" maxlength="50">
+					
+				</div>
+				
+				<div class="unit">
+					<label >Role  </label>
+						<select name="roleId" >
+						 <option value="" selected="selected">All</option>
+						   #foreach($role in $rcRoles)
+				           <option value="$role.roleId">$role.name</option>
+				           #end
+						</select>
+				  
+				</div>
+				<div  style=" float:right;">
+					<input  class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			</div>
+			</form>
+		</div>
+		
+	
+		<div class="service_wrap mt10" id="productListDiv">
+			<input type="hidden" value="$!page.currentPage" id="currentPage" />
+						<table class="table order_table mt10">
+							<tr>
+								<th width="10%">User ID</th>
+								<th width="10%">User Name</th>
+								<th width="10%">Email</th>
+								<th width="10%">Description</th>
+								<th width="10%">Role</th>
+								<th width="10%">The Last Login Time</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.memberId}</td>
+								<td>$!{item.account}</td>
+								<td>$!{item.email}</td>
+								<td>$!{item.description}</td>
+								#if($!item.roles&&!$item.roles.isEmpty())
+								#foreach( $role in $item.roles )
+								<td hidden>$!{role.roleId}</td>
+								<td>$!{role.name}</td>
+								#end
+								#else
+								<td></td>
+								#end
+								<td>$!viewutil.dateFormat($!{item.lastLoginTime})</td>
+								<td>
+									#if($!item.delFlag==0)
+									<a href="javascript:void(0)" onclick="javascript:editMemberWin('$!item.memberId',this)">Edit</a>
+								   | <a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable user?',&quot;deleteMember('$!{item.memberId}')&quot;)">Disable</a>
+									#else
+									Disabled
+									#end
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="open_returnPop" style="display: none;"></div>
+	<!-- 查看库存 div begin -->
+<div class="shade_layout" style="display: none;"></div>
+<div class="pop_windows" id="memberWin" style="display:none;">
+<form id="memberWinForm">
+<input type="hidden" name="memberId">
+	<div class="layout">
+		<a class="ico_close" href="javascript:close();"></a> 
+		<div class="main">
+			<div class="hd">
+				<h2></h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle" style="margin-left:15px;margin-right:10px;"><span class="colorRed">*</span><span>Role:</span></lebel>	
+               	<select name="roleId" style="width: 305px; height: 30px;">
+					  <option value="" hidden></option>
+						   				     #foreach($role in $rcRoles)
+				           <option value="$role.roleId" >$role.name</option>
+				           #end
+				 </select>
+						</div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -17px;"><span class="colorRed">*</span><span>Username:</span></lebel><input class="poptxt" type="text" name="account" value="" maxlength="50"></div>
+				<div style="margin-top:20px;"><lebel style="margin-left: -13px;" class="colortitle"><span class="colorRed">*</span><span>Password:</span></lebel><input class="poptxt" type="password" name="password" value="" maxlength="50"></div>
+				<div id="passwordTip" style="color:red;margin-left:69px;" hidden=""><span>if you need reset password,please input here.</span><br><span>if not,just make it empty.</span></div>
+		        <div style="margin-top:20px;"><lebel style="margin-left: 10px;" class="colortitle"><span class="colorRed">*</span><span>Email:</span></lebel><input class="poptxt" type="text" name="email" value="" maxlength="50"></div>
+			    <div style="margin-top:20px;"><lebel style="margin-left: -24px;" class="colortitle"><span class="colorRed" style="visibility:hidden;">*</span><span>Description:</span></lebel><textarea style=" vertical-align: middle;height:70px" class="poptxt" name="description" maxlength="200"></textarea></div>
+			</div>
+			
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16" type="button" onclick="addMember()" id="readnumbtn" value="Submit">
+			</div>
+		</div>
+	</div>
+	</form>
+</div>

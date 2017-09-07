@@ -1,0 +1,33 @@
+
+<html>
+<body>
+#set($root=$request.getContextPath())
+<input id="site_domain" value="$root" type="hidden" />
+<script type="text/javascript" src="$root/static/js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript">
+		var url="$!url";
+		var imgsnum="$!imgsnum";
+		var enumid="$!enumid";
+		var errormsg = "$!errormsg";
+		var imgid = "$!imgid";
+		if(errormsg!=""){
+			window.parent.prompt(errormsg);
+		}
+		else{
+			if(enumid==""){
+				$("#prodimgarea"+imgsnum,parent.document).attr("src","$url"+"?rs=120_120");
+				$("#prodimgarea"+imgsnum,parent.document).attr("originurl","$url");
+				$("#prodimgarea"+imgsnum,parent.document).attr("imgid",imgid);
+				$("#prodimgarea"+imgsnum,parent.document).attr("isedit","1");
+			}
+			else{
+				$("#prodimgarea"+enumid+imgsnum,parent.document).attr("src","$url"+"?rs=120_120");
+				$("#prodimgarea"+enumid+imgsnum,parent.document).attr("originurl","$url");
+				$("#prodimgarea"+enumid+imgsnum,parent.document).attr("imgid",imgid);
+				$("#prodimgarea"+enumid+imgsnum,parent.document).attr("isedit","1");
+			}
+		}
+	</script>
+
+</body>
+</html>

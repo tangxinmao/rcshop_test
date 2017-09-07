@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.socool.soft.dao.RcUserGetuiMapper" >
+    <cache eviction="LRU" type="com.socool.soft.common.cache.MybatisRedisCache" />
+  <resultMap id="BaseResultMap" type="com.socool.soft.bo.RcUserGetui" >
+    <id column="USER_GETUI_ID" property="userGetuiId" jdbcType="INTEGER" />
+    <result column="MEMBER_ID" property="memberId" jdbcType="INTEGER" />
+    <result column="CID" property="cid" jdbcType="CHAR" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    USER_GETUI_ID, MEMBER_ID, CID, UPDATE_TIME
+  </sql>
+
+  <select id="select" resultMap="BaseResultMap" parameterType="com.socool.soft.bo.RcUserGetui" >
+    select 
+    <include refid="Base_Column_List" />
+    from rc_user_getui
+    <where>
+        <if test="userGetuiId != null" >
+            and USER_GETUI_ID = #{userGetuiId}
+        </if>
+        <if test="memberId != null" >
+            and MEMBER_ID = #{memberId}
+        </if>
+        <if test="cid != null" >
+            and CID = #{cid}
+        </if>
+    </where>
+  </select>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from rc_user_getui
+    where USER_GETUI_ID = #{userGetuiId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from rc_user_getui
+    where USER_GETUI_ID = #{userGetuiId,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByMemberIdOrCID" parameterType="com.socool.soft.bo.RcUserGetui" >
+    delete from rc_user_getui
+    where MEMBER_ID = #{memberId} or CID = #{cid}
+  </delete>
+
+  <insert id="insert" parameterType="com.socool.soft.bo.RcUserGetui" >
+    insert into rc_user_getui (USER_GETUI_ID, MEMBER_ID, CID, 
+      UPDATE_TIME)
+    values (#{userGetuiId,jdbcType=INTEGER}, #{memberId,jdbcType=INTEGER}, #{cid,jdbcType=CHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.socool.soft.bo.RcUserGetui" >
+    insert into rc_user_getui
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userGetuiId != null" >
+        USER_GETUI_ID,
+      </if>
+      <if test="memberId != null" >
+        MEMBER_ID,
+      </if>
+      <if test="cid != null" >
+        CID,
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userGetuiId != null" >
+        #{userGetuiId,jdbcType=INTEGER},
+      </if>
+      <if test="memberId != null" >
+        #{memberId,jdbcType=INTEGER},
+      </if>
+      <if test="cid != null" >
+        #{cid,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.socool.soft.bo.RcUserGetui" >
+    update rc_user_getui
+    <set >
+      <if test="memberId != null" >
+        MEMBER_ID = #{memberId,jdbcType=INTEGER},
+      </if>
+      <if test="cid != null" >
+        CID = #{cid,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where USER_GETUI_ID = #{userGetuiId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.socool.soft.bo.RcUserGetui" >
+    update rc_user_getui
+    set MEMBER_ID = #{memberId,jdbcType=INTEGER},
+      CID = #{cid,jdbcType=CHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP}
+    where USER_GETUI_ID = #{userGetuiId,jdbcType=INTEGER}
+  </update>
+</mapper>

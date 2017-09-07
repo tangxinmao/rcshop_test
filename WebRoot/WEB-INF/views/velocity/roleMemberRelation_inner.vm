@@ -1,0 +1,43 @@
+			<table class="table order_table mt10">
+							<tr>
+								<th width="10%">User ID</th>
+								<th width="10%">User Name</th>
+								<th width="10%">Email</th>
+								<th width="10%">Description</th>
+								<th width="10%">Role</th>
+								<th width="10%">The Last Login Time</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+								#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.memberId}</td>
+								<td>$!{item.account}</td>
+								<td>$!{item.email}</td>
+								<td>$!{item.description}</td>
+								#if($!item.roles&&!$item.roles.isEmpty())
+								#foreach( $role in $item.roles )
+								<td hidden>$!{role.roleId}</td>
+								<td>$!{role.name}</td>
+								#end
+								#else
+								<td>1</td>
+								#end
+								<td>$!viewutil.dateFormat($!{item.lastLoginTime})</td>
+								<td>
+								#if($!item.delFlag==0)
+								<a href="javascript:void(0)" onclick="javascript:editMemberWin('$!item.memberId',this)">Edit</a>
+							   | <a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable user?',&quot;deleteMember('$!{item.memberId}')&quot;)">Disable</a>
+								#else
+								Disabled
+								#end
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

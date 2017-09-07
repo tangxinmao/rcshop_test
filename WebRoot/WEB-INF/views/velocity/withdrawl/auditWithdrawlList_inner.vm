@@ -1,0 +1,76 @@
+<div class="service_wrap">
+	<table class="table order_table mt10" id="review">
+	<tbody>
+		<th>Bill ID</th>
+		<th>Store ID</th>
+		<th>Store Name</th>
+		<th>Month</th>
+		<th>Account Receivable</th>
+		<th>Bank</th>
+		<th>Bank Account</th>
+		<th>Bank Account Name</th>
+		<th>Bill Time</th>
+		<th>Status</th>
+		<th>Paid Time</th>
+		<th>Actions</th>
+		
+		#foreach($apply in $list)
+		<tr>
+			<td>
+				$!apply.merchantWidId
+			</td>
+			<td>
+				$!apply.merchantId
+			</td>
+			<td>$!apply.merchantName</td>
+			<td>
+				$!apply.balanceMonth
+			</td>
+			<td>
+				$!viewutil.moneyStringFormat($!apply.applyAmount)
+			</td>
+			<td>$!apply.bankName</td>
+			<td>$!apply.bankAccount</td>
+			<td>$!apply.bankAccountName</td>
+			<td>$!viewutil.dateFormat($!apply.applyTime)</td>
+			<td>
+				#if($apply.status==1)
+					<b style="color:#FF8B1D;">Unconfirmed</b>
+				#elseif($apply.status==2)
+					<b style="color:#4ED321;">Confirmed</b>
+				#elseif($apply.status==4)
+					<b style="color:#4ED321;">Audited</b>
+				#elseif($apply.status==6)
+					<b style="color:#000000;">Paid</b>
+				#end
+			</td>
+			<td>$!viewutil.dateFormat($!apply.payTime)</td>
+            <td>
+				#if($session.getAttribute("RcMerchant"))
+                    <a href="javascript:void(0)" onclick="orderBoxPopup('$!apply.merchantId','$!apply.balanceMonth')">View Transactions</a>
+					#if($apply.status==1)
+                        |
+                        <a href="javascript:void(0)" onclick="showConfirm('Are you sure to Confirm?',&quot;changeStatus('$apply.merchantWidId',2)&quot;)">Confirm</a>
+					#end
+				#else
+                    <a href="javascript:void(0)" onclick="orderBoxPopup('$!apply.merchantId','$!apply.balanceMonth')">View Transactions</a>
+					#if($apply.status==2)
+                        |
+                        <a href="javascript:void(0)" onclick="showConfirm('Are you sure to Approved?',&quot;changeStatus('$apply.merchantWidId',4)&quot;)">Approved</a>
+					#elseif($apply.status==4)
+                        |
+                        <a href="javascript:void(0)" onclick="showConfirm('Are you sure to Paid?',&quot;paid('$apply.merchantWidId')&quot;)">Paid</a>
+					#end
+				#end
+            </td>
+		</tr>
+		#end
+		
+	</tbody>
+	</table>
+	<input type="hidden" value="$!page.currentPage" id="currentPage">
+	<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+	<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+	<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+	<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+</div>

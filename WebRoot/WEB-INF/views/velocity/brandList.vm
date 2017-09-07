@@ -1,0 +1,144 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Brand list" )
+#set($extJs = "/static/js/prodBrand.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Brand List</h1>
+	 	<div class="fr">
+			<input class="btnG bwt125 bht39 bfz16 fr mt12" type="button" value="Add Brand" onclick="showAddPopWin()">
+		</div>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht62">
+			<div class="mt35">
+				<label>Brand Name<input class="poptxt w190i" type="text" name="shBrandName" id="shBrandName" value=""></label>
+				<input class="fr button" type="button" value="Search" onclick="goThisPage('search')">
+			</div>
+		</div>
+		<div class="service_wrap mt10" id="reloadSearchMessages">
+			<table class="table order_table mt10" id="table">
+			<tbody>
+				<th style="width:22%;">Brand Name</th>
+				<th style="width:25%;">Logo</th>
+				<th style="width:32%;">Description</th>
+				<th style="width:21%;">Actions</th>
+				#foreach($bra in $list)
+				<tr>
+					<td>$!bra.name</td>
+					<td><img url="$!{bra.logoUrl}" src="$!{bra.logoUrl}?rs=550_90" style="max-height:60px;"></td>
+					<td style="text-align: left;">$!bra.description</td>
+					<td>
+						#if($!bra.delFlag ==  0)
+						<a href="javascript:void(0)" onclick="updatePopWin('$!bra.prodBrandId',this)">Edit</a> |
+						<a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable the brand? If you disable,The data can not be restore.',&quot;deleteBrand('$!bra.prodBrandId')&quot;)">Disable</a>
+						#else
+						Disabled
+						#end
+					</td>
+				</tr>
+				#end
+				
+			</tbody>
+			</table>
+			<input type="hidden" value="$!page.currentPage" id="currentPage">
+			<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+			<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+			<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+			<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+		</div>
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+<!-- 添加品牌弹窗 -->
+<div class="pop_windows" id="addpopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Add Brand</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+               	<div><lebel class="colortitle"><span class="colorRed">*</span>Brand Name:</lebel><input class="poptxt" type="text" name="prodBrandName" id="prodBrandName" value="" maxlength="50"></div>
+				<div style="margin-top:20px;"></div>
+				<input type="hidden" name="fileId" id="fileId" value="">
+				<div style="position:relative;">
+					<lebel class="colortitle" style="margin-left: 40px;"><span class="colorRed">*</span>Logo:</lebel> 
+					
+					<img class="ml13" src="$root/static/images/ico/icon_image.png" id="photocover" style="width:70px; height:70px;">
+					<input type="button" class="button" value="Upload">
+			        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+				</div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 8px;"><span class="colorRed">*</span>Description:</lebel><textarea class="poptxt" style="height:100px;" name="prodBrandDesc" id="prodBrandDesc" value="" maxlength="500"></textarea></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="addNewBrand()" id="addnewbtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- 修改品牌弹窗 -->
+<div class="pop_windows" id="modifypopwin" style="display:none;">
+	<div class="layout">
+		<a  class="ico_close" href="javascript:close();" ></a> 
+		<div class="main">
+			<div class="hd">
+				<h2>Modify Brand</h2>
+			</div>
+			<div class="bd_p10" style="padding-left:82px">
+				<input type="hidden" name="prodBrandId" id="prodBrandId" value="">
+               	<div><lebel class="colortitle"><span class="colorRed">*</span>Brand Name:</lebel><input class="poptxt" type="text" name="updateprodBrandName" id="updateprodBrandName" value="" maxlength="100"></div>
+				<div style="margin-top:20px;"></div>
+				<input type="hidden" name="updatefileId" id="updatefileId" value="">
+				<div style="position:relative;">
+					<lebel class="colortitle" style="margin-left: 40px;"><span class="colorRed">*</span>Logo:</lebel>
+					
+					<img class="ml13" src="$root/static/images/ico/icon_image.png" id="updatephotocover" style="width:70px; height:70px;">
+					<input type="button" class="button" value="Upload">
+			        <input type="file" name="updatecover" size="1" id="updatecover" onchange="uploadUpdatedCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+				</div>
+				<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 8px;"><span class="colorRed">*</span>Description:</lebel><textarea class="poptxt" style="height:100px;" name="updateprodBrandDesc" id="updateprodBrandDesc" value="" maxlength="500"></textarea></div>
+			</div>
+			<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+				<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modifyBrand()" id="modifybtn" value="Submit" />
+			</div>
+		</div>
+	</div>
+</div>
+<script  type="text/javascript" >
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		var prodBrandName = $("#shBrandName").val();
+		$.post("$root/brand/brandlist", {"currentPage":currentPage,"prodBrandName":prodBrandName},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+</script>

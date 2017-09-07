@@ -1,0 +1,35 @@
+#set($root=$request.getContextPath())
+<input type="hidden" value="$!page.currentPage" id="currentPage">
+<table class="table">
+	<tr>
+		<th>Name</th>
+		<th>Type</th>
+		<th>Resolution</th>
+		<th>Size</th>
+		<th>Actions</th>
+	</tr>
+	#foreach($image in $ImageObj)
+		<tr>
+			#if($image.type==2)
+				<td><p title="$!image.title">$!image.name</p></td>
+				<td>Picture</td>
+				<td>$!{image.imgWidth}*$!{image.imgHeight}</td>
+				<td>$!viewutil.bytesToK($!{image.imgSize})K</td>
+				<td> <a href="javascript:void(0)" onclick="showConfirm('Are you sure to restore it?',&quot;restoreimg('$!image.imageSpaceId')&quot;)">Restore 
+				| <a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete it? If you do this operation,the data can not be restore.',&quot;physicaldelimg('$!image.imageSpaceId')&quot;)">Shift Delete</td>
+			#else
+				<td><p title="$!image.get("title")">$!image.name</p></td>
+				<td>Dir</td>
+				<td>-</td>
+				<td>$!{image.Filesize}K</td>
+				<td> <a href="javascript:void(0)" onclick="showConfirm('Are you sure to restore it?',&quot;restoreimg('$!image.imageSpaceId')&quot;)">Restore 
+				| <a href="javascript:void(0)" onclick="showConfirm('Are you sure to delete it? If you do this operation,the data can not be restore.',&quot;physicaldelimg('$!image.imageSpaceId')&quot;)">Shift Delete</td>
+			#end
+		</tr>
+	#end
+		
+</table>
+<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

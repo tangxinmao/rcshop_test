@@ -1,0 +1,41 @@
+	<table class="table order_table mt10">
+							<tr>
+								<th width="10%">Principal ID</th>
+								<th width="10%">Name</th>
+								<th width="10%">Contact</th>
+								<th width="10%">Phone</th>
+								<th width="10%">Username</th>
+								<th width="10%">Email</th>
+								<th width="20%">Create Time</th>
+								<th width="20%" class="tac">Actions</th>
+							</tr>
+							#if($list&&!$list.isEmpty())
+		                              #foreach($item in $list)
+							<tr>
+							    <td>$!{item.vendorId}</td>
+								<td>$!{item.name}</td>
+								<td>$!{item.contactPerson}</td>
+								<td>$!{item.mobile}</td>
+								<td>$!{item.member.account}</td>
+								<td>$!{item.member.email}</td>
+								<td hidden>$!{item.member.description}</td>
+								<td>#if(${item.createTime})$viewutil.dateFormat($!{item.createTime})#end</td>
+								<td>
+									#if($!item.delFlag == 0)
+									<a href="javascript:void(0)" onclick="javascript:editVendorWin('$!item.vendorId',this)">Edit Principal</a>		
+	                               | <a href="javascript:void(0)" onclick="javascript:editUserWin('$!item.member.memberId',this)">Edit User</a>		
+								   | <a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable this principal? If you disable,the principal can not be restore.',&quot;deleteVendor('$!item.vendorId','$!item.memberId')&quot;)">Disable</a>
+									</td>
+									#else
+                                        <a href="javascript:void(0)" onclick="showConfirm('Are you sure to enable this chain?',&quot;enable('$!item.vendorId','$!item.memberId')&quot;)">Enable</a>
+									#end
+								</td>
+							</tr>
+							#end
+							#end
+						</table>
+					   <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+					   <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+					   <input type="hidden" value="$!page.currentPage" id="currentPage" />
+					   <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+					   <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

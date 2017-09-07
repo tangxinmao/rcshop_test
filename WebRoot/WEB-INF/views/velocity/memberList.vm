@@ -1,0 +1,264 @@
+#set($layout = "layout/main.vm")  
+#set($title = "Buyer list" )
+#set($extJs = "/static/js/memberInfo.js")
+#set($root=$request.getContextPath())
+<input type="hidden" name="signUpDesc" id="signUpDesc" value="0">
+<input type="hidden" name="lastLoginDesc" id="lastLoginDesc" value="0">
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Buyer Management</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht62">
+			<div class="mt35">
+				<div class="unit">
+					<label>Buyer ID</label>
+					<input type="text" name="memberId" value="$!{rcMemberInfo.memberId}" />
+				</div>
+				<div class="unit">
+					<label>Buyer Name</label>
+					<input type="text" name="memberNickname" value="$!{rcMemberInfo.memberNickname}" />
+				</div>
+				<div class="unit">
+					<label>Phone</label>
+					<input type="text"  name="mobile" value="$!{rcMemberInfo.mobile}" />
+				</div>
+				<div style="float: right;">
+					<input class="button" type="button" onclick="goThisPage('search')" value="Search" />
+				</div>
+			</div>
+		</div>
+		<div id="reloadSearchMessages">
+			<div class="service_wrap">
+				<table class="table order_table mt10" id="table">
+					<tr width="100%">
+						<th colspan="9" class="th_lev1"><span class="fl">Sort By</span>
+							<div onclick="goThisPage('sort1')" class="sortDiv" id="sortDiv1">
+								<p class="sortP">Sign Up Time</p>
+								<span class="item dot-top checked"></span> 
+								<span class="item dot-bottom checked"></span> 
+									 
+							</div>
+							<div onclick="goThisPage('sort2')" class="sortDiv" id="sortDiv2">
+								<p class="sortP">Last Login Time</p>
+								<span class="item dot-top checked"></span> 
+								<span class="item dot-bottom checked"></span> 
+									 
+							</div>
+						</th>
+					</tr>
+					<tr>
+						<th>Buyer ID</th>
+						<th>Buyer Username</th>
+						<th>Phone</th>
+						<th>Email</th>
+						<th>wallet</th>
+						<th>Icon</th>
+						<th>Sign Up Time</th>
+						<th>Last Login Time</th>
+						<th>Actions</th>
+					</tr>
+		
+					
+					#foreach($rcMemberInfo in $list)
+					<tr>
+						<td>$!rcMemberInfo.memberId</td>
+						<td>$!rcMemberInfo.name</td>
+						<td>$!rcMemberInfo.mobile</td>
+						<td>$!rcMemberInfo.email</td>
+						<td>$!viewutil.moneyStringFormat($!rcMemberInfo.walletAmount)</td>
+						<td>#if($rcMemberInfo.imgUrl)<img src="$!rcMemberInfo.imgUrl?rs=70_70" style="width:60px; height:60px;">#else<img src="$root/static/images/ico/iocn_head.png" style="width:60px; height:60px;">#end</td>
+						<td>$!viewutil.dateFormat($!rcMemberInfo.signUpTime)</td>
+						<td>$!viewutil.dateFormat($!rcMemberInfo.lastLoginTime)</td>
+						<td>
+							<!-- <a href="javascript:void(0)" onclick="showModifyPopupWin('$rcMemberInfo.memberId',this)">Edit</a>| -->
+							<!-- <a href="javascript:void(0)" onclick="deleteOne('$rcMemberInfo.memberId',this)">Delete</a>| -->
+							<a href="javascript:void(0)" onclick="orderInfo('$rcMemberInfo.memberId',this)">View Order history</a>
+						#*	|
+							<a href="javascript:void(0)" onclick="walletInfo('$rcMemberInfo.memberId',this)">View Top-up history</a>*#
+						</td>
+					</tr>
+					#end
+				</table>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>	
+
+	</div>
+</div>
+<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="popwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+       <!--          	<div><lebel class="colortitle"style="margin-left: 10px;"><span class="colorRed">*</span>Account:</lebel><input type="text" style="width:300px" data-rules="{required:true}" name="memberAccount" id="memberAccount"/></div> -->
+						<div style="margin-top:20px;"></div>
+					<div><lebel class="colortitle"><span class="colorRed">*</span>Nickname:</lebel><input type="text" class="poptxt" name="memberNickname" id="memberNickname"/></div>
+						<div style="margin-top:20px;"></div>
+					<div><lebel class="colortitle" style="margin-left: 26px;"><span class="colorRed">*</span>Email:</lebel><input type="text" class="poptxt" name="email" id="email"/></div>
+			       	<div style="margin-top:20px;"></div>
+			        <lebel class="colortitle" style="margin-left: 20px;"><span class="colorRed">*</span>Gender:</label> <input style="margin-left: 13px;" type="radio" name="sex" value="0"> Male 
+                     <input type="radio" name="sex" value="1"> Female
+					<div style="margin-top:20px;"></div>
+						<div><lebel class="colortitle" style="margin-left: 17px;"><span class="colorRed">*</span>Mobile:</lebel><input type="text" class="poptxt" name="mobile" id="mobile"/></div>
+			       	<div style="margin-top:20px;"></div>
+					<input type="hidden" name="memberLogo" id="memberLogo" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 30px;"><span class="colorRed">*</span>Logo:</lebel>
+						<input type="hidden" name="memberId" id="memberId" value="">
+						<img src="$root/static/images/ico/icon_image.png"  id="photocover" style="width:70px; height:70px;">
+						<input type="button" class="button" value="Upload">
+				        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+<!-- 					<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 30px;"><span class="colorRed">*</span>Type:</lebel><select name="memberType">
+<option value="1">user</option>
+<option value="2">administrator</option>
+<option value="3">merchant</option>
+<option value="4">maintenance</option>
+<option value="5">recharger</option>
+</select></div> -->
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="save()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+<script  type="text/javascript" >
+function formatAmount(val,row){
+	return '<span>'+formatNum(val)+'<span>';
+}
+function formatNum(strNum) {
+	if(!strNum){
+		return "0";
+	}
+
+	if (strNum.length <= 3) {
+	return strNum;
+	}
+	if (!/^(\+|-)?(\d+)(\.\d+)?$/.test(strNum)) {
+	return strNum;
+	}
+	var a = RegExp.$1, b = RegExp.$2, c = RegExp.$3;
+
+	var re = new RegExp();
+
+	re.compile("(\\d)(\\d{3})(,|$)");
+
+	while (re.test(b)) {
+
+	b = b.replace(re, "$1,$2$3");
+
+	}
+
+	return a + "" + b + "" + c;
+
+	}
+	function goThisPage(ta){
+		var currentPage = '';
+		var signUpDesc = $("#signUpDesc").val();
+		var lastLoginDesc = $("#lastLoginDesc").val();
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else if(ta == 'sort1'){
+			currentPage = 1;
+			$("#lastLoginDesc").val("0");
+			lastLoginDesc = "0"
+			if($("#signUpDesc").val()=="0"){
+				signUpDesc = "1";
+			}
+			else if($("#signUpDesc").val()=="1"){
+				signUpDesc = "2";
+			}
+			else{
+				signUpDesc = "1";
+			}
+		}else if(ta == 'sort2'){
+			currentPage = 1;
+			$("#signUpDesc").val("0");
+			signUpDesc = 0;
+			if($("#lastLoginDesc").val()=="0"){
+				lastLoginDesc = "1";
+			}else if($("#lastLoginDesc").val()=="1"){
+				lastLoginDesc = "2";
+			}
+			else{
+				lastLoginDesc = "1";
+			}
+		}else{
+			currentPage = ta;
+		}
+		$.post("$root/memberinfo/member_list", {"currentPage":currentPage
+			,mobile:$('.searchArea input[name="mobile"]').val(),
+			account:$('.searchArea input[name="memberAccount"]').val(),
+			memberId:$('.searchArea input[name="memberId"]').val(),
+			name:$('.searchArea input[name="memberNickname"]').val(),
+			"signUpDesc":signUpDesc,
+			"lastLoginDesc":lastLoginDesc
+			},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+			    if(signUpDesc=="2"){
+					$("#signUpDesc").val("2");
+					if(!$("#sortDiv1 .dot-bottom").hasClass("checked")){
+						$("#sortDiv1 .dot-bottom").addClass("checked");
+					}
+					$("#sortDiv1 .dot-top").removeClass("checked");
+				}
+				else if(signUpDesc=="1"){
+					$("#signUpDesc").val("1");
+					if(!$("#sortDiv1 .dot-top").hasClass("checked")){
+						$("#sortDiv1 .dot-top").addClass("checked");
+					}
+					$("#sortDiv1 .dot-bottom").removeClass("checked");
+					
+				}
+			    
+			    if(lastLoginDesc=="2"){
+					$("#lastLoginDesc").val("2");
+					if(!$("#sortDiv2 .dot-bottom").hasClass("checked")){
+						$("#sortDiv2 .dot-bottom").addClass("checked");
+					}
+					$("#sortDiv2 .dot-top").removeClass("checked");
+				}
+				else if(lastLoginDesc=="1"){
+					$("#lastLoginDesc").val("1");
+					if(!$("#sortDiv2 .dot-top").hasClass("checked")){
+						$("#sortDiv2 .dot-top").addClass("checked");
+					}
+					$("#sortDiv2 .dot-bottom").removeClass("checked");
+					
+				}
+		    }
+		);
+	}	
+	
+</script>
+

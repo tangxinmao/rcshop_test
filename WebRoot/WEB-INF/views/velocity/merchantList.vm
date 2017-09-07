@@ -1,0 +1,331 @@
+#set($layout = "layout/main.vm")  
+#set($extJs = "/static/js/merchant.js")
+#set($root=$request.getContextPath())
+<div class="rightContent fl">
+	<div class="tpos ml30 mt25">
+	 	<h1 class="fl">Store List</h1>
+	</div>
+	<div class="data_logic ml30">
+		<div class="searchArea bht107">
+			<div class="mt35">
+				<div class="unit">
+					<label>Store ID</label>
+					<input type="text" name="storeId" id="storeId" value="">
+				</div>
+				<div class="unit">
+					<label>Store Name</label>
+					<input type="text" name="storeName" id="storeName" value="">
+				</div>
+				<div class="unit">
+					<label>Contact Name</label>
+					<input type="text" name="merchantContact" id="merchantContact" value="">
+				</div>
+			</div>
+			
+			<div class="clearfix">
+				<div class="mt10 unit">
+					<label>Phone</label>
+					<input type="text" name="phone" id="phone" value="">
+				</div>
+				
+				<div class="mt10 unit">
+					<label>Email</label>
+					<input type="text" name="email" id="email" value="">
+				</div>
+				
+				<div class="mt10 unit">
+					<label>City</label>
+					<input type="text" name="city" id="city" value="">
+				</div>
+				
+				<div class="mt10" style="float:right;">
+					<input class="button" type="button" value="Search" onclick="goThisPage('search')">
+				</div>
+			
+			</div>
+		</div>
+
+		<div id="reloadSearchMessages" class="tableTile">
+			<div class="service_wrap" >
+				<table class="table order_table mt10" id="review" >
+					<th>Store ID</th>
+					<th>Store Name</th>
+					<th>Logo</th>
+					<th>Delivery</th>
+					<th>Service</th>
+					<th>Quality</th>
+					<th>Principal</th>
+					<th>City</th>
+					<th>Contact</th>
+					<th>Phone</th>
+					<th>Username</th>
+					<th style="width:8%;">Create Time</th>
+					<th style="width:20%;">Actions</th>
+					#foreach($merchant in $list)
+					<tr>
+						<td>$merchant.merchantId</td>
+						<td>$merchant.name</td>
+						<td>
+							<img src="$!{merchant.logoUrl}?rs=90_90" style="max-width:50px;">
+							<input type="hidden" name="logoUrl" value="$!{merchant.logoUrl}">
+							<input type="hidden" name="logoId" value="$!merchant.logoUrl">
+							<input type="hidden" name="mdesc" value="$!merchant.description">
+						</td>
+						<td>
+							#if($merchant.deliveryScore>=4)
+								<b style="color:#4ED321;">$!merchant.deliveryScore</b>
+							#else
+								<b style="color:#FF8B1D;">$!merchant.deliveryScore</b>
+							#end
+						</td>
+						<td>
+							#if($merchant.serviceScore>=4)
+								<b style="color:#4ED321;">$!merchant.serviceScore</b>
+							#else
+								<b style="color:#FF8B1D;">$!merchant.serviceScore</b>
+							#end
+						</td>
+						<td>
+							#if($merchant.productScore>=4)
+								<b style="color:#4ED321;">$!merchant.productScore</b>
+							#else
+								<b style="color:#FF8B1D;">$!merchant.productScore</b>
+							#end
+						</td>
+						<td>
+							<input type="hidden" name="vendorId" value="$!merchant.vendorId">
+							$!merchant.vendor.name
+						</td>
+						<td>
+							<input type="hidden" name="province" value="$!merchant.city.name">
+							<input type="hidden" name="cityId" value="$!merchant.cityId">
+							<input type="hidden" name="myaddress" value="$!merchant.address">
+							$!merchant.city.name
+						</td>
+						<td>$!merchant.contactPerson</td>
+						<td>$merchant.mobile</td>
+						<td>$!merchant.member.account</td>
+						<td>$!viewutil.dateFormat($!merchant.createTime)</td>
+						<td>
+							#if($!merchant.delFlag == 0)
+								#if(!$session.getAttribute("RcVendor"))
+									<a href="javascript:void(0)" onclick="showModifyPopupWin('$!merchant.merchantId',this)">Edit</a> |
+									<a href="javascript:void(0)" onclick="showAccountPopupWin('$!merchant.merchantId',this)">Edit User</a> |
+									<a href="javascript:void(0)" onclick="showBankPopupWin('$!merchant.merchantId',this)">Edit Bank</a> |
+									<a href="javascript:void(0)" onclick="showConfirm('Are you sure to disable the merchant? If you disable,The data can not be restore.',&quot;deleteOne('$!merchant.merchantId',this)&quot;)">Disable</a> |
+									<!--<a href="javascript:void(0)" onclick="authBrandChoseBox('$!merchant.merchantId')">Authorize Brand</a>-->
+								<!-- 	<a href="javascript:void(0)" onclick="authApplicator('$!merchant.merchantId')">Auth Applicator</a>  --> 
+								#else
+									<span>Edit</span> |
+									<span>Edit User</span> |
+									<span>Edit Bank</span> |
+									<span>Delete</span> |
+									<span>Authorize Brand</span>
+								#end
+							#else
+                                <a href="javascript:void(0)" onclick="showConfirm('Are you sure to enable the merchant?', 'enableOne($!merchant.merchantId,this)')">Enable</a>
+							#end
+						</td>
+						
+					</tr>
+					#end
+				</table>
+				<input type="hidden" value="$!page.currentPage" id="currentPage">
+				<input id="page_pageSize" type="hidden" value="$page.pageSize" />
+				<input id="page_totalRows" type="hidden" value="$page.totalRows" />
+				<div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+				<div class="page_wrap" style="padding-right: 10px">#vm_page2</div>
+			</div>
+		</div>
+	</div>
+</div>	
+<div class="shade_layout" style="display: none;"></div>
+	<div class="pop_windows" id="popwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit Store</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+                	<div>
+                		<lebel class="colortitle" style="margin-left: 41px;"><span class="colorRed">*</span>Principal:</lebel>
+						<select class="poptxt" name="vendor" id="vendor">
+							#foreach($vendor in $vendorList)
+								<option value="$vendor.vendorId">$vendor.name</option>
+							#end
+						</select>
+                	</div>
+                	<!-- <div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 50px;"><span class="colorRed">*</span>Region:</lebel>
+						<select class="poptxt" style="width:138px;" name="province" id="province" onchange="changeProvince()">
+							#foreach($province in $provinceList)
+								<option value="$province">$province</option>
+							#end
+						</select>
+						
+						<select class="poptxt" style="width:138px;" name="city" id="city"> 
+							#foreach($city in $cityList)
+								<option value="$!city.cityId">$!city.cityName</option>
+							#end
+						</select>
+					</div> -->
+                	<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left:26px;"><span class="colorRed">*</span>Store Name:</lebel><input type="text" class="poptxt" name="merchantName" id="merchantName" value="" maxlength="50">
+					</div>
+					
+					<div style="margin-top:20px;"></div>
+					<input type="hidden" name="fileId" id="fileId" value="">
+					<div style="position:relative;">
+						<lebel class="colortitle" style="margin-left: 75px;"><span class="colorRed">*</span>Logo:</lebel>
+						
+						<input type="hidden" name="merchantId" id="merchantId" value="">
+						<img src="$root/static/images/head_img.png" id="photocover" style="width:70px; height:70px;">
+						<input type="button" class="button" value="Upload">(Image Size:500x300px)
+				        <input type="file" name="cover" size="1" id="cover" onchange="uploadCover()" value="上传图片" style="opacity:0; filter: Alpha(Opacity=0); cursor:pointer;z-index:1;position: absolute;left: 163px; top: 18px; width: 89px;height: 29px;" />
+					</div>
+					<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 29px;"><span class="colorRed">*</span>Description:</lebel><textarea id="merchantDesc" class="poptxt" style="height: 100px;"></textarea>
+					</div>
+					
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 52px;">Contact:</lebel>
+						<input type="text" class="poptxt" name="contact" id="contact" value="" maxlength="50">
+					</div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 51px;"><span class="colorRed">*</span>Mobile:</lebel>
+						<input type="text" class="poptxt" name="mobile" id="mobile" value="" maxlength="20"></div>
+					<div style="margin-top:20px;">
+						<lebel class="colortitle" style="margin-left: 51px;">Address:</lebel>
+						<input type="text" class="poptxt" name="address" id="address" value="" maxlength="200">
+					</div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modify()" id="readnumbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pop_windows" id="accountpopwin" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit User</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<div style="margin-top:20px;">
+                		<lebel class="colortitle" style="margin-left: 45px;">Role:</lebel>
+                		<span style="margin-left: 17px;">Store Seller</span>
+                	</div>
+                	<div style="margin-top:20px;">
+                		<lebel class="colortitle" style="margin-left: 12px;">Username:</lebel>
+                		<span id="accountSpan" style="margin-left: 17px;"></span>
+                		<input type="hidden" name="memberAccount" id="memberAccount" value="" maxlength="50">
+                	</div>
+			        <div style="margin-top:20px;">
+			        	<lebel class="colortitle" style="margin-left: -19px;"><span class="colorRed" style="visibility: hidden;">*</span>New Password:</lebel>
+			        	<input type="password" class="poptxt" name="memberPwd" id="memberPwd" value="" maxlength="100">
+			        </div>
+			        <div id="passwordTip" style="color:red;margin-left:96px; margin-top: 10px;"><span>if you need reset password,please input here.</span><br><span>if not,just make it empty.</span></div>
+			        <div style="margin-top:10px;">
+			        	<lebel class="colortitle" style="margin-left: 34px;"><span class="colorRed">*</span>Email:</lebel>
+			        	<input type="text" class="poptxt" name="upemail" id="upemail" value="" maxlength="50">
+			        </div>
+			        <div style="margin-top:20px;">
+			        	<lebel class="colortitle" style="margin-left: 4px;">Description:</lebel>
+			        	<textarea class="poptxt" name="memberDesc" id="memberDesc" style="height:100px" maxlength="500"></textarea>
+			        </div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="modifyAccount()" id="accountbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="pop_windows" id="vendorPopup" style="display:none;">
+		<div class="layout">
+			<a  class="ico_close" href="javascript:close();" ></a> 
+			<div class="main">
+				<div class="hd">
+					<h2>Edit Bank account info</h2>
+				</div>
+				<div class="bd_p10" style="padding-left:82px">
+					<input type="hidden" name="bankMerchantId" id="bankMerchantId" value="">
+                	<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: 34px;"><span class="colorRed">*</span>Bank Name:</lebel><input type="text" class="poptxt" name="bankName" id="bankName" value="" maxlength="100"></div>
+					<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -30px;"><span class="colorRed">*</span>Bank Account Number:</lebel><input type="text" class="poptxt" name="bankAccount" id="bankAccount" value="" maxlength="50"></div>
+					<div style="margin-top:20px;"><lebel class="colortitle" style="margin-left: -17px;"><span class="colorRed">*</span>Bank Account Name:</lebel><input type="text" class="poptxt" name="bankAccountName" id="bankAccountName" value="" maxlength="50"></div>
+				</div>
+				<div class="popup_btn_con" id="popup_btn_con" myvalue="">
+					<input class="btnG bwt100 bht30 bfz16"  type="button" onclick="saveBankInfo()" id="bankbtn" value="Submit" />
+				</div>
+			</div>
+		</div>
+	</div>
+<script  type="text/javascript" >
+$(function(){
+	var root = $("#rootsite").val()
+	var provinceName = $("#province").val();
+	$.post(root+"/manager/changeprovince", {"provinceName":provinceName},
+		function(data){
+			var jsonObjArr = JSON.parse(data);
+		    for(var i in jsonObjArr){
+		    	 $("#city").append("<option value='"+jsonObjArr[i].cityId+"'>"+jsonObjArr[i].cityName+"</option>");  
+		    }
+	    }
+	);
+});
+function formatterImageUrl(val,row){
+	return '<img style="width:100px;height:100px;"src="'+val+'?rs=150_150">';
+}
+function formatterImageUrlHot(val,row){
+	return '<img style="width:100%;height:100%"src="'+val+'?rs=150_150">';
+}
+function aa(obj){
+	$('#windowApplicator').parent().css('margin-top',document.body.scrollTop);
+}
+	function goThisPage(ta){
+		var currentPage = '';
+		if(ta == 'search'){
+			currentPage = 1;
+		}else if(ta == '+'){//下一页
+			//当前页
+			currentPage = parseInt($('#currentPage').val()) + 1;
+		}else if(ta == '-'){
+			currentPage = parseInt($('#currentPage').val()) - 1;
+		}else if(ta == '='){
+			currentPage = $("#page_currentPage").val();
+			var reg =/^\d+$/;
+			if(!currentPage.match(reg) || parseInt(currentPage) <= 0 ){
+				$("#pageNm_tip").text('Please input Positive integer!');
+				return;
+			}
+			var pageSize = $("#page_pageSize").val();
+			var totalRow = $("#page_totalRows").val();
+			var totalPage = Math.ceil(parseInt(totalRow)/parseInt(pageSize));
+			if (parseInt(currentPage) > totalPage) {
+				$("#pageNm_tip").text('The total page is :' + totalPage);
+				return;
+			}
+		}else{
+			currentPage = ta;
+		}
+		var storeId = $("#storeId").val();
+		var storeName = $("#storeName").val();
+		var merchantContact = $("#merchantContact").val();
+		var phone = $("#phone").val();
+		var email = $("#email").val();
+		var city = $("#city").val();
+		$.post("$root/manager/merchantlist", {"currentPage":currentPage,
+					"storeId":storeId,
+					"storeName":storeName,
+					"merchantContact":merchantContact,
+					"phone":phone,
+					"email":email,
+					"city":city},
+			function(data){
+			    $("#reloadSearchMessages").empty().html(data);
+		    }
+		);
+	}	
+</script>

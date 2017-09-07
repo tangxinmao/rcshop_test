@@ -1,0 +1,29 @@
+<input type="hidden" value="$!page.currentPage" id="currentPage" />
+<table class="table order_table mt10">
+	<tr>
+		<th>Order ID</th>
+		<th>Order Time</th>
+		<th>Buyer Username</th>
+		<th>Sub Total</th>
+		<th>Grand Total</th>
+		<th>Store</th>
+		<th>Recevied Time</th>
+	</tr>
+	#foreach($order in $list)
+		<tr>
+			<td>$!order.orderId</td>
+			<td>$!viewutil.dateFormat($!order.createTime)</td>
+			<td>$!order.member.name</td>
+			<td>$!order.productPrice</td>
+			<td>$!order.payPrice</td>
+			<td>$!order.merchant.name</td>
+			<td>$!viewutil.dateFormat($!order.receiveTime)</td>
+		</tr>
+	#end
+</table>
+<input type="button" value="Export to Excel" class="btnG bwt125 bht39 bfz16 mt12" onclick="exportExcel()" style="float: left; margin-top: -4px; height: 33px !important;">
+  <input id="page_pageSize" type="hidden" value="$page.pageSize" />
+  <input id="page_totalRows" type="hidden" value="$page.totalRows" />
+  <input type="hidden" value="$!page.currentPage" id="currentPage" />
+  <div id="pageNm_tip" style="text-align: right; color:red; margin-bottom:20px"></div>
+  <div class="page_wrap" style="padding-right: 10px">#vm_page2</div>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>$title</title>
+#set($root=$request.getContextPath())
+</head>
+<body>
+<style type="text/css">
+body{font-size: 20px; font-family:"Roboto";}
+</style>
+
+$html
+</body>
+</html>
